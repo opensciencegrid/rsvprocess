@@ -1,9 +1,7 @@
 package rsv.process.test;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.PropertyConfigurator;
-
 
 public class Log4j implements Test{
 
