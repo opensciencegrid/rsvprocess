@@ -24,4 +24,14 @@
 	<target name="compress" description="Compression target">
 		<jar jarfile="rsvprocess.jar" basedir="build/classes" includes="**/*.class" />
 	</target>
+	
+    <target name="run" depends="main">
+        <java fork="true" classname="${main-class}">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+
 </project>
