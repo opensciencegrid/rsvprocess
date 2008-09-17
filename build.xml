@@ -7,18 +7,21 @@
 		<fileset dir="${lib.dir}" includes="**/*.jar"/>
 	</path>
 
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
 
 	<target name="main" depends="compile, compress" description="Main target">
-		<echo>
-            Building the .jar file.
-        </echo>
+		<echo>Building the .jar file.</echo>
 	</target>
 
 	<target name="compile" description="Compilation target">
-		<javac srcdir="src/rsv/process" classpathref="classpath"/>
+		<mkdir dir="build/classes"/>
+
+		<javac srcdir="src/rsv/process" destdir="build/classes" classpathref="classpath"/>
 	</target>
 
 	<target name="compress" description="Compression target">
-		<jar jarfile="rsvprocess.jar" basedir="src/rsv/process" includes="**/*.class" />
+		<jar jarfile="rsvprocess.jar" basedir="build/classes" includes="**/*.class" />
 	</target>
 </project>

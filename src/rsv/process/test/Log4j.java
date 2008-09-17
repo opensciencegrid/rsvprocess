@@ -18,7 +18,7 @@ public class Log4j implements Test{
 	}
 	public void run() {
 		System.out.println("Test Log4J");	
-    	BasicConfigurator.configure();
+    	//BasicConfigurator.configure();
     	logger.debug("Hello world.");
     	logger.info("What a beatiful day.");
 	}
