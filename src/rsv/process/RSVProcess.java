@@ -7,7 +7,6 @@ public class RSVProcess {
 	 */
 	public static void main(String[] args) {
 		System.out.println("RSV Process");
-
 	}
 
 }
