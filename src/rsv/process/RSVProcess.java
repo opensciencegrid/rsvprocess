@@ -1,12 +1,20 @@
 package rsv.process;
 
-public class RSVProcess {
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
+public class RSVProcess {
+	
+	private static final Logger logger = Logger.getLogger(RSVProcess.class);
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println("RSV Process");
+		//PropertyConfigurator.configure("log4j.properties");
+		
+		logger.info("Initializing RSV Process");
+		RSVProcess app = new RSVProcess();
+		
 	}
 
 }
