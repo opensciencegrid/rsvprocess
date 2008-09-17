@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<project default="main">
+
+	<property name="lib.dir"     value="lib"/>
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar"/>
+	</path>
+
+
+	<target name="main" depends="compile, compress" description="Main target">
+		<echo>
+            Building the .jar file.
+        </echo>
+	</target>
+
+	<target name="compile" description="Compilation target">
+		<javac srcdir="src/rsv/process" classpathref="classpath"/>
+	</target>
+
+	<target name="compress" description="Compression target">
+		<jar jarfile="rsvprocess.jar" basedir="src/rsv/process" includes="**/*.class" />
+	</target>
+</project>
