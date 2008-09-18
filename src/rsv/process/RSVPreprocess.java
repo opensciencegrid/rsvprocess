@@ -1,8 +1,7 @@
 package rsv.process;
 
 import rsv.process.model.GratiaModel;
-import rsv.process.model.MetricDataInserter;
-import rsv.process.model.MetricDetailInserter;
+import rsv.process.model.MetricInserter;
 import rsv.process.model.OIMModel;
 import rsv.process.model.ProcessLogModel;
 import rsv.process.model.RSVExtraModel;
@@ -36,14 +35,11 @@ public class RSVPreprocess implements RSVProcess {
 			//some bookkeeping
 			int records_pulled = 0;
 			int records_added = 0;
-			int records_mdata_inserted = 0;
-			int records_mdetail_inserted = 0;
-			
+
 			logger.info("Pulling upto " + maxrecords + " records from Gratia.MetricRecord");
 			ResultSet rs = grartia.getMetricRecords(last_dbid, maxrecords);
 			
-			MetricDataInserter mdata = new MetricDataInserter();
-			MetricDetailInserter mdetail = new MetricDetailInserter();
+			MetricInserter mdetail = new MetricInserter();
 			
 			while(rs.next()){
 	            records_pulled++;
@@ -70,31 +66,19 @@ public class RSVPreprocess implements RSVProcess {
 	            String metricdetail = rs.getString("DetailsData");
 	            
 	            //request for insertions
-	            mdata.add(utimestamp, resource_id, metric_id, status_id, dbid);
-	            mdetail.add(dbid, metricdetail);
+	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
 	            records_added++;
 	        }
 
-	        records_mdata_inserted = mdata.commit();
-			records_mdetail_inserted = mdetail.commit();
-			lm.updateLastGratiaIDProcessed(last_dbid);
-	        
 	        //do some reporting
 	        logger.info("Records pulled from Gratia: " + records_pulled);
-	        logger.info("Records sent to Metricdata/Metricdetail Table: " + records_added);
-	        logger.info("Records inserted to MetricData table: " + records_mdata_inserted);  
-	        logger.info("Records inserted to MetricDetail table: " + records_mdetail_inserted);  
-	        if(records_added != records_mdata_inserted) {
-	        	logger.warn(records_added + " records were sent to Metricdata table but only " + 
-	        			records_mdata_inserted + " was actually inserted to Metricdata. It should be the same..");
-	        	ret = RSVMain.exitcode_warning;
-	        }
-	        if(records_added != records_mdetail_inserted) {
-	        	logger.warn(records_added + " records were sent to Metricdetail table but only " + 
-	        			records_mdetail_inserted + " was actually inserted to Metricdetail. It should be the same..");
-	        	ret = RSVMain.exitcode_warning;
-	        }
+	        logger.info("Records sending to Metricdata/Metricdetail Table: " + records_added);
 	        
+			mdetail.commit();
+			
+			logger.info("Updated process log with last dbid of " + last_dbid);
+			
+			lm.updateLastGratiaIDProcessed(last_dbid);	        
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.error("SQL Error", e);

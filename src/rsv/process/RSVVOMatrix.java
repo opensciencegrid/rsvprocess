@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import rsv.process.model.GratiaModel;
-import rsv.process.model.MetricDataInserter;
 import rsv.process.model.OIMModel;
 import rsv.process.model.RSVExtraModel;
 
