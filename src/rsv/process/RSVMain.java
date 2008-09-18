@@ -15,7 +15,7 @@ public class RSVMain {
 	public static void main(String[] args) {
 		//PropertyConfigurator.configure("log4j.properties");
 		
-		logger.info("Initializing RSV Process");
+		logger.info("Initializing RSV Process!");
 		RSVMain app = new RSVMain();
 		
 		if(args.length != 1) {
