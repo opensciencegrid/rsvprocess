@@ -5,8 +5,7 @@
 	<property name="lib.dir"     value="lib"/>
     <property name="build.dir"   value="build"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
-    <property name="main-class"  value="rsv.process.RSVProcess"/>
-
+    <property name="main-class"  value="rsv.process.RSVMain"/>
 
 	<path id="classpath">
 		<fileset dir="${lib.dir}" includes="**/*.jar"/>

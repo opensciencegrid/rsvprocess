@@ -3,7 +3,7 @@ package rsv.process.test;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-public class Log4j implements Test{
+public class Log4j implements Base{
 
 	private static final Logger logger = Logger.getLogger(Log4j.class);
 

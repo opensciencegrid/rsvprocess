@@ -1,5 +1,5 @@
 package rsv.process.test;
 
-public interface Test {
+public interface Base {
 	public void run();
 }

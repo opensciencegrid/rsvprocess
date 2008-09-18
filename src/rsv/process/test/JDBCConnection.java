@@ -2,7 +2,7 @@ package rsv.process.test;
 
 import java.sql.*;
 
-public class JDBCConnection implements Test {
+public class JDBCConnection implements Base {
 
 	public static void main(String[] args) {
 		 JDBCConnection test = new JDBCConnection();
@@ -32,8 +32,7 @@ public class JDBCConnection implements Test {
 	        System.out.println("Connection Closed");
 	        
 	    } catch( Exception e ) {
-	            e.printStackTrace();
-	        
+	            e.printStackTrace();  
 	    }
 	}
 }
