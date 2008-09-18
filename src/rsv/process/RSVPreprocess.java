@@ -61,9 +61,12 @@ public class RSVPreprocess implements RSVProcess {
 	            	           
 	            int dbid = rs.getInt("dbid");
 	            last_dbid = dbid;
+	            
 	            int utimestamp = rs.getInt("utimestamp");
 	            if(utimestamp == 0) continue;
+	            
 	            String metricdetail = rs.getString("DetailsData");
+	            if(metricdetail == null) continue;
 	            
 	            //request for insertions
 	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
@@ -72,7 +75,7 @@ public class RSVPreprocess implements RSVProcess {
 
 	        //do some reporting
 	        logger.info("Records pulled from Gratia: " + records_pulled);
-	        logger.info("Records sending to Metricdata/Metricdetail Table: " + records_added);
+	        logger.info("Valid records being sent to MetricData/MetricDetail Tables: " + records_added);
 	        
 			mdetail.commit();
 			
