@@ -32,7 +32,10 @@
 	</target>
 	
     <target name="run-preprocess" depends="jar">
-        <java fork="true" classname="${main-class}" args="preprocess">
+        <java fork="true" classname="${main-class}">
+        	<arg value="preprocess">
+        		
+        	</arg>
             <classpath>
                 <path refid="classpath"/>
                 <path location="rsvprocess.jar"/>
