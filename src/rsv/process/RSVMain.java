@@ -2,28 +2,42 @@ package rsv.process;
 
 import org.apache.log4j.Logger;
 import rsv.process.model.ModelBase;
+import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class RSVMain {
 	public static final int exitcode_invalid_arg = -1;
 	public static final int exitcode_ok = 0;
-	public static final int exitcode_error = 1;
+	public static final int exitcode_warning = 1;
+	public static final int exitcode_error = 2;
 	
 	private static final Logger logger = Logger.getLogger(RSVMain.class);
-	/**
-	 * @param args
-	 */
+	public static Properties conf = null;
+
 	public static void main(String[] args) {
-		//PropertyConfigurator.configure("log4j.properties");
-		
-		logger.info("Initializing RSV Process!");
-		RSVMain app = new RSVMain();
-		
-		if(args.length != 1) {
-			showUsage();
-			System.exit(0);
+		int ret = exitcode_ok;		
+		logger.info("Initializing RSV Process");
+		conf = new Properties();
+		try {
+			conf.load(new FileInputStream("rsvprocess.conf"));
+			RSVMain app = new RSVMain();
+			
+			if(args.length != 1) {
+				showUsage();
+			} else {
+				//run specified process
+				String command = args[0];
+				ret = app.dispatch(command);
+			}
+		} catch (FileNotFoundException e) {
+			logger.error("rsvprocess.conf not found in currernt directory.", e);
+			ret = exitcode_error;
+		} catch (IOException e) {
+			logger.error("Failed to read rsvprocess.conf", e);
+			ret = exitcode_error;
 		}
-		String command = args[0];
-		int ret = app.dispatch(command);
 		
 		exit(ret);
 	}
@@ -80,6 +94,9 @@ public class RSVMain {
 			break;
 		case RSVMain.exitcode_ok:
 			System.out.println("Process ended OK");
+			break;
+		case RSVMain.exitcode_warning:
+			System.out.println("Process ended with Warning");
 			break;
 		case RSVMain.exitcode_error:
 			System.out.println("Process ended with Error");

@@ -8,11 +8,19 @@ import org.apache.log4j.Logger;
 public class ModelBase {
 	
 	private static final Logger logger = Logger.getLogger(ModelBase.class);	
-	protected static final Connection db = connectDB();
+	protected static Connection db = null;
 	
 	ModelBase()
 	{
-		
+		try {
+			if(db == null) {
+				logger.info("Initializing ModelBase");
+				db = connectDB();
+				db.setAutoCommit(false);
+			}
+		} catch (SQLException e) {
+			logger.error("Fafiled to initialize ModelBase", e);
+		}
 	}
 	
 	private static Connection connectDB()
@@ -33,8 +41,9 @@ public class ModelBase {
 	public static void closeDB() 
 	{
         try {
-        	if(ModelBase.db != null) {
-        		ModelBase.db.close();
+        	if(db != null) {
+        		db.commit(); 
+        		db.close();
         		logger.info("Closed db connection");
         	}
 		} catch (SQLException e) {

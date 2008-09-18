@@ -18,7 +18,6 @@ public class MetricDataInserter extends ModelBase {
 	public MetricDataInserter()
 	{
 		try {
-			ModelBase.db.setAutoCommit(false);
 	        stmt = ModelBase.db.createStatement();
 		} catch (SQLException e) {
 			logger.error("failed to prepare for butch insert", e);
@@ -35,19 +34,27 @@ public class MetricDataInserter extends ModelBase {
 				metric_status_id + ", " + 
 				gratia_dbid + ")";
 		} else {
-			String sql = "insert into rsvextra.metricdata" +
-				" (timestamp, resource_id, metric_id, metric_status_id, gratia_dbid) values " + batch;
-			//logger.debug(sql);
-			stmt.addBatch(sql);
-			batch = "";
+			flushBatch();
 		}
+	}
+	private void flushBatch() throws SQLException
+	{
+		String sql = "insert into rsvextra.metricdata" +
+			" (timestamp, resource_id, metric_id, metric_status_id, gratia_dbid) values " + batch;
+		stmt.addBatch(sql);
+		//logger.debug(sql);
+		batch = "";	
 	}
 	
 	//returns number of records inserted
 	public int commit() throws SQLException
 	{
+		if(batch.length() != 0) {
+			flushBatch();
+		}
+		
 		int records = 0;
-		logger.info("Inserting new metricdata records in our insert batch");
+		logger.info("Executing Insert Batch");
 		int [] numUpdates=stmt.executeBatch();              
 		for (int i=0; i < numUpdates.length; i++) {           
 		    if (numUpdates[i] == -2)
@@ -55,9 +62,6 @@ public class MetricDataInserter extends ModelBase {
 		    else
 		    	records += numUpdates[i];
 		}
-		ModelBase.db.commit(); 
-		ModelBase.db.setAutoCommit(true);
-		
 		return records;
 	}
 
