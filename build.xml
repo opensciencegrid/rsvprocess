@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<project default="main">
+<project default="jar">
 
     <property name="src.dir"     value="src"/>
 	<property name="lib.dir"     value="lib"/>
@@ -16,11 +16,13 @@
     </target>
 
     <target name="clean-build" depends="clean,jar"/>
-    <target name="main" depends="jar"/>
 
 	<target name="compile" description="Compilation target">
 		<mkdir dir="build/classes"/>
 		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" debug="true"/>
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" excludes="**/*.java"/>
+        </copy>
 	</target>
 
 	<target name="jar" description="Compression target" depends="compile">
