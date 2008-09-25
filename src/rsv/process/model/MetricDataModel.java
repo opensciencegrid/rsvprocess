@@ -54,6 +54,7 @@ public class MetricDataModel extends ModelBase {
         
         ResultSet rs = stmt.executeQuery("select * from rsvextra.metricdata" + 
         		" where id > " + start_dbid + 
+        		" order by id " + //not sure if this is needed, but if not, then mysql should optimize away, right?
         		" limit " + limit); 
         
         return rs;
