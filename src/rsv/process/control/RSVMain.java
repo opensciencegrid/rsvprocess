@@ -1,11 +1,14 @@
-package rsv.process;
+package rsv.process.control;
 
 import org.apache.log4j.Logger;
 import rsv.process.model.ModelBase;
-import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.nio.channels.*;
+
+import rsv.process.Configuration;
 
 public class RSVMain {
 	public static final int exitcode_invalid_arg = -1;
@@ -14,12 +17,12 @@ public class RSVMain {
 	public static final int exitcode_error = 2;
 	
 	private static final Logger logger = Logger.getLogger(RSVMain.class);
-	public static Properties conf = null;
+	public static Configuration conf = null;
 
 	public static void main(String[] args) {
 		int ret = exitcode_ok;		
 		logger.info("Initializing RSV Process");
-		conf = new Properties();
+		conf = new Configuration();
 		try {
 			conf.load(new FileInputStream("rsvprocess.conf"));
 			RSVMain app = new RSVMain();
@@ -27,9 +30,22 @@ public class RSVMain {
 			if(args.length != 1) {
 				showUsage();
 			} else {
-				//run specified process
 				String command = args[0];
-				ret = app.dispatch(command);
+				
+				//get file lock to make sure I am the only one running this process
+				String lock_filename = conf.getProperty(Configuration.common_filelock_prefix) + "." + command;
+				FileOutputStream fos= new FileOutputStream(lock_filename);
+				FileLock fl = fos.getChannel().tryLock();
+				if(fl != null) {
+					//ok. run specified process
+					ret = app.dispatch(command);
+					
+					fl.release();
+				} else {
+					System.out.println("Failed to obtain filelock on " + lock_filename);
+					ret = exitcode_error;
+				}
+				fos.close();
 			}
 		} catch (FileNotFoundException e) {
 			logger.error("rsvprocess.conf not found in currernt directory.", e);

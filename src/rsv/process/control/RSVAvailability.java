@@ -1,4 +1,4 @@
-package rsv.process;
+package rsv.process.control;
 
 public class RSVAvailability implements RSVProcess {
 	public int run() {

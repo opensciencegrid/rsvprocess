@@ -13,7 +13,7 @@ public class Log4j implements Base{
 	public static void main(String[] args) {
 		
 		//configure log4j
-		 PropertyConfigurator.configure("log4j.properties");
+		// PropertyConfigurator.configure("log4j.properties");
 
 		 Log4j test = new Log4j();
 		 test.run();

@@ -15,7 +15,7 @@ public class GratiaModel extends ModelBase {
         Statement stmt = ModelBase.db.createStatement();
         ResultSet rs = stmt.executeQuery("select *, UNIX_Timestamp(Timestamp) as utimestamp from gratia.MetricRecord" + 
         		" where dbid > " + start_dbid + 
-        		" order by dbid" + 
+        		" order by dbid" +  //TODO - is this necessary?
         		" limit " + limit);
         return rs;
 	}

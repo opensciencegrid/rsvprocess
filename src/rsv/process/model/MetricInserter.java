@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-import rsv.process.RSVPreprocess;
+import rsv.process.control.RSVPreprocess;
 
 public class MetricInserter extends ModelBase {
 	private static final Logger logger = Logger.getLogger(MetricInserter.class);
@@ -28,6 +28,25 @@ public class MetricInserter extends ModelBase {
 		} catch (SQLException e) {
 			logger.error("failed to prepare for butch insert", e);
 		}
+	}
+	
+	//remove all records from metricdetail and metricdata with dbid larger than last_dbid
+	public int clearRecords(int last_dbid) throws SQLException
+	{
+		int recs = 0;
+		String sql = "delete from rsvextra.metricdetail where metricdata_id > ?";
+		PreparedStatement stmt = ModelBase.db.prepareStatement(sql);		
+	    stmt.setInt(1, last_dbid);
+	    stmt.execute();
+	    recs += stmt.getUpdateCount();
+	    
+		sql = "delete from rsvextra.metricdata where id > ?";
+		stmt = ModelBase.db.prepareStatement(sql);		
+	    stmt.setInt(1, last_dbid);
+	    stmt.execute();
+	    recs += stmt.getUpdateCount();	   
+	    
+	    return recs;
 	}
 	
 	public void add(int id, int timestamp, int resource_id, int metric_id, int status_id, String detail) throws SQLException {
