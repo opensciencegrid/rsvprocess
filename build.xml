@@ -31,7 +31,7 @@
 		</jar>
 	</target>
 	
-    <target name="run-preprocess" depends="jar">
+    <target name="preprocess" depends="jar">
         <java fork="true" classname="${main-class}">
         	<arg value="preprocess">
         		
