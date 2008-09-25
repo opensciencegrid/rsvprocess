@@ -20,7 +20,7 @@
 
 	<target name="compile" description="Compilation target">
 		<mkdir dir="build/classes"/>
-		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" debug="true"/>
 	</target>
 
 	<target name="jar" description="Compression target" depends="compile">

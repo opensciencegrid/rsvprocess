@@ -85,11 +85,12 @@ public class RSVPreprocess implements RSVProcess {
 	        logger.info("Records pulled from Gratia: " + records_pulled);
 	        logger.info("Valid records being sent to MetricData/MetricDetail Tables: " + records_added);
 	        
+	        //now, let's commit all changes..
 			mdetail.commit();
+			lm.updateLastGratiaIDProcessed(last_dbid);	 
 			
 			logger.info("Updated process log with last dbid of " + last_dbid);
 			
-			lm.updateLastGratiaIDProcessed(last_dbid);	        
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.error("SQL Error", e);
