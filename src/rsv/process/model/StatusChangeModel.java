@@ -16,7 +16,7 @@ public class StatusChangeModel extends ModelBase {
 	private static final Logger logger = Logger.getLogger(StatusChangeModel.class);	
 	
 	@SuppressWarnings("serial")
-	public class LSCType extends TreeMap<Integer, ServiceStatus> {}//<service_id, status_is>
+	public static class LSCType extends TreeMap<Integer, ServiceStatus> {}//<service_id, status_is>
 	public LSCType getLastStatusChange_Service(int resource_id, Integer timestamp) throws SQLException {
 		LSCType ret = new LSCType();
         Statement stmt = ModelBase.db.createStatement();
@@ -104,16 +104,16 @@ public class StatusChangeModel extends ModelBase {
 	//returns number of record inserted
 	public int outputServiceStatusChanges(ArrayList<ServiceStatus> service_statuschanges) throws SQLException
 	{
-		String sql = "insert into rsvextra.statuschange_service (resource_id, service_id, status_id, responsible_metricdata_id, timestamp, detail) values (?,?,?,?,?,?)";
+		String sql = "insert into rsvextra.statuschange_service (resource_id, service_id, status_id, timestamp, detail) values (?,?,?,?,?)";
 	    PreparedStatement stmt_data = ModelBase.db.prepareStatement(sql);
 	    
 	    for(ServiceStatus s : service_statuschanges) {
 			stmt_data.setInt(1, s.resource_id);
 			stmt_data.setInt(2, s.service_id);
 			stmt_data.setInt(3, s.status_id);
-			stmt_data.setInt(4, s.responsible_metricdata_id);
-			stmt_data.setInt(5, s.timestamp);
-			stmt_data.setString(6, s.note);
+			//stmt_data.setInt(4, s.responsible_metricdata_id);
+			stmt_data.setInt(4, s.timestamp);
+			stmt_data.setString(5, s.note);
 			stmt_data.addBatch();
 	    }
 	    
@@ -129,15 +129,15 @@ public class StatusChangeModel extends ModelBase {
 	
 	public int outputResourceStatusChanges(ArrayList<ResourceStatus> resource_statuschanges) throws SQLException
 	{
-		String sql = "insert into rsvextra.statuschange_resource (resource_id, status_id, responsible_sc_service_id, timestamp, detail) values (?,?,?,?,?)";
+		String sql = "insert into rsvextra.statuschange_resource (resource_id, status_id, timestamp, detail) values (?,?,?,?)";
 	    PreparedStatement stmt_data = ModelBase.db.prepareStatement(sql);
 	    
 	    for(ResourceStatus s : resource_statuschanges) {
 			stmt_data.setInt(1, s.resource_id);
 			stmt_data.setInt(2, s.status_id);
-			stmt_data.setInt(3, s.responsible_service_id);
-			stmt_data.setInt(4, s.timestamp);
-			stmt_data.setString(5, s.note);
+			//stmt_data.setInt(3, s.responsible_service_id);
+			stmt_data.setInt(3, s.timestamp);
+			stmt_data.setString(4, s.note);
 			stmt_data.addBatch();
 	    }
 	    

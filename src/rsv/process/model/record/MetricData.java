@@ -48,6 +48,11 @@ public class MetricData {
 		MetricDataModel mdm = new MetricDataModel();
 		return mdm.getDetail(getID());
 	}
+
+	public int getFreshFor() throws SQLException {
+		OIMModel oim = new OIMModel();
+		return oim.lookupFreshFor(metric_id);
+	}
 	
 	public void addNote(String _note) {
 		note += _note;

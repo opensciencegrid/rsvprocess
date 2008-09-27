@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.TreeMap;
 import java.util.ArrayList;
+//import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -120,83 +121,32 @@ public class RSVOverallStatus implements RSVProcess {
 		
 		ArrayList<ServiceStatus> statuschanges = new ArrayList<ServiceStatus>();
 
-		//load critical metrics for each service that this resource supports
+		//load all services (and critical metrics for each services) that this resource support
 		TreeMap<Integer/*service_id*/, ArrayList<Integer/*metric_id*/>> critical_metrics = 
 			new TreeMap<Integer, ArrayList<Integer>>();
 		ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
+		//TreeSet<Integer/*metric_id*/> all_critical_metrics = new TreeSet<Integer>();
 		for(Integer service_id : services) {
-			critical_metrics.put(service_id, oim.getCriticalMetrics(service_id));
+			ArrayList<Integer> critical = oim.getCriticalMetrics(service_id);
+			//all_critical_metrics.addAll(critical);
+			critical_metrics.put(service_id, critical);
 		}
 		
 		//iterate each metric data inside ITP
 		for(MetricData md : mds) {
 			
+			//ignore if this is not a critical metrics
+			//if(!all_critical_metrics.contains(md.getMetricID())) continue;
+			
 			//first of all, update rrs with the new metric data unless it's dummy (for expiration test)
 			if(!(md instanceof DummyMetricData)) {
 				rrs.update(md);
 			}
-
-			//1. check for expired metrics
-			ArrayList<MetricData> expired = new ArrayList<MetricData>();
-			for(MetricData it : rrs.getAllMetricData()) {
-				if(!oim.isFresh(it, md.getTimestamp())) {
-					expired.add(it);
-				}
-			}
 			
-			//2. calculate overall "service" status
+			//for each service,
 			for(Integer service_id : services) {
-				
-				ServiceStatus new_status = new ServiceStatus();
-				
-				//reset counters
-				int non_expired_critical = 0;
-				int nullmetric = 0;
-				int unknown = 0;
-				int warning = 0;
-				ArrayList<Integer> critical = critical_metrics.get(service_id);
-
-				//let's count the critical metrics status
-				for(Integer metric_id : critical) {
-					MetricData critical_metricdata = rrs.getCurrent(metric_id);
-					if(critical_metricdata == null) {
-						nullmetric++;
-						continue;
-					}
-					int status_id = critical_metricdata.getStatusID();
-					switch(status_id) {
-					case Status.CRITICAL:
-						non_expired_critical++;
-						continue;
-					case Status.WARNING:
-						warning++;
-						continue;
-					case Status.UNKNOWN:
-						unknown++;
-						continue;
-					}					
-				}	
-				
-				//let's analyze
-				if(non_expired_critical > 0) {
-					new_status.status_id = Status.CRITICAL;
-					new_status.note = non_expired_critical + " of " + critical.size() + " critical metrics are in CRITICAL status.";
-				} else if(expired.size() > 0) {
-					new_status.status_id = Status.UNKNOWN;
-					new_status.note = expired.size() + " of " + critical.size() + " critical metrics have expired.";
-				} else if(nullmetric > 0) {
-					new_status.status_id = Status.UNKNOWN;
-					new_status.note = nullmetric + " of " + critical.size() + " critical metrics have not been reported.";
-				} else if(unknown > 0) {
-					new_status.status_id = Status.UNKNOWN;
-					new_status.note = unknown + " of " + critical.size() + " critical metrics are in UNKNOWN status.";
-				} else if(warning > 0) {
-					new_status.status_id = Status.WARNING;
-					new_status.note = warning + " of " + critical.size() + " critical metrics are in WARNING status.";				
-				} else {
-					new_status.status_id = Status.OK;
-					new_status.note = "No issues found.";						
-				}
+				//calculate the service status
+				ServiceStatus new_status = calculateServiceStatus(critical_metrics.get(service_id), rrs, md.getTimestamp());
 				
 				//4. record status changes (if any)
 				ServiceStatus current_servicestatus = current_status.get(service_id);
@@ -206,15 +156,6 @@ public class RSVOverallStatus implements RSVProcess {
 					//set some additional info
 					new_status.resource_id = resource_id;
 					new_status.service_id = service_id;
-					new_status.timestamp = md.getTimestamp();
-					if(md instanceof DummyMetricData) {
-						//the only case where this code is reached is when dummy metricdata has 
-						//successfully detected metric expiration on at least one of the current RRS.
-						//But, is hasn't being proven so..
-						new_status.responsible_metricdata_id = expired.get(0).getID();//grab first one
-					} else {
-						new_status.responsible_metricdata_id = md.getID();
-					}
 					
 					//service status has changed
 					current_status.put(service_id, new_status);
@@ -223,14 +164,86 @@ public class RSVOverallStatus implements RSVProcess {
 							" Service Status for " + service_id + 
 							" has changed to " + new_status.status_id + 
 							" at " + new_status.timestamp +
-							" reason: " + new_status.note +
-							" metric ID responsible: " + new_status.responsible_metricdata_id);
+							" reason: " + new_status.note);
 				}
 			}
 		}
 			
 		return statuschanges;
 	}
+	
+	//this function is used by RSVCache as well..
+	public ServiceStatus calculateServiceStatus(ArrayList<Integer/*metric_id*/> critical, RelevantRecordSet rrs, int timestamp) throws SQLException
+	{
+
+		//2. calculate overall "service" status		
+		ServiceStatus new_status = new ServiceStatus();
+		new_status.timestamp = timestamp;
+		
+		//reset counters
+		int expired = 0;
+		int first_expired_time = 0;
+		int non_expired_critical = 0;
+		int nullmetric = 0;
+		int unknown = 0;
+		int warning = 0;
+
+		//let's count the critical metrics status
+		for(Integer metric_id : critical) {
+			MetricData critical_metricdata = rrs.getCurrent(metric_id);
+					
+			if(critical_metricdata == null) {
+				nullmetric++;
+				continue;
+			}
+			if(!oim.isFresh(critical_metricdata, timestamp)) {
+				expired++;
+				if(first_expired_time == 0) {
+					first_expired_time = critical_metricdata.getTimestamp() + critical_metricdata.getFreshFor();
+				}
+				continue;
+			}	
+			
+			int status_id = critical_metricdata.getStatusID();
+			switch(status_id) {
+			case Status.CRITICAL:
+				non_expired_critical++;
+				continue;
+			case Status.WARNING:
+				warning++;
+				continue;
+			case Status.UNKNOWN:
+				unknown++;
+				continue;
+			}					
+		}	
+		
+		//let's analyze
+		if(non_expired_critical > 0) {
+			new_status.status_id = Status.CRITICAL;
+			new_status.note = non_expired_critical + " of " + critical.size() + " critical metrics are in CRITICAL status.";
+		} else if(expired > 0) {
+			new_status.status_id = Status.UNKNOWN;
+			new_status.note = expired + " of " + critical.size() + " critical metrics have expired.";
+			//reset effective time to be first_expired_time
+			new_status.timestamp = first_expired_time;
+		} else if(nullmetric > 0) {
+			new_status.status_id = Status.UNKNOWN;
+			new_status.note = nullmetric + " of " + critical.size() + " critical metrics have not been reported.";
+		} else if(unknown > 0) {
+			new_status.status_id = Status.UNKNOWN;
+			new_status.note = unknown + " of " + critical.size() + " critical metrics are in UNKNOWN status.";
+		} else if(warning > 0) {
+			new_status.status_id = Status.WARNING;
+			new_status.note = warning + " of " + critical.size() + " critical metrics are in WARNING status.";				
+		} else {
+			new_status.status_id = Status.OK;
+			new_status.note = "No issues found.";						
+		}
+		
+		return new_status;
+	}
+	
 	
 	private ArrayList<ResourceStatus> calculateResourceStatusChanges(int resource_id, 
 			ResourceStatus current_resource_status, 
@@ -244,42 +257,7 @@ public class RSVOverallStatus implements RSVProcess {
 			//update current list
 			current_service_statuses.put(change.service_id, change);
 			
-			//prepare counter
-			int critical = 0;
-			int unknown = 0;
-			int warning = 0;
-			
-			//let's count
-			for(ServiceStatus s : current_service_statuses.values()) {
-				switch(s.status_id) {
-				case Status.CRITICAL:
-					critical++;
-					continue;
-				case Status.WARNING:
-					warning++;
-					continue;
-				case Status.UNKNOWN:
-					unknown++;
-					continue;
-				}
-			}
-			
-			ResourceStatus rs = new ResourceStatus();
-			
-			//analyze..
-			if(critical > 0) {
-				rs.status_id = Status.CRITICAL;
-				rs.note = critical + " of " + current_service_statuses.size() + " services are in CRITICAL status.";
-			} else if(unknown > 0) {
-				rs.status_id = Status.UNKNOWN;
-				rs.note = unknown + " of " + current_service_statuses.size() + " services are in UNKNOWN status.";
-			} else if(warning > 0) {
-				rs.status_id = Status.WARNING;
-				rs.note = warning + " of " + current_service_statuses.size() + " services are in WARNING status.";
-			} else {
-				rs.status_id = Status.OK;
-				rs.note = "No issues found for critical services.";		
-			}
+			ResourceStatus rs = calculateResourceStatus(current_service_statuses);
 			
 			//record if any status change has occured
 			if(current_resource_status == null ||
@@ -288,7 +266,7 @@ public class RSVOverallStatus implements RSVProcess {
 				//set some additional info
 				rs.resource_id = resource_id;
 				rs.timestamp = change.timestamp;
-				rs.responsible_service_id = change.service_id;
+				//rs.responsible_service_id = change.service_id;
 				
 				current_resource_status = rs;
 				resource_statuschanges.add(rs);
@@ -296,12 +274,55 @@ public class RSVOverallStatus implements RSVProcess {
 				logger.debug("Resource " + resource_id + 
 						" overall status has changed to " + rs.status_id + 
 						" at " + rs.timestamp +
-						" reason: " + rs.note +
-						" service responsible: " + rs.responsible_service_id);
+						" reason: " + rs.note);
+						//" service responsible: " + rs.responsible_service_id);
 			}
 		}
 		
 		return resource_statuschanges;
+	}
+	
+	//this function is used by RSVCache as well..
+	public ResourceStatus calculateResourceStatus(LSCType current_service_statuses)
+	{
+		//prepare counter
+		int critical = 0;
+		int unknown = 0;
+		int warning = 0;
+		
+		//let's count
+		for(ServiceStatus s : current_service_statuses.values()) {
+			switch(s.status_id) {
+			case Status.CRITICAL:
+				critical++;
+				continue;
+			case Status.WARNING:
+				warning++;
+				continue;
+			case Status.UNKNOWN:
+				unknown++;
+				continue;
+			}
+		}
+		
+		ResourceStatus rs = new ResourceStatus();
+		
+		//analyze..
+		if(critical > 0) {
+			rs.status_id = Status.CRITICAL;
+			rs.note = critical + " of " + current_service_statuses.size() + " services are in CRITICAL status.";
+		} else if(unknown > 0) {
+			rs.status_id = Status.UNKNOWN;
+			rs.note = unknown + " of " + current_service_statuses.size() + " services are in UNKNOWN status.";
+		} else if(warning > 0) {
+			rs.status_id = Status.WARNING;
+			rs.note = warning + " of " + current_service_statuses.size() + " services are in WARNING status.";
+		} else {
+			rs.status_id = Status.OK;
+			rs.note = "No issues found for critical services.";		
+		}
+		
+		return rs;
 	}
 	
 	private TreeMap<Integer/*resource_id*/, TimeRange> calculateITPs() throws SQLException

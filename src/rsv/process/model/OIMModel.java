@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Resource;
+import rsv.process.model.record.Metric;
 
 @SuppressWarnings("serial")
 
@@ -34,7 +35,7 @@ public class OIMModel extends ModelBase {
 		return cache_resource_fqdn2id.get(fqdn);
 	}
 	
-	public class ResourcesType extends TreeMap<Integer, Resource> {}
+	public static class ResourcesType extends TreeMap<Integer/*resource_id*/, Resource> {}
 	private static ResourcesType cache_resource_id2rec = null;
 	public ResourcesType getResources() throws SQLException
 	{
@@ -138,14 +139,14 @@ public class OIMModel extends ModelBase {
 		*/
 	}
 	public boolean isFresh(MetricData md, int timestamp) throws SQLException {
-		int freshfor = lookupFreshFor(md.getMetricID());
+		int freshfor = md.getFreshFor();
 		if(timestamp > md.getTimestamp() - freshfor) {
 			return true;
 		}
 		return false;
 	}
 	
-	public class GetResourceGroupsType extends HashMap<Integer, ArrayList<Integer>> {}//<service_id, status_is>
+	public static class GetResourceGroupsType extends HashMap<Integer, ArrayList<Integer>> {}//<service_id, status_is>
 	private static GetResourceGroupsType cache_rrg_id2gid = null;
 	public ArrayList<Integer> getResourceGroups(int resource_id) throws SQLException {
 		if(cache_rrg_id2gid == null) {
@@ -165,7 +166,8 @@ public class OIMModel extends ModelBase {
 	        	list.add(gid);
 	        }
 		}
-        return cache_rrg_id2gid.get(resource_id);
+		return cache_rrg_id2gid.get(resource_id);
+
 	}	
 	
 	//public class ResourceServiceType extends TreeMap<Integer, ArrayList<Integer>> {}//<service_id, status_is>
@@ -189,6 +191,7 @@ public class OIMModel extends ModelBase {
 	    	"FROM oim.service PS " +
 	    	"WHERE PS.parent_service_id IS NOT NULL " +
 	    	") ";
+	    	//logger.debug(sql);
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {
 	        	Integer id = rs.getInt("resource_id");
@@ -201,7 +204,9 @@ public class OIMModel extends ModelBase {
 	        	list.add(service_id);
 	        }
 		}
-        return cache_resourceservice_rid2sid.get(resource_id);
+		ArrayList<Integer> list = cache_resourceservice_rid2sid.get(resource_id);
+		if(list == null) return new ArrayList<Integer>();
+		return list;
 	}
 	
 	//return list of metric_ids that are critical for the service
@@ -223,7 +228,9 @@ public class OIMModel extends ModelBase {
 	        	list.add(mid);
 	        }
 		}
-		return cache_criticalmetric_id2ids.get(service_id);
+		ArrayList<Integer> list = cache_criticalmetric_id2ids.get(service_id);
+		if(list == null) return new ArrayList<Integer>();
+		return list;
 	}
 	
 	//return list of metric_ids that are non-critical for the service
@@ -245,10 +252,12 @@ public class OIMModel extends ModelBase {
 	        	list.add(mid);
 	        }
 		}
-		return cache_non_criticalmetric_id2ids.get(service_id);
+		ArrayList<Integer> list = cache_non_criticalmetric_id2ids.get(service_id);
+		if(list == null) return new ArrayList<Integer>();
+		return list;
 	}
 
-	public class StatusType extends TreeMap<Integer, String> {}//<service_id, status_is>
+	public static class StatusType extends TreeMap<Integer, String> {}//<service_id, status_is>
 	private static StatusType cache_status_id2status = null;
 	public StatusType getStatus() throws SQLException {
 		if(cache_status_id2status == null) {
@@ -263,6 +272,23 @@ public class OIMModel extends ModelBase {
 	        }
 		}
         return cache_status_id2status;
+	}
+	
+	public static class MetricType extends TreeMap<Integer/*metric_id*/, Metric> {}
+	private static MetricType cache_status_id2metric = null;
+	public Metric getMetric(int metric_id) throws SQLException {
+		if(cache_status_id2metric == null) {
+			cache_status_id2metric = new MetricType();
+	        Statement stmt = ModelBase.db.createStatement();
+	        String sql = "select * from oim.metric";
+	        ResultSet rs = stmt.executeQuery(sql);
+	        while(rs.next()) {
+	        	Integer id = rs.getInt("metric_id");
+	        	Metric m = new Metric(rs);
+	        	cache_status_id2metric.put(id, m);
+	        }			
+		}
+		return cache_status_id2metric.get(metric_id);
 	}
 
 }

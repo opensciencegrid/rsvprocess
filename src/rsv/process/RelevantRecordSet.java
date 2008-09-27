@@ -28,7 +28,7 @@ public class RelevantRecordSet {
 		//consume the initial metricdata
 		for(Integer metric_id : rrs.keySet()) {
 			MetricData md = rrs.get(metric_id);
-			//if status is uknown, try to find the effective records
+			//if status is unknown, try to find the effective records
 			if(md.getStatusID() == Status.UNKNOWN) {
 				MetricData effective_md = mdm.getLastNonUnknownMetricData(resource_id, md.getMetricID(), md.getTimestamp());
 				if(effective_md != null) {
