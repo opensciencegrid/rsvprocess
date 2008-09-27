@@ -53,6 +53,16 @@
         </java>
     </target>
 	
+	<target name="cache" depends="jar">
+        <java fork="true" classname="${main-class}">
+        	<arg value="cache"/>
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+		
 	<target name="vomatrix" depends="jar">
         <java fork="true" classname="${main-class}">
         	<arg value="vomatrix"/>
