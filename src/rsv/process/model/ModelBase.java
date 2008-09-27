@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
+import rsv.process.Configuration;
+import rsv.process.control.RSVMain;
+
 public class ModelBase {
 	
 	private static final Logger logger = Logger.getLogger(ModelBase.class);	
@@ -26,10 +29,12 @@ public class ModelBase {
 	private static Connection connectDB()
 	{
     	//connect to mysql
-        String url = "jdbc:mysql://rsv-itb.grid.iu.edu:49152/rsvextra";
+		String url = RSVMain.conf.getProperty(Configuration.db_url);
         Connection con = null;
 		try {
-			con = DriverManager.getConnection(url,"rsv-view-write", "soichisviews");
+			con = DriverManager.getConnection(url,
+					RSVMain.conf.getProperty(Configuration.db_user), 
+					RSVMain.conf.getProperty(Configuration.db_pass));
 			logger.info("Connected to " + url);
 		} catch (SQLException e) {
 			logger.error("Caught exception while connecting to db", e);
