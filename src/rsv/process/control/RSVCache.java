@@ -18,6 +18,7 @@ import rsv.process.model.OIMModel.ResourcesType;
 import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Resource;
 import rsv.process.model.record.ResourceStatus;
+import rsv.process.model.record.Service;
 import rsv.process.model.record.ServiceStatus;
 import rsv.process.model.record.Status;
 import rsv.process.model.record.Metric;
@@ -76,6 +77,10 @@ public class RSVCache implements RSVProcess {
 				for(Integer service_id : services) {
 					xml += "<Service>";
 					xml += "<ServiceID>"+service_id+"</ServiceID>";
+					Service s = oim.getService(service_id);
+					xml += "<ServiceName>"+s.getName()+"</ServiceName>";					
+					xml += "<ServiceDescription>"+s.getDescription()+"</ServiceDescription>";	
+					
 					ArrayList<Integer> critical_metrics = oim.getCriticalMetrics(service_id);
 					ArrayList<Integer> non_critical_metrics = oim.getNonCriticalMetrics(service_id);
 					

@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import org.apache.log4j.Logger;
 
-import rsv.process.model.record.MetricData;
-import rsv.process.model.record.Resource;
-import rsv.process.model.record.Metric;
+import rsv.process.model.record.*;
 
 @SuppressWarnings("serial")
 
@@ -289,6 +287,23 @@ public class OIMModel extends ModelBase {
 	        }			
 		}
 		return cache_status_id2metric.get(metric_id);
+	}
+	
+	public static class ServiceType extends TreeMap<Integer/*service_id*/, Service> {}
+	private static ServiceType cache_service_id2service = null;
+	public Service getService(Integer service_id) throws SQLException {
+		if(cache_service_id2service == null) {
+			cache_service_id2service = new ServiceType();
+	        Statement stmt = ModelBase.db.createStatement();
+	        String sql = "select * from oim.service where active = 1 and disable = 0";
+	        ResultSet rs = stmt.executeQuery(sql);
+	        while(rs.next()) {
+	        	Integer id = rs.getInt("service_id");
+	        	Service m = new Service(rs);
+	        	cache_service_id2service.put(id, m);
+	        }			
+		}
+		return cache_service_id2service.get(service_id);
 	}
 
 }
