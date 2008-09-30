@@ -238,7 +238,7 @@ public class RSVOverallStatus implements RSVProcess {
 			new_status.note = warning + " of " + critical.size() + " critical metrics are in WARNING status.";				
 		} else {
 			new_status.status_id = Status.OK;
-			new_status.note = "No issues found.";						
+			new_status.note = "No issues found for this service.";						
 		}
 		
 		return new_status;
@@ -319,7 +319,7 @@ public class RSVOverallStatus implements RSVProcess {
 			rs.note = warning + " of " + current_service_statuses.size() + " services are in WARNING status.";
 		} else {
 			rs.status_id = Status.OK;
-			rs.note = "No issues found for critical services.";		
+			rs.note = "No issues found for this resource.";		
 		}
 		
 		return rs;

@@ -173,7 +173,7 @@ public class RSVCache implements RSVProcess {
 			if(md == null) {
 				xml += "<Status></Status>";
 				xml += "<Timestamp></Timestamp>";
-				xml += "<Detail>(The metric data has never been reported for this metric.)</Detail>";					
+				xml += "<Detail></Detail>";					
 			} else {
 				xml += "<Status>"+Status.getStatus(md.getStatusID())+"</Status>";
 				xml += "<Timestamp>"+md.getTimestamp()+"</Timestamp>";
