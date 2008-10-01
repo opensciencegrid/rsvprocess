@@ -121,20 +121,17 @@ public class OIMModel extends ModelBase {
 	private static HashMap<Integer, Integer> cache_metric_id2freshfor = null;
 	public Integer lookupFreshFor(int metric_id) throws SQLException
 	{
-		return 60*60*12; //hardcode for now to 12 hours
-		/*
 		if(cache_metric_id2freshfor == null) {
 			cache_metric_id2freshfor = new HashMap<Integer, Integer>();
 	        Statement stmt = ModelBase.db.createStatement();
 	        ResultSet rs = stmt.executeQuery("select metric_id, fresh_for from oim.metric");			
 	        while(rs.next()) {
-	        	Integer id = rs.getInt("metrid_id");
+	        	Integer id = rs.getInt("metric_id");
 	        	Integer value = rs.getInt("fresh_for");
 	        	cache_metric_id2freshfor.put(id, value);
 	        }
 		}
 		return cache_metric_id2freshfor.get(metric_id);
-		*/
 	}
 	public boolean isFresh(MetricData md, int timestamp) throws SQLException {
 		int freshfor = md.getFreshFor();
