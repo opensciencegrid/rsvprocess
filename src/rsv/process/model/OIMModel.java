@@ -135,7 +135,7 @@ public class OIMModel extends ModelBase {
 	}
 	public boolean isFresh(MetricData md, int timestamp) throws SQLException {
 		int freshfor = md.getFreshFor();
-		if(timestamp > md.getTimestamp() - freshfor) {
+		if(timestamp < md.getTimestamp() + freshfor) {
 			return true;
 		}
 		return false;

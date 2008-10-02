@@ -2,6 +2,7 @@ package rsv.process.control;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.TreeMap;
 import java.util.ArrayList;
 //import java.util.TreeSet;
@@ -49,9 +50,6 @@ public class RSVOverallStatus implements RSVProcess {
 			//Step 2: For each resource we found...
 			for(Integer resource_id : itps.keySet()) {
 				
-				//debug
-				//if(resource_id != 107) continue;
-				
 				logger.info("Processing resource ID : " + resource_id);
 				
 				ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
@@ -61,11 +59,7 @@ public class RSVOverallStatus implements RSVProcess {
 				
 				//for each ranges (currently there is only 1 range per resource, but we can improve this later)
 				for(TimePeriod tp : ranges) {
-					
-					//A. Clear Status Change History within ITP (on all statuschange_xxx tables)
-					//int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
-					//logger.info("Cleared " + removed + " records inside ITP of start: " + tp.start + " and end: " + tp.end);
-		
+							
 					//B. Retrieve Initial Status History (all statuschange_xxx tables)
 					LSCType initial_service_statuses = scm.getLastStatusChange_Service(resource_id, tp.start);
 					ResourceStatus initial_resource_status = scm.getLastStatusChange_Resource(resource_id, tp.start);
@@ -104,8 +98,10 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
-					logger.info("For resource " + resource_id + " - cleared " + removed + " records inside ITP of start: " + tp.start + " and end: " + tp.end + " (duration: " + (tp.end - tp.start) + " seconds)");
-		
+					java.util.Date start_date = new java.util.Date((long)tp.start * 1000);
+
+					logger.info("For resource " + resource_id + " - cleared " + removed + " records inside ITP of start: " + 
+							start_date.toString() + " (duration: " + (tp.end - tp.start)/60 + " minutes)");
 				}
 			}
 			
@@ -150,7 +146,7 @@ public class RSVOverallStatus implements RSVProcess {
 			//if(!all_critical_metrics.contains(md.getMetricID())) continue;
 			
 			//first of all, update rrs with the new metric data unless it's dummy (for expiration test)
-			if(!(md instanceof DummyMetricData)) {
+			if(md instanceof MetricData) {
 				rrs.update(md);
 			}
 			
