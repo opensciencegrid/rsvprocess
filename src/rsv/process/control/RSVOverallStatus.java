@@ -39,7 +39,7 @@ public class RSVOverallStatus implements RSVProcess {
 	public int run() {
 		int ret = RSVMain.exitcode_ok;
 		ArrayList<ServiceStatus> all_service_statuschanges = new ArrayList<ServiceStatus>();
-		ArrayList<ResourceStatus> all_resource_statuschanges = new ArrayList<ResourceStatus>();	
+		ArrayList<ResourceStatus> all_resource_statuschanges = new ArrayList<ResourceStatus>();
 		
 		try {
 			
@@ -63,8 +63,8 @@ public class RSVOverallStatus implements RSVProcess {
 				for(TimePeriod tp : ranges) {
 					
 					//A. Clear Status Change History within ITP (on all statuschange_xxx tables)
-					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
-					logger.info("Cleared " + removed + " records inside ITP of start: " + tp.start + " and end: " + tp.end);
+					//int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
+					//logger.info("Cleared " + removed + " records inside ITP of start: " + tp.start + " and end: " + tp.end);
 		
 					//B. Retrieve Initial Status History (all statuschange_xxx tables)
 					LSCType initial_service_statuses = scm.getLastStatusChange_Service(resource_id, tp.start);
@@ -95,6 +95,17 @@ public class RSVOverallStatus implements RSVProcess {
 					//D3. Calculate Resource Status Changes.
 					resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
 					all_resource_statuschanges.addAll(resource_statuschanges);
+				}
+			}
+			
+			//pre-E. Clear ITP window 
+			for(Integer resource_id : itps.keySet()) {
+				TimeRange itp = itps.get(resource_id);
+				ArrayList<TimePeriod> ranges = itp.getRanges();
+				for(TimePeriod tp : ranges) {
+					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
+					logger.info("For resource " + resource_id + " - cleared " + removed + " records inside ITP of start: " + tp.start + " and end: " + tp.end + " (duration: " + (tp.end - tp.start) + " seconds)");
+		
 				}
 			}
 			
