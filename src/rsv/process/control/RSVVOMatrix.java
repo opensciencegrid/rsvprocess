@@ -3,14 +3,19 @@ package rsv.process.control;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.TreeSet;
+
 import org.apache.log4j.Logger;
 
 import rsv.process.Configuration;
 import rsv.process.model.MetricDataModel;
 import rsv.process.model.OIMModel;
 import rsv.process.model.record.MetricData;
+import rsv.process.model.record.Resource;
+import rsv.process.model.record.VirtualOrganization;
 
 public class RSVVOMatrix implements RSVProcess{
 	
@@ -29,7 +34,10 @@ public class RSVVOMatrix implements RSVProcess{
 			xml += "<VOMembership>\n";
 			MetricDataModel mdm = new MetricDataModel();
 			OIMModel oim = new OIMModel();
+			TreeMap<Integer/*vo_id*/, TreeSet<Integer/*resource_id*/>> void2resources = new TreeMap<Integer, TreeSet<Integer>>();
 			
+			//grouped by Resource ID
+			xml += "<ResourceGrouped>";
 			OIMModel.ResourcesType resources = oim.getResources();
 			for(Integer resource_id : resources.keySet()) {
 				MetricDataModel.LMDType mset = mdm.getLastMetricDataSet(resource_id, null);
@@ -52,6 +60,16 @@ public class RSVVOMatrix implements RSVProcess{
 									logger.warn("Unknown VO name: "+ voname + " found for resource " + resource_id);
 								} else {
 									volist.put(vo_id, voname);
+									
+									//store the entry to void2resources (for later output of VO grouped list)
+									TreeSet<Integer> rs = void2resources.get(vo_id);
+									if(rs == null) {
+										rs = new TreeSet<Integer>();
+										void2resources.put(vo_id, rs);
+									}
+									if(!rs.contains(resource_id)) {
+										rs.add(resource_id);
+									}
 								}
 						    }
 						}
@@ -61,16 +79,41 @@ public class RSVVOMatrix implements RSVProcess{
 					}
 					
 					//output XML
+					Resource r = resources.get(resource_id);
 					xml += "<Resource id=\""+resource_id+"\">";
+					xml += "<Name>"+r.getName()+"</Name>";
+					xml += "<MembersRaw><![CDATA["+voinfo+"]]></MembersRaw>";
+					xml += "<Members>";
 					if(volist != null) {
 						for(Integer vo : volist.keySet()) {
 							xml += "<VO id=\""+vo+"\">"+volist.get(vo)+"</VO>";
 						}
 					}
-					xml += "<Raw><![CDATA["+voinfo+"]]></Raw>";
+					xml += "</Members>";
 					xml += "</Resource>\n";
 				}
-			}        
+			}      
+			xml += "</ResourceGrouped>";
+			
+			//grouped by VO
+			xml += "<VOGrouped>";
+			for(Integer vo_id : void2resources.keySet()) {
+				TreeSet<Integer> rs = void2resources.get(vo_id);
+				xml += "<VO id=\""+vo_id+"\">";
+				VirtualOrganization vo = oim.lookupVO(vo_id);
+				xml += "<Name>"+vo.getShortName()+"</Name>";
+				xml += "<Members>";
+				for(Integer resource_id : rs) {
+					xml += "<Resource>";
+					Resource r = resources.get(resource_id);
+					xml += "<ResourceID>" + r.getID() + "</ResourceID>";
+					xml += "<ResourceName>" + r.getName() + "</ResourceName>";
+					xml += "</Resource>";
+				}
+				xml += "</Members>";
+				xml += "</VO>";
+			}
+			xml += "</VOGrouped>";
 
 			xml += "</VOMembership>\n";
 			//output XML to specified location

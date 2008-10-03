@@ -22,7 +22,7 @@ public class OIMModel extends ModelBase {
 		if(cache_resource_fqdn2id == null) {
 			cache_resource_fqdn2id = new HashMap<String, Integer>();
 	        Statement stmt = ModelBase.db.createStatement();
-	        ResultSet rs = stmt.executeQuery("select resource_id,fqdn from oim.resource");			
+	        ResultSet rs = stmt.executeQuery("select resource_id,fqdn from oim.resource where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Integer resource_id = rs.getInt("resource_id");
 	        	String resource_fqdn = rs.getString("fqdn");
@@ -40,7 +40,7 @@ public class OIMModel extends ModelBase {
 		if(cache_resource_id2rec == null) {
 			cache_resource_id2rec = new ResourcesType();
 			Statement stmt = ModelBase.db.createStatement();
-	        ResultSet rs = stmt.executeQuery("select resource_id,name from oim.resource");			
+	        ResultSet rs = stmt.executeQuery("select resource_id,name from oim.resource where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Resource rec = new Resource();
 	        	int id = rs.getInt("resource_id");
@@ -61,7 +61,7 @@ public class OIMModel extends ModelBase {
 		if(cache_metric_name2id == null) {
 			cache_metric_name2id = new HashMap<String, Integer>();
 	        Statement stmt = ModelBase.db.createStatement();
-	        ResultSet rs = stmt.executeQuery("select metric_id,name from oim.metric");			
+	        ResultSet rs = stmt.executeQuery("select metric_id,name from oim.metric where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Integer metric_id = rs.getInt("metric_id");
 	        	String metric_name = rs.getString("name");
@@ -106,7 +106,7 @@ public class OIMModel extends ModelBase {
 			//Remove CaseInsensitiveComparator once we sort out issues with VO names
 			cache_vo_name2id = new TreeMap<String, Integer>(new CaseInsensitiveComparator());
 	        Statement stmt = ModelBase.db.createStatement();
-	        ResultSet rs = stmt.executeQuery("select vo_id,short_name from oim.virtualorganization");			
+	        ResultSet rs = stmt.executeQuery("select vo_id,short_name from oim.virtualorganization where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Integer vo_id = rs.getInt("vo_id");
 	        	String short_name = rs.getString("short_name");
@@ -117,6 +117,22 @@ public class OIMModel extends ModelBase {
 		return cache_vo_name2id.get(name);
 	}
 	
+	private static TreeMap<Integer, VirtualOrganization> cache_vo_id2vo = null;
+	public VirtualOrganization lookupVO(Integer id) throws SQLException
+	{
+		if(cache_vo_id2vo == null) {
+			//Remove CaseInsensitiveComparator once we sort out issues with VO names
+			cache_vo_id2vo = new TreeMap<Integer, VirtualOrganization>();
+	        Statement stmt = ModelBase.db.createStatement();
+	        ResultSet rs = stmt.executeQuery("select * from oim.virtualorganization where active = 1 and disable = 0");			
+	        while(rs.next()) {
+	        	VirtualOrganization vo = new VirtualOrganization(rs);
+	        	cache_vo_id2vo.put(vo.getID(), vo);
+	        }
+		}
+		return cache_vo_id2vo.get(id);
+	}
+	
 	//hashmap<metric_id, fresh_for seconds>
 	private static HashMap<Integer, Integer> cache_metric_id2freshfor = null;
 	public Integer lookupFreshFor(int metric_id) throws SQLException
@@ -124,7 +140,7 @@ public class OIMModel extends ModelBase {
 		if(cache_metric_id2freshfor == null) {
 			cache_metric_id2freshfor = new HashMap<Integer, Integer>();
 	        Statement stmt = ModelBase.db.createStatement();
-	        ResultSet rs = stmt.executeQuery("select metric_id, fresh_for from oim.metric");			
+	        ResultSet rs = stmt.executeQuery("select metric_id, fresh_for from oim.metric where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Integer id = rs.getInt("metric_id");
 	        	Integer value = rs.getInt("fresh_for");
@@ -178,13 +194,13 @@ public class OIMModel extends ModelBase {
 	    	"IN ( " +
 	    	"SELECT service_id " +
 	    	"FROM oim.service_service_group " +
-	    	"WHERE service_group_id =1 " +
+	    	"WHERE active = 1 and disable = 0 and service_group_id = 1 " +
 	    	") " +
 	    	"AND s.service_id NOT " +
 	    	"IN ( " +
 	    	"SELECT DISTINCT PS.parent_service_id psid " +
 	    	"FROM oim.service PS " +
-	    	"WHERE PS.parent_service_id IS NOT NULL " +
+	    	"WHERE PS.parent_service_id IS NOT NULL and active = 1 and disable = 0" +
 	    	") ";
 	    	//logger.debug(sql);
 	        ResultSet rs = stmt.executeQuery(sql);
@@ -275,7 +291,7 @@ public class OIMModel extends ModelBase {
 		if(cache_status_id2metric == null) {
 			cache_status_id2metric = new MetricType();
 	        Statement stmt = ModelBase.db.createStatement();
-	        String sql = "select * from oim.metric";
+	        String sql = "select * from oim.metric where active = 1 and disable = 0";
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {
 	        	Integer id = rs.getInt("metric_id");
