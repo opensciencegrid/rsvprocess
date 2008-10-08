@@ -84,20 +84,6 @@ public class StatusChangeModel extends ModelBase {
 	    stmt.execute();
 	    recs += stmt.getUpdateCount();
 	    
-	    /*
-		//statuschagne_resource_group
-	    OIMModel oim = new OIMModel();
-	    ArrayList<Integer> group_ids = oim.getResourceGroups(resource_id);
-	    for(Integer group_id : group_ids) {
-			sql = "delete from rsvextra.statuschange_resource_group where resource_group_id = ? and timestamp >= ? and timestamp <= ?";
-			stmt = ModelBase.db.prepareStatement(sql);		
-			stmt.setInt(1, group_id);
-		    stmt.setInt(2, start);
-		    stmt.setInt(3, end);
-		    stmt.execute();
-		    recs += stmt.getUpdateCount();
-	    }
-	    */
 	    return recs;
 	}
 	
