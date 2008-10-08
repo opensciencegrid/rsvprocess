@@ -164,6 +164,7 @@ public class RSVCache implements RSVProcess {
 			Metric m = oim.getMetric(metric_id);
 			
 			xml += "<Metric>";
+			xml += "<MetricDataID>"+m.getID()+"</MetricDataID>";
 			xml += "<MetricID>"+metric_id+"</MetricID>";
 			xml += "<MetricName>"+m.getName()+"</MetricName>";
 			xml += "<MetricDescription>"+m.getDescription()+"</MetricDescription>";
