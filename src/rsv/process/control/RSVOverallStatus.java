@@ -209,7 +209,7 @@ public class RSVOverallStatus implements RSVProcess {
 			
 			if(critical_metricdata == null) {
 				nullmetric++;
-				status_detail += m.getName() + " is not available. ";
+				status_detail += m.getName() + "=NA ";
 				continue;
 			}
 			if(!oim.isFresh(critical_metricdata, timestamp)) {
@@ -217,7 +217,7 @@ public class RSVOverallStatus implements RSVProcess {
 				if(first_expired_time == 0) {
 					first_expired_time = critical_metricdata.getTimestamp() + critical_metricdata.getFreshFor();
 				}
-				status_detail += m.getName() + "(ID: "+critical_metricdata.getID()+") is expired. ";
+				status_detail += critical_metricdata.getID()+"=EXPIRED ";
 				continue;
 			}
 			
@@ -225,15 +225,18 @@ public class RSVOverallStatus implements RSVProcess {
 			switch(status_id) {
 			case Status.CRITICAL:
 				non_expired_critical++;
-				status_detail += m.getName() + "(ID: "+critical_metricdata.getID()+") is CRITICAL. ";
+				status_detail += critical_metricdata.getID()+"=CRITICAL ";
 				continue;
 			case Status.WARNING:
 				warning++;
-				status_detail += m.getName() + "(ID: "+critical_metricdata.getID()+") is WARNING. ";
+				status_detail += critical_metricdata.getID()+"=WARNING ";
 				continue;
 			case Status.UNKNOWN:
 				unknown++;
-				status_detail += m.getName() + "(ID: "+critical_metricdata.getID()+") is UNKNOWN. ";
+				status_detail += critical_metricdata.getID()+"=UNKNOWN ";
+				continue;
+			case Status.OK:
+				status_detail += critical_metricdata.getID() + "=OK ";
 				continue;
 			}					
 		}	
