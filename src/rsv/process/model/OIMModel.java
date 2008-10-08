@@ -187,6 +187,7 @@ public class OIMModel extends ModelBase {
 		if(cache_resourceservice_rid2sid == null) {
 			cache_resourceservice_rid2sid = new TreeMap<Integer, ArrayList<Integer>>();
 	        Statement stmt = ModelBase.db.createStatement();
+	        /*
 	    	String sql = "SELECT r.resource_id, s.service_id, s.name, s.description " +
 	    	"FROM oim.resource_service r " +
 	    	"LEFT JOIN oim.service s ON r.service_id = s.service_id " +
@@ -202,6 +203,8 @@ public class OIMModel extends ModelBase {
 	    	"FROM oim.service PS " +
 	    	"WHERE PS.parent_service_id IS NOT NULL and active = 1 and disable = 0" +
 	    	") ";
+	    	*/
+	        String sql = "SELECT rs.resource_id, rs.service_id FROM oim.resource_service rs join oim.service s on rs.service_id = s.service_id";
 	    	//logger.debug(sql);
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {
