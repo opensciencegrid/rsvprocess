@@ -181,7 +181,7 @@ public class RSVOverallStatus implements RSVProcess {
 					//service status has changed
 					current_status.put(service_id, new_status);
 					statuschanges.add(new_status);
-					Date change_date = new Date(new_status.timestamp*1000);
+					Date change_date = new Date(new_status.timestamp*1000L);
 					logger.debug("Resource " + resource_id + 
 							" Service Status for " + service_id + 
 							" has changed to " + new_status.status_id + 
