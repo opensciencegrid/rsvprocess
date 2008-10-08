@@ -54,6 +54,7 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
 				if(services.size() == 0) {
 					logger.info(resource_id + " has no services - skipping this one.");
+				} else {
 					itps.put(resource_id, itps_original.get(resource_id));
 				}
 			}
