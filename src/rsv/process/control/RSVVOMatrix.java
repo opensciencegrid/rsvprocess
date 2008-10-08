@@ -40,6 +40,11 @@ public class RSVVOMatrix implements RSVProcess{
 			xml += "<ResourceGrouped>";
 			OIMModel.ResourcesType resources = oim.getResources();
 			for(Integer resource_id : resources.keySet()) {
+				
+				//ignore resource with no service
+				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
+				if(services.size() == 0) continue;
+				
 				MetricDataModel.LMDType mset = mdm.getLastMetricDataSet(resource_id, null);
 				MetricData m = mset.get(vosupported_metric_id);
 				if(m == null) {

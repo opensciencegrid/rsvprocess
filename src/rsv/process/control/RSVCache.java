@@ -64,7 +64,7 @@ public class RSVCache implements RSVProcess {
 				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
 				if(services.size() == 0) continue;
 				
-				logger.info("Processing resource ID " + resource_id);
+				logger.info("Processing resource ID " + resource_id + " with services count of " + services.size());
 				
 				//load RRS				
 				RelevantRecordSet rrs = new RelevantRecordSet(resource_id, currenttime);

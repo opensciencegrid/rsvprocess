@@ -204,7 +204,7 @@ public class OIMModel extends ModelBase {
 	    	"WHERE PS.parent_service_id IS NOT NULL and active = 1 and disable = 0" +
 	    	") ";
 	    	*/
-	        String sql = "SELECT rs.resource_id, rs.service_id FROM oim.resource_service rs join oim.service s on rs.service_id = s.service_id";
+	        String sql = "SELECT rs.resource_id, rs.service_id FROM oim.resource_service rs join oim.service s on rs.service_id = s.service_id where rs.active = 1 and rs.disable = 0";
 	    	//logger.debug(sql);
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {
