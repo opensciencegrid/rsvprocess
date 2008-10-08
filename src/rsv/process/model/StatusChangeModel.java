@@ -104,6 +104,7 @@ public class StatusChangeModel extends ModelBase {
 	//returns number of record inserted
 	public int outputServiceStatusChanges(ArrayList<ServiceStatus> service_statuschanges) throws SQLException
 	{
+		int note_max_length = 256;
 		String sql = "insert into rsvextra.statuschange_service (resource_id, service_id, status_id, timestamp, detail) values (?,?,?,?,?)";
 	    PreparedStatement stmt_data = ModelBase.db.prepareStatement(sql);
 	    
@@ -112,7 +113,8 @@ public class StatusChangeModel extends ModelBase {
 			stmt_data.setInt(2, s.service_id);
 			stmt_data.setInt(3, s.status_id);
 			stmt_data.setInt(4, s.timestamp);
-			stmt_data.setString(5, s.note.substring(0, 256));
+			if(s.note.length() < note_max_length) s.note = s.note.substring(0, note_max_length);
+			stmt_data.setString(5, s.note);
 			stmt_data.addBatch();
 	    }
 	    
@@ -128,6 +130,7 @@ public class StatusChangeModel extends ModelBase {
 	
 	public int outputResourceStatusChanges(ArrayList<ResourceStatus> resource_statuschanges) throws SQLException
 	{
+		int note_max_length = 256;
 		String sql = "insert into rsvextra.statuschange_resource (resource_id, status_id, timestamp, detail) values (?,?,?,?)";
 	    PreparedStatement stmt_data = ModelBase.db.prepareStatement(sql);
 	    
@@ -136,7 +139,8 @@ public class StatusChangeModel extends ModelBase {
 			stmt_data.setInt(2, s.status_id);
 			//stmt_data.setInt(3, s.responsible_service_id);
 			stmt_data.setInt(3, s.timestamp);
-			stmt_data.setString(4, s.note.substring(0, 256));
+			if(s.note.length() < note_max_length) s.note = s.note.substring(0, note_max_length);
+			stmt_data.setString(4, s.note);
 			stmt_data.addBatch();
 	    }
 	    
