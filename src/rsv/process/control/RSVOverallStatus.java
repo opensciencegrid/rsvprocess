@@ -245,7 +245,6 @@ public class RSVOverallStatus implements RSVProcess {
 		if(non_expired_critical > 0) {
 			new_status.status_id = Status.CRITICAL;
 			new_status.note = non_expired_critical + " of " + critical.size() + " critical metrics are in CRITICAL status.";
-			new_status.note += "\n" + status_detail;
 		} else if(expired > 0) {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = expired + " of " + critical.size() + " critical metrics have expired.";
@@ -264,6 +263,9 @@ public class RSVOverallStatus implements RSVProcess {
 			new_status.status_id = Status.OK;
 			new_status.note = "No issues found for this service.";						
 		}
+		
+		//this is most likely for temporary, and once everything starts to working correctly, we wouldn't need this
+		new_status.note += "\n" + status_detail;
 		
 		return new_status;
 	}
