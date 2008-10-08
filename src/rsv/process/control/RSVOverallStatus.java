@@ -15,6 +15,7 @@ import rsv.process.model.MetricDataModel;
 import rsv.process.model.StatusChangeModel;
 import rsv.process.TimeRange.TimePeriod;
 import rsv.process.*;
+import rsv.process.model.record.Metric;
 import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Status;
 import rsv.process.model.record.ServiceStatus;
@@ -182,7 +183,6 @@ public class RSVOverallStatus implements RSVProcess {
 	//this function is used by RSVCache as well..
 	public ServiceStatus calculateServiceStatus(ArrayList<Integer/*metric_id*/> critical, RelevantRecordSet rrs, int timestamp) throws SQLException
 	{
-
 		//2. calculate overall "service" status		
 		ServiceStatus new_status = new ServiceStatus();
 		new_status.timestamp = timestamp;
@@ -194,13 +194,18 @@ public class RSVOverallStatus implements RSVProcess {
 		int nullmetric = 0;
 		int unknown = 0;
 		int warning = 0;
+		
+		//hold some status details that are used to calculate the overall status.
+		String status_detail = "";
 
 		//let's count the critical metrics status
 		for(Integer metric_id : critical) {
 			MetricData critical_metricdata = rrs.getCurrent(metric_id);
-					
+			Metric m = oim.getMetric(metric_id);
+			
 			if(critical_metricdata == null) {
 				nullmetric++;
+				status_detail += m.getName() + " is not available. ";
 				continue;
 			}
 			if(!oim.isFresh(critical_metricdata, timestamp)) {
@@ -208,19 +213,23 @@ public class RSVOverallStatus implements RSVProcess {
 				if(first_expired_time == 0) {
 					first_expired_time = critical_metricdata.getTimestamp() + critical_metricdata.getFreshFor();
 				}
+				status_detail += m.getName() + "(ID: "+critical_metricdata.getID()+") is expired. ";
 				continue;
-			}	
+			}
 			
 			int status_id = critical_metricdata.getStatusID();
 			switch(status_id) {
 			case Status.CRITICAL:
 				non_expired_critical++;
+				status_detail += m.getName() + "(ID: "+critical_metricdata.getID()+") is CRITICAL. ";
 				continue;
 			case Status.WARNING:
 				warning++;
+				status_detail += m.getName() + "(ID: "+critical_metricdata.getID()+") is WARNING. ";
 				continue;
 			case Status.UNKNOWN:
 				unknown++;
+				status_detail += m.getName() + "(ID: "+critical_metricdata.getID()+") is UNKNOWN. ";
 				continue;
 			}					
 		}	
@@ -229,6 +238,7 @@ public class RSVOverallStatus implements RSVProcess {
 		if(non_expired_critical > 0) {
 			new_status.status_id = Status.CRITICAL;
 			new_status.note = non_expired_critical + " of " + critical.size() + " critical metrics are in CRITICAL status.";
+			new_status.note += status_detail;
 		} else if(expired > 0) {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = expired + " of " + critical.size() + " critical metrics have expired.";
