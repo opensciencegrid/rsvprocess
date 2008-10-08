@@ -112,7 +112,7 @@ public class StatusChangeModel extends ModelBase {
 			stmt_data.setInt(2, s.service_id);
 			stmt_data.setInt(3, s.status_id);
 			stmt_data.setInt(4, s.timestamp);
-			stmt_data.setString(5, s.note);
+			stmt_data.setString(5, s.note.substring(0, 256));
 			stmt_data.addBatch();
 	    }
 	    
@@ -136,7 +136,7 @@ public class StatusChangeModel extends ModelBase {
 			stmt_data.setInt(2, s.status_id);
 			//stmt_data.setInt(3, s.responsible_service_id);
 			stmt_data.setInt(3, s.timestamp);
-			stmt_data.setString(4, s.note);
+			stmt_data.setString(4, s.note.substring(0, 256));
 			stmt_data.addBatch();
 	    }
 	    
