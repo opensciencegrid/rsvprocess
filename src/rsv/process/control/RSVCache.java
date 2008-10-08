@@ -58,10 +58,14 @@ public class RSVCache implements RSVProcess {
 			allxml += "<Timestamp>"+currenttime+"</Timestamp>";
 			
 			for(Integer resource_id : resources.keySet()) {
+				
+				//ignore resources that doesn't have any services
 				Resource r = resources.get(resource_id);
-				logger.info("Processing resource ID " + resource_id);
 				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
-
+				if(services.size() == 0) continue;
+				
+				logger.info("Processing resource ID " + resource_id);
+				
 				//load RRS				
 				RelevantRecordSet rrs = new RelevantRecordSet(resource_id, currenttime);
 					

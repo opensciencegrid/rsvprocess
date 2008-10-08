@@ -51,6 +51,10 @@ public class RSVOverallStatus implements RSVProcess {
 			//Step 2: For each resource we found...
 			for(Integer resource_id : itps.keySet()) {
 				
+				//ignore resources that has no services
+				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
+				if(services.size() == 0) continue;
+				
 				logger.info("Processing resource ID : " + resource_id);
 				
 				ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
@@ -238,7 +242,7 @@ public class RSVOverallStatus implements RSVProcess {
 		if(non_expired_critical > 0) {
 			new_status.status_id = Status.CRITICAL;
 			new_status.note = non_expired_critical + " of " + critical.size() + " critical metrics are in CRITICAL status.";
-			new_status.note += status_detail;
+			new_status.note += "\n" + status_detail;
 		} else if(expired > 0) {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = expired + " of " + critical.size() + " critical metrics have expired.";
