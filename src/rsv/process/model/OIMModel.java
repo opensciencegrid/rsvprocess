@@ -190,7 +190,7 @@ public class OIMModel extends ModelBase {
 	    	String sql = "SELECT r.resource_id, s.service_id, s.name, s.description " +
 	    	"FROM oim.resource_service r " +
 	    	"LEFT JOIN oim.service s ON r.service_id = s.service_id " +
-	    	"WHERE s.service_id " +
+	    	"WHERE r.active = 1 and disable = 0 and s.service_id " +
 	    	"IN ( " +
 	    	"SELECT service_id " +
 	    	"FROM oim.service_service_group " +
