@@ -38,8 +38,13 @@ public class RSVMain {
 				FileLock fl = fos.getChannel().tryLock();
 				if(fl != null) {
 					//ok. run specified process
-					ret = app.dispatch(command);
-					
+					try {
+						ret = app.dispatch(command);
+					} catch (Exception e) {
+						logger.error("Unhandled exception" , e);
+						//TODO - send email to GOC?
+						ret = exitcode_error;
+					}
 					fl.release();
 				} else {
 					System.out.println("Failed to obtain filelock on " + lock_filename);
