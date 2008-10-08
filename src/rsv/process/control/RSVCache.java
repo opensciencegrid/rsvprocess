@@ -164,7 +164,6 @@ public class RSVCache implements RSVProcess {
 			Metric m = oim.getMetric(metric_id);
 			
 			xml += "<Metric>";
-			xml += "<MetricDataID>"+m.getID()+"</MetricDataID>";
 			xml += "<MetricID>"+metric_id+"</MetricID>";
 			xml += "<MetricName>"+m.getName()+"</MetricName>";
 			xml += "<MetricDescription>"+m.getDescription()+"</MetricDescription>";
@@ -172,13 +171,15 @@ public class RSVCache implements RSVProcess {
 			MetricData md = rrs.getCurrent(metric_id);
 			
 			if(md == null) {
-				xml += "<Status></Status>";
-				xml += "<Timestamp></Timestamp>";
-				xml += "<Detail></Detail>";					
+				xml += "<Status/>";
+				xml += "<Timestamp/>";
+				xml += "<Detail/>";			
+				xml += "<MetricDataID/>";
 			} else {
 				xml += "<Status>"+Status.getStatus(md.getStatusID())+"</Status>";
 				xml += "<Timestamp>"+md.getTimestamp()+"</Timestamp>";
 				xml += "<Detail><![CDATA["+md.fetchDetail()+"]]></Detail>";
+				xml += "<MetricDataID>"+md.getID()+"</MetricDataID>";
 			}
 			xml += "</Metric>";
 		}
