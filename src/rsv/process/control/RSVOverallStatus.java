@@ -2,7 +2,7 @@ package rsv.process.control;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
+import java.util.Date;
 import java.util.TreeMap;
 import java.util.ArrayList;
 //import java.util.TreeSet;
@@ -55,8 +55,6 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
 				if(services.size() == 0) continue;
 				
-				logger.info("Processing resource ID : " + resource_id);
-				
 				ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
 				ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();	
 				TimeRange itp = itps.get(resource_id);
@@ -64,7 +62,10 @@ public class RSVOverallStatus implements RSVProcess {
 				
 				//for each ranges (currently there is only 1 range per resource, but we can improve this later)
 				for(TimePeriod tp : ranges) {
-							
+					Date start_date = new Date(tp.start*1000L);
+					Date end_date = new Date(tp.end*1000L);
+					logger.info("Processing resource ID " + resource_id + " between " + start_date.toString() + " and " + end_date.toString());
+					
 					//B. Retrieve Initial Status History (all statuschange_xxx tables)
 					LSCType initial_service_statuses = scm.getLastStatusChange_Service(resource_id, tp.start);
 					ResourceStatus initial_resource_status = scm.getLastStatusChange_Resource(resource_id, tp.start);
