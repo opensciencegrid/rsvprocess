@@ -50,10 +50,10 @@ public class RSVOverallStatus implements RSVProcess {
 			TreeMap<Integer, TimeRange> itps = new TreeMap<Integer, TimeRange>();
 			
 			//filter resources that are irrelevant
-			for(Integer resource_id : itps.keySet()) {	
+			for(Integer resource_id : itps_original.keySet()) {	
 				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
 				if(services.size() == 0) {
-					logger.info(resource_id + " has no services - skipping this one.");
+					logger.info("Resource " + resource_id + " has no services - skipping this one.");
 				} else {
 					itps.put(resource_id, itps_original.get(resource_id));
 				}
