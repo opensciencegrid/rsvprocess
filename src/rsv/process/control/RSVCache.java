@@ -170,6 +170,7 @@ public class RSVCache implements RSVProcess {
 			xml += "<Metric>";
 			xml += "<MetricID>"+metric_id+"</MetricID>";
 			xml += "<MetricName>"+m.getName()+"</MetricName>";
+			xml += "<MetricCommonName>"+m.getCommonName()+"</MetricCommonName>";
 			xml += "<MetricDescription>"+m.getDescription()+"</MetricDescription>";
 			
 			MetricData md = rrs.getCurrent(metric_id);
