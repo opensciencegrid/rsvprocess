@@ -46,14 +46,20 @@ public class RSVOverallStatus implements RSVProcess {
 		try {
 			
 			//Step 1: Find ITP
-			TreeMap<Integer, TimeRange> itps = calculateITPs();
+			TreeMap<Integer, TimeRange> itps_original = calculateITPs();
+			TreeMap<Integer, TimeRange> itps = new TreeMap<Integer, TimeRange>();
 			
+			//filter resources that are irrelevant
+			for(Integer resource_id : itps.keySet()) {	
+				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
+				if(services.size() == 0) {
+					logger.info(resource_id + " has no services - skipping this one.");
+					itps.put(resource_id, itps_original.get(resource_id));
+				}
+			}
+	
 			//Step 2: For each resource we found...
 			for(Integer resource_id : itps.keySet()) {
-				
-				//ignore resources that has no services
-				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
-				if(services.size() == 0) continue;
 				
 				ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
 				ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();	
@@ -100,6 +106,7 @@ public class RSVOverallStatus implements RSVProcess {
 			
 			//pre-E. Clear ITP window 
 			for(Integer resource_id : itps.keySet()) {
+				
 				TimeRange itp = itps.get(resource_id);
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
