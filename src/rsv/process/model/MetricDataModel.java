@@ -15,8 +15,11 @@ import rsv.process.model.record.Resource;
 public class MetricDataModel extends ModelBase {
 	private static final Logger logger = Logger.getLogger(MetricDataModel.class);	
 	
-	//pull the last metric data set at or before specified timestamp on specified resource
+	//pull the last metric data set before specified timestamp on specified resource
 	//returns map of <metric_id, metricdata record>
+	//note - on rsv viewer, similar sql exists but it pull metric including at the specified timestamp.
+	//here, we don't include it because metric *at* the timestamp given will be pulled as part of ITP 
+	//records
 	public class LMDType extends TreeMap<Integer, MetricData> {}
 	public LMDType getLastMetricDataSet(int resource_id, Integer timestamp) throws SQLException {
 		LMDType ret = new LMDType();

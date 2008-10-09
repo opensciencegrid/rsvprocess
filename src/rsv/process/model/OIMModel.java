@@ -149,6 +149,8 @@ public class OIMModel extends ModelBase {
 		}
 		return cache_metric_id2freshfor.get(metric_id);
 	}
+	
+	//check if md is fresh at timestamp
 	public boolean isFresh(MetricData md, int timestamp) throws SQLException {
 		int freshfor = md.getFreshFor();
 		if(timestamp < md.getTimestamp() + freshfor) {

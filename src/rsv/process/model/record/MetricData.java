@@ -20,7 +20,7 @@ public class MetricData {
 	protected int timestamp;
 	protected int status_id;
 	
-	private String note = new String();
+	private String note = "";
 	
 	public MetricData(ResultSet rs) {
 		try {

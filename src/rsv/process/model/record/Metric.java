@@ -13,6 +13,7 @@ public class Metric {
 	protected String name;
 	protected String common_name;
 	protected String description;
+	protected int fresh_for;
 	
 	public Metric(ResultSet rs) {
 		try {
@@ -20,6 +21,7 @@ public class Metric {
 			name = rs.getString("name");
 			common_name = rs.getString("common_name");
 			description = rs.getString("description");
+			fresh_for = rs.getInt("fresh_for");
 		} catch (SQLException e) {
 			logger.error("Failed to inialize Metric record from given resultset", e);
 		}
@@ -29,5 +31,6 @@ public class Metric {
 	public String getName() { return name; }
 	public String getCommonName() { return common_name; }
 	public String getDescription() { return description; }
+	public int getFreshFor() {return fresh_for; }
 	
 }
