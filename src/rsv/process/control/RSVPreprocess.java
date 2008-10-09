@@ -48,6 +48,10 @@ public class RSVPreprocess implements RSVProcess {
 			//process each records
 			while(rs.next()){
 	            records_pulled++;
+	            
+	            //lookup dbid
+	            int dbid = rs.getInt("dbid");
+	            last_dbid = dbid;
 	        	
 	            //lookup resource_id
 	            String resourcefqdn = rs.getString("ServiceUri");
@@ -63,10 +67,6 @@ public class RSVPreprocess implements RSVProcess {
 	            String metricstatus = rs.getString("MetricStatus");
 	            Integer status_id = oim.lookupStatusID(metricstatus);	   
 	            if(status_id == null) continue;
-	            	    
-	            //lookup dbid
-	            int dbid = rs.getInt("dbid");
-	            last_dbid = dbid;
 	            
 	            //lookup unix timestamp
 	            int utimestamp = rs.getInt("utimestamp");

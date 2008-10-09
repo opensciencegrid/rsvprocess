@@ -385,15 +385,15 @@ public class RSVOverallStatus implements RSVProcess {
 			int fresh_for = oim.lookupFreshFor(metric_id);
 			int end = start + fresh_for;
 			
+			//keep the last id retrived
+			last_mdid = rs.getInt("id");
+			
 			TimeRange itp = itps.get(resource_id);
 			if(itp == null) {
 				itp = new TimeRange();
 				itps.put(resource_id, itp);
 			} 
 			itp.add(start, end);
-			
-			//keep the last id retrived
-			last_mdid = rs.getInt("id");
 		}
 		
 		/*
