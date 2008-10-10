@@ -52,7 +52,7 @@ public class StatusChangeModel extends ModelBase {
         	"where resource_id = "+ resource_id + " " + where_timestamp +
         	") last "+
         	"where s.timestamp = last.last_timestamp";
-        logger.debug(sql);
+        //logger.debug(sql);
         ResultSet rs = stmt.executeQuery(sql);
         if(rs.next()) {
         	ResourceStatus status = new ResourceStatus();
