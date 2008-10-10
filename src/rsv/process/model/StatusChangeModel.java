@@ -29,7 +29,7 @@ public class StatusChangeModel extends ModelBase {
         	"where resource_id = "+ resource_id + " " + where_timestamp +
         	"group by service_id) last "+
         	"where s.timestamp = last.last_timestamp and s.service_id = last.service_id ";
-        logger.debug(sql);
+        //logger.debug(sql);
         ResultSet rs = stmt.executeQuery(sql);
         while(rs.next()) {
         	Integer service_id = rs.getInt("service_id");
