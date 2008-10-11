@@ -275,7 +275,7 @@ public class RSVOverallStatus implements RSVProcess {
 		}
 		
 		//this is most likely for temporary, and once everything starts to working correctly, we wouldn't need this
-		//new_status.note += "\n" + status_detail;
+		new_status.note += "\n" + status_detail;
 		
 		return new_status;
 	}
