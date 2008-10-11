@@ -28,7 +28,7 @@ public class RSVCache implements RSVProcess {
 	private static final Logger logger = Logger.getLogger(RSVCache.class);
 	OIMModel oim = new OIMModel();
 	
-	public int run() {
+	public int run(String args[]) {
 		int ret = RSVMain.exitcode_ok;
 		
 		int r = outputCurrentStatusCache();

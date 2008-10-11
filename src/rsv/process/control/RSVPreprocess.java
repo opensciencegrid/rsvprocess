@@ -15,7 +15,7 @@ public class RSVPreprocess implements RSVProcess {
 	
 	private static final Logger logger = Logger.getLogger(RSVPreprocess.class);
 	
-	public int run() 
+	public int run(String args[]) 
 	{
 		int ret = RSVMain.exitcode_ok;
 		//do some initialization
