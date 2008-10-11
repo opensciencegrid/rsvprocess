@@ -25,7 +25,7 @@ public class RSVVOMatrix implements RSVProcess{
 	private static final Integer vosupported_metric_id = 19;
 	private static final String vodetail_token = "# List of VOs this site claims to support ";
 	
-	public int run() 
+	public int run(String args[]) 
 	{
 		int ret = RSVMain.exitcode_ok;
 				

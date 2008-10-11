@@ -36,29 +36,36 @@ public class RSVOverallStatus implements RSVProcess {
 	private OIMModel oim = new OIMModel();
 	private StatusChangeModel scm = new StatusChangeModel();
 	private ProcessLogModel lm = new ProcessLogModel();
-	private int last_mdid;
+	private Integer last_mdid = null;
 	
-	public int run() {
+	public int run(String args[]) {
 		int ret = RSVMain.exitcode_ok;
 		ArrayList<ServiceStatus> all_service_statuschanges = new ArrayList<ServiceStatus>();
 		ArrayList<ResourceStatus> all_resource_statuschanges = new ArrayList<ResourceStatus>();
 		
 		try {
-			
+
 			//Step 1: Find ITP
-			TreeMap<Integer, TimeRange> itps_original = calculateITPs();
 			TreeMap<Integer, TimeRange> itps = new TreeMap<Integer, TimeRange>();
-			
-			//filter resources that are irrelevant
-			for(Integer resource_id : itps_original.keySet()) {	
-				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
-				if(services.size() == 0) {
-					logger.info("Resource " + resource_id + " has no services - skipping this one.");
-				} else {
-					itps.put(resource_id, itps_original.get(resource_id));
+
+			if(args.length == 4) {
+				//recalculate on specified resource, start, end..
+				TimeRange tr = new TimeRange();
+				tr.add(Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+				itps.put(Integer.parseInt(args[1]), tr);
+			} else {			
+				//filter resources that are irrelevant
+				TreeMap<Integer, TimeRange> itps_original = calculateITPs();
+				for(Integer resource_id : itps_original.keySet()) {	
+					ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
+					if(services.size() == 0) {
+						logger.info("Resource " + resource_id + " has no services - skipping this one.");
+					} else {
+						itps.put(resource_id, itps_original.get(resource_id));
+					}
 				}
 			}
-	
+			
 			//Step 2: For each resource we found...
 			for(Integer resource_id : itps.keySet()) {
 				
@@ -122,7 +129,9 @@ public class RSVOverallStatus implements RSVProcess {
 			//E. Write out any status changes recorded		
 			scm.outputServiceStatusChanges(all_service_statuschanges);
 			scm.outputResourceStatusChanges(all_resource_statuschanges);
-			lm.updateLastMetricDataIDProcessed(last_mdid);	   
+			if(last_mdid != null) {
+				lm.updateLastMetricDataIDProcessed(last_mdid);	   
+			}
 			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);

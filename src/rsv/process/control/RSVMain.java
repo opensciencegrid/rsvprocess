@@ -27,7 +27,7 @@ public class RSVMain {
 			conf.load(new FileInputStream("rsvprocess.conf"));
 			RSVMain app = new RSVMain();
 			
-			if(args.length != 1) {
+			if(args.length == 0) {
 				showUsage();
 			} else {
 				String command = args[0];
@@ -39,7 +39,7 @@ public class RSVMain {
 				if(fl != null) {
 					//ok. run specified process
 					try {
-						ret = app.dispatch(command);
+						ret = app.dispatch(command, args);
 					} catch (Exception e) {
 						logger.error("Unhandled exception" , e);
 						//TODO - send email to GOC?
@@ -71,7 +71,7 @@ public class RSVMain {
 		System.exit(ret);
 	}
 	
-	public int dispatch(String command) {
+	public int dispatch(String command, String args[]) {
 		RSVProcess process = null;
 		if(command.compareToIgnoreCase("preprocess") == 0) {
 			process = new RSVPreprocess();
@@ -91,7 +91,7 @@ public class RSVMain {
 		if(process == null) {
 			return RSVMain.exitcode_invalid_arg;
 		} else {
-			return process.run();
+			return process.run(args);
 		}
 	}
 	
@@ -102,6 +102,9 @@ public class RSVMain {
 		System.out.println("\t[command]");
 		System.out.println("\tpreprocess - Run Preprocess");
 		System.out.println("\toverallstatus - Overall Status Calculation Process");
+		System.out.println("\t\t optional arguments: [resource_id] [start_time] [end_time] -- " + 
+					"Causes status recalculation on specific resource and specific time period. " + 
+					"This will not update the processlog.");
 		System.out.println("\tcache - Current status cache update process");
 		System.out.println("\tavailability - Availability, Reliability Number Calculation");
 		System.out.println("\tvomatrix - VO Matrix Processing");
