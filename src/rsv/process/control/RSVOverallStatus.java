@@ -172,9 +172,9 @@ public class RSVOverallStatus implements RSVProcess {
 			//first of all, update rrs with the new metric data unless it's dummy (for expiration test)
 			if(!(md instanceof DummyMetricData)) {
 				rrs.update(md);
-				logger.debug("Updating: " + md.getID() + " at timestamp " + md.getTimestamp());
+				//logger.debug("Updating: " + md.getID() + " at timestamp " + md.getTimestamp());
 			} else {
-				logger.debug("Dummy calculation at timestamp " + md.getTimestamp());
+				//logger.debug("Dummy calculation at timestamp " + md.getTimestamp());
 			}
 			
 			//for each service,
