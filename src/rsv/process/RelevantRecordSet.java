@@ -50,8 +50,9 @@ public class RelevantRecordSet {
 			if(curmet != null && 
 					curmet.getStatusID() != Status.UNKNOWN && 
 					oim.isFresh(curmet, md.getTimestamp())) {
-				//curmet is still fresh. let's ignore..
+				//current is still fresh. let's ignore..
 				noteEffectiveMetricReplacement(curmet, md);
+				md.addNote("This UNKNOWN status metric data was ignored by an earlier non-UNKNOWN MetricData ID:" + curmet.getID());
 				return;
 			}
 		}
