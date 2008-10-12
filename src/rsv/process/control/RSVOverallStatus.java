@@ -49,13 +49,13 @@ public class RSVOverallStatus implements RSVProcess {
 			TreeMap<Integer, TimeRange> itps = new TreeMap<Integer, TimeRange>();
 
 			if(args.length == 4) {
-				//recalculate on specified resource, start, end..
+				//recalculate on specified resource, start, end.. via command line
 				TimeRange tr = new TimeRange();
 				tr.add(Integer.parseInt(args[2]), Integer.parseInt(args[3]));
 				itps.put(Integer.parseInt(args[1]), tr);
 			} else {			
-				//filter resources that are irrelevant
-				TreeMap<Integer, TimeRange> itps_original = calculateITPs();
+				//recalculate based on the latest metric records
+				TreeMap<Integer, TimeRange> itps_original = calculateITPs(); //resets last_mdid.. so that I can update log later.
 				for(Integer resource_id : itps_original.keySet()) {	
 					ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
 					if(services.size() == 0) {
@@ -90,20 +90,21 @@ public class RSVOverallStatus implements RSVProcess {
 					//D1. Pull metricdata inside ITP
 					MetricDataModel mdm = new MetricDataModel();
 					ArrayList<MetricData> mds = mdm.getMeticData(resource_id, tp.start, tp.end);
-					
-					//D1b. Add blank metric to force status recalculation at tp.end
-					int size = mds.size();
-					MetricData last = null;
-					if(size > 0) {
-						last = mds.get(size-1);
-					}
-					if(last == null || last.getTimestamp() != tp.end) {
-						DummyMetricData dummy = new DummyMetricData(tp.end);
-						mds.add(dummy);
+				
+					//add dummy metric data at expiration time for each metric data to recalculate status when metric expires.
+					TreeMap<Integer/*timestamp*/, MetricData> mds_with_dummy = new TreeMap<Integer, MetricData>();
+					for(MetricData m : mds) {
+						mds_with_dummy.put(m.getTimestamp(), m);
+						Integer expires = m.getTimestamp() + m.getFreshFor();
+						if(mds_with_dummy.get(expires) == null) {
+							//insert dummy
+							MetricData d = new DummyMetricData(expires);
+							mds_with_dummy.put(expires, d);
+						}
 					}
 
 					//D2. Calculate Service Status Changes inside this ITP.
-					service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds);
+					service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
 					all_service_statuschanges.addAll(service_statuschanges);
 					
 					//D3. Calculate Resource Status Changes.
@@ -144,7 +145,7 @@ public class RSVOverallStatus implements RSVProcess {
 	private ArrayList<ServiceStatus> calculateServiceStatusChanges(int resource_id, 
 			LSCType initial_service_statuses, 
 			RelevantRecordSet rrs, 
-			ArrayList<MetricData> mds) throws SQLException
+			TreeMap<Integer/*timestamp*/, MetricData> mds) throws SQLException
 	{
 		//initial_service_statues will be used by calculateResourceStatusChanges(), so let's not change it.
 		LSCType current_status = (LSCType) initial_service_statuses.clone();
@@ -163,14 +164,17 @@ public class RSVOverallStatus implements RSVProcess {
 		}
 		
 		//iterate each metric data inside ITP
-		for(MetricData md : mds) {
+		for(MetricData md : mds.values()) {
 			
 			//ignore if this is not a critical metrics
 			//if(!all_critical_metrics.contains(md.getMetricID())) continue;
 			
 			//first of all, update rrs with the new metric data unless it's dummy (for expiration test)
-			if(md instanceof MetricData) {
+			if(!(md instanceof DummyMetricData)) {
 				rrs.update(md);
+				//logger.debug("Updating: " + md.getID() + " at timestamp " + md.getTimestamp());
+			} else {
+				//logger.debug("Dummy calculation at timestamp " + md.getTimestamp());
 			}
 			
 			//for each service,
@@ -186,6 +190,7 @@ public class RSVOverallStatus implements RSVProcess {
 					//set some additional info
 					new_status.resource_id = resource_id;
 					new_status.service_id = service_id;
+					new_status.timestamp = md.getTimestamp();
 					
 					//service status has changed
 					current_status.put(service_id, new_status);
@@ -194,7 +199,7 @@ public class RSVOverallStatus implements RSVProcess {
 					logger.debug("Resource " + resource_id + 
 							" Service Status for " + service_id + 
 							" has changed to " + new_status.status_id + 
-							" at " + change_date.toString() + "(" + new_status.timestamp + ")" +
+							" at " + change_date.toGMTString() + "(" + new_status.timestamp + ")" +
 							" reason: " + new_status.note);
 				}
 			}
@@ -208,11 +213,11 @@ public class RSVOverallStatus implements RSVProcess {
 	{
 		//2. calculate overall "service" status		
 		ServiceStatus new_status = new ServiceStatus();
-		new_status.timestamp = timestamp;
+		//new_status.timestamp = timestamp;
 		
 		//reset counters
 		int expired = 0;
-		int first_expired_time = 0;
+		//int first_expired_time = 0;
 		int non_expired_critical = 0;
 		int nullmetric = 0;
 		int unknown = 0;
@@ -233,9 +238,11 @@ public class RSVOverallStatus implements RSVProcess {
 			}
 			if(!oim.isFresh(critical_metricdata, timestamp)) {
 				expired++;
+				/*
 				if(first_expired_time == 0) {
 					first_expired_time = critical_metricdata.getTimestamp() + critical_metricdata.getFreshFor();
 				}
+				*/
 				status_detail += critical_metricdata.getID()+"=EXPIRED ";
 				continue;
 			}
@@ -268,7 +275,7 @@ public class RSVOverallStatus implements RSVProcess {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = expired + " of " + critical.size() + " critical metrics have expired.";
 			//reset effective time to be first_expired_time
-			new_status.timestamp = first_expired_time;
+			//new_status.timestamp = first_expired_time;
 		} else if(nullmetric > 0) {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = nullmetric + " of " + critical.size() + " critical metrics have not been reported.";
