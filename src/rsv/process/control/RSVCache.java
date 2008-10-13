@@ -15,6 +15,7 @@ import rsv.process.Configuration;
 import rsv.process.RelevantRecordSet;
 import rsv.process.model.OIMModel;
 import rsv.process.model.OIMModel.ResourcesType;
+import rsv.process.model.record.Downtime;
 import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Resource;
 import rsv.process.model.record.ResourceStatus;
@@ -89,12 +90,26 @@ public class RSVCache implements RSVProcess {
 					
 					ArrayList<Integer> critical_metrics = oim.getCriticalMetrics(service_id);
 					ArrayList<Integer> non_critical_metrics = oim.getNonCriticalMetrics(service_id);
-					
-					//calculate service status
-					ServiceStatus status = overall.calculateServiceStatus(critical_metrics, rrs, currenttime);
-					service_statues.put(service_id, status);
+				
+					//find service status
+					ServiceStatus status = null;
+					Downtime down = getDownTime(resource_id, service_id, currenttime);
+					if(down != null) {
+						//this service is in downtime
+						status = new ServiceStatus();
+						status.status_id = Status.DOWNTIME;
+						status.note = "This service is currently under maintenance. ";
+						status.note += "Maintenance Summary: " + down.getSummary();
+						Date from = new Date(down.getStartTime()*1000L);
+						Date to = new Date(down.getEndTime()*1000L);
+						status.note += " (From " + from.toGMTString() + " to " + to.toGMTString() + ")";
+					} else {
+						//calculate service status
+						status = overall.calculateServiceStatus(critical_metrics, rrs, currenttime);			
+					}
+					service_statues.put(service_id, status);	
 					xml += "<Status>"+Status.getStatus(status.status_id)+"</Status>";
-					xml += "<Note>"+status.note+"</Note>";
+					xml += "<Note>"+status.note+"</Note>";	
 					
 					//output critical metric details
 					xml += "<CriticalMetrics>";
@@ -161,6 +176,23 @@ public class RSVCache implements RSVProcess {
 			ret = RSVMain.exitcode_error;
 		}
 		return ret;		
+	}
+	
+	private Downtime getDownTime(int resource_id, int service_id, int timestamp) throws SQLException 
+	{
+		ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
+		if(downtimes != null) {
+			for(Downtime downtime : downtimes) {
+				//TODO - check boundary case policies.
+				if(downtime.getStartTime() < timestamp && downtime.getEndTime() > timestamp) {
+					ArrayList<Integer/*service_id*/> services = downtime.getServiceIDs();
+					if(services.contains(service_id)) {
+						return downtime;
+					}
+				}
+			}
+		}	
+		return null;
 	}
 	
 	private String outputMetricXML(ArrayList<Integer> critical_metrics, RelevantRecordSet rrs) throws SQLException

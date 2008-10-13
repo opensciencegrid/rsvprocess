@@ -324,4 +324,48 @@ public class OIMModel extends ModelBase {
 		return cache_service_id2service.get(service_id);
 	}
 
+	public static class DowntimeType extends TreeMap<Integer/*resource_id*/, ArrayList<Downtime>> {}
+	private static DowntimeType cache_downtime_id2downtime = null;
+	public ArrayList<Downtime> getDowntimes(Integer resource_id) throws SQLException {
+		if(cache_downtime_id2downtime == null) {
+			cache_downtime_id2downtime = new DowntimeType();
+	        Statement stmt = ModelBase.db.createStatement();
+	        String sql = "select *,  UNIX_Timestamp(start_time) as unix_start_time, UNIX_Timestamp(end_time) as unix_end_time " + 
+	        		"from oim.resource_downtime where disable = 0";
+	        ResultSet rs = stmt.executeQuery(sql);
+	        while(rs.next()) {
+	        	Integer id = rs.getInt("resource_id");
+	        	Downtime m = new Downtime(rs);
+	        	ArrayList<Downtime> list = cache_downtime_id2downtime.get(id);
+	        	if(list == null) {
+	        		list = new ArrayList<Downtime>();
+	        		cache_downtime_id2downtime.put(id, list);
+	        	}
+	        	list.add(m);
+	        }			
+		}
+		return cache_downtime_id2downtime.get(resource_id);
+	}
+
+	public static class DowntimeServiceType extends TreeMap<Integer/*downtime_id*/, ArrayList<Integer/*service_id*/>> {}
+	private static DowntimeServiceType cache_downtimeservice_id2downtime = null;
+	public ArrayList<Integer> lookupResourceDowntimeService(Integer downtime_id) throws SQLException {
+		if(cache_downtimeservice_id2downtime == null) {
+			cache_downtimeservice_id2downtime = new DowntimeServiceType();
+	        Statement stmt = ModelBase.db.createStatement();
+	        String sql = "select * from oim.resource_downtime_service";
+	        ResultSet rs = stmt.executeQuery(sql);
+	        while(rs.next()) {
+	        	Integer id = rs.getInt("downtime_id");
+	        	Integer service_id = rs.getInt("service_id");
+	        	ArrayList<Integer> list = cache_downtimeservice_id2downtime.get(id);
+	        	if(list == null) {
+	        		list = new ArrayList<Integer>();
+	        		cache_downtimeservice_id2downtime.put(id, list);
+	        	}
+	        	list.add(service_id);
+	        }			
+		}
+		return cache_downtimeservice_id2downtime.get(downtime_id);
+	}
 }
