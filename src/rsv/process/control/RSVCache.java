@@ -15,6 +15,7 @@ import rsv.process.Configuration;
 import rsv.process.RelevantRecordSet;
 import rsv.process.model.OIMModel;
 import rsv.process.model.OIMModel.ResourcesType;
+import rsv.process.model.record.Downtime;
 import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Resource;
 import rsv.process.model.record.ResourceStatus;
@@ -96,6 +97,16 @@ public class RSVCache implements RSVProcess {
 					xml += "<Status>"+Status.getStatus(status.status_id)+"</Status>";
 					xml += "<Note>"+status.note+"</Note>";
 					
+					//see if this service is currerntly in downtime
+					Downtime down = getDownTime(resource_id, service_id, currenttime);
+					if(down != null) {
+						xml += "<Downtime>";
+						xml += "<Summary>" + down.getSummary() + "</Summary>";
+						xml += "<StartTime>" + down.getStartTime() + "</StartTime>";
+						xml += "<EndTime>" + down.getEndTime() + "</EndTime>";
+						xml += "</Downtime>";
+					} 
+					
 					//output critical metric details
 					xml += "<CriticalMetrics>";
 					xml += outputMetricXML(critical_metrics, rrs);
@@ -161,6 +172,23 @@ public class RSVCache implements RSVProcess {
 			ret = RSVMain.exitcode_error;
 		}
 		return ret;		
+	}
+	
+	private Downtime getDownTime(int resource_id, int service_id, int timestamp) throws SQLException 
+	{
+		ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
+		if(downtimes != null) {
+			for(Downtime downtime : downtimes) {
+				//TODO - check boundary case policies.
+				if(downtime.getStartTime() < timestamp && downtime.getEndTime() > timestamp) {
+					ArrayList<Integer/*service_id*/> services = downtime.getServiceIDs();
+					if(services.contains(service_id)) {
+						return downtime;
+					}
+				}
+			}
+		}	
+		return null;
 	}
 	
 	private String outputMetricXML(ArrayList<Integer> critical_metrics, RelevantRecordSet rrs) throws SQLException
