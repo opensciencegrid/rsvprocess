@@ -101,7 +101,7 @@ public class RSVCache implements RSVProcess {
 						status.note = "This service is currently under maintenance. ";
 						status.note += "Maintenance Summary: " + down.getSummary();
 						Date from = new Date(down.getStartTime()*1000L);
-						Date to = new Date(down.getStartTime()*1000L);
+						Date to = new Date(down.getEndTime()*1000L);
 						status.note += " (From " + from.toGMTString() + " to " + to.toGMTString() + ")";
 					} else {
 						//calculate service status
