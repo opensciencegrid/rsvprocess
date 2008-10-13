@@ -90,22 +90,26 @@ public class RSVCache implements RSVProcess {
 					
 					ArrayList<Integer> critical_metrics = oim.getCriticalMetrics(service_id);
 					ArrayList<Integer> non_critical_metrics = oim.getNonCriticalMetrics(service_id);
-					
-					//calculate service status
-					ServiceStatus status = overall.calculateServiceStatus(critical_metrics, rrs, currenttime);
-					service_statues.put(service_id, status);
-					xml += "<Status>"+Status.getStatus(status.status_id)+"</Status>";
-					xml += "<Note>"+status.note+"</Note>";
-					
-					//see if this service is currerntly in downtime
+				
+					//find service status
+					ServiceStatus status = null;
 					Downtime down = getDownTime(resource_id, service_id, currenttime);
 					if(down != null) {
-						xml += "<Downtime>";
-						xml += "<Summary>" + down.getSummary() + "</Summary>";
-						xml += "<StartTime>" + down.getStartTime() + "</StartTime>";
-						xml += "<EndTime>" + down.getEndTime() + "</EndTime>";
-						xml += "</Downtime>";
-					} 
+						//this service is in downtime
+						status = new ServiceStatus();
+						status.status_id = Status.DOWNTIME;
+						status.note = "This service is currently under maintenance. ";
+						status.note += "Maintenance Summary: " + down.getSummary();
+						Date from = new Date(down.getStartTime()*1000L);
+						Date to = new Date(down.getStartTime()*1000L);
+						status.note += " (From " + from.toGMTString() + " to " + to.toGMTString() + ")";
+					} else {
+						//calculate service status
+						status = overall.calculateServiceStatus(critical_metrics, rrs, currenttime);			
+					}
+					service_statues.put(service_id, status);	
+					xml += "<Status>"+Status.getStatus(status.status_id)+"</Status>";
+					xml += "<Note>"+status.note+"</Note>";	
 					
 					//output critical metric details
 					xml += "<CriticalMetrics>";

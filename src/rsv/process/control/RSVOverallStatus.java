@@ -270,13 +270,10 @@ public class RSVOverallStatus implements RSVProcess {
 	//this function is used by RSVCache as well..
 	public ServiceStatus calculateServiceStatus(ArrayList<Integer/*metric_id*/> critical, RelevantRecordSet rrs, int timestamp) throws SQLException
 	{
-		//2. calculate overall "service" status		
 		ServiceStatus new_status = new ServiceStatus();
-		//new_status.timestamp = timestamp;
 		
 		//reset counters
 		int expired = 0;
-		//int first_expired_time = 0;
 		int non_expired_critical = 0;
 		int nullmetric = 0;
 		int unknown = 0;
@@ -400,6 +397,7 @@ public class RSVOverallStatus implements RSVProcess {
 		int critical = 0;
 		int unknown = 0;
 		int warning = 0;
+		int downtime = 0;
 		
 		//let's count
 		for(ServiceStatus s : current_service_statuses.values()) {
@@ -413,6 +411,9 @@ public class RSVOverallStatus implements RSVProcess {
 			case Status.UNKNOWN:
 				unknown++;
 				continue;
+			case Status.DOWNTIME:
+				downtime++;
+				continue;
 			}
 		}
 		
@@ -422,6 +423,9 @@ public class RSVOverallStatus implements RSVProcess {
 		if(critical > 0) {
 			rs.status_id = Status.CRITICAL;
 			rs.note = critical + " of " + current_service_statuses.size() + " services are in CRITICAL status.";
+		} else if(downtime > 0) {
+			rs.status_id = Status.DOWNTIME;
+			rs.note = downtime + " of " + current_service_statuses.size() + " services are in maintenance.";
 		} else if(unknown > 0) {
 			rs.status_id = Status.UNKNOWN;
 			rs.note = unknown + " of " + current_service_statuses.size() + " services are in UNKNOWN status.";
@@ -471,17 +475,6 @@ public class RSVOverallStatus implements RSVProcess {
 			itp.add(start, end);
 		}
 		
-		/*
-		//debug - dump ITP
-		for(Integer resource_id : itps.keySet()) {
-			TimeRange itp = itps.get(resource_id);
-			logger.debug("ITP for resource: " + resource_id);
-			ArrayList<TimePeriod> ranges = itp.getRanges();
-			for(TimePeriod tp : ranges) {
-				logger.debug("\tStart: "+tp.start + " End:"+tp.end);
-			}
-		}
-		*/
 		return itps;
 	}
 }
