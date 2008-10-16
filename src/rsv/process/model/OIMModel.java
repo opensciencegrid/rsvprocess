@@ -189,24 +189,7 @@ public class OIMModel extends ModelBase {
 		if(cache_resourceservice_rid2sid == null) {
 			cache_resourceservice_rid2sid = new TreeMap<Integer, ArrayList<Integer>>();
 	        Statement stmt = ModelBase.db.createStatement();
-	        /*
-	    	String sql = "SELECT r.resource_id, s.service_id, s.name, s.description " +
-	    	"FROM oim.resource_service r " +
-	    	"LEFT JOIN oim.service s ON r.service_id = s.service_id " +
-	    	"WHERE r.active = 1 and r.disable = 0 and s.active = 1 and s.disable = 0 and s.service_id " +
-	    	"IN ( " +
-	    	"SELECT service_id " +
-	    	"FROM oim.service_service_group " +
-	    	"WHERE active = 1 and disable = 0 and service_group_id = 1 " +
-	    	") " +
-	    	"AND s.service_id NOT " +
-	    	"IN ( " +
-	    	"SELECT DISTINCT PS.parent_service_id psid " +
-	    	"FROM oim.service PS " +
-	    	"WHERE PS.parent_service_id IS NOT NULL and active = 1 and disable = 0" +
-	    	") ";
-	    	*/
-	        String sql = "SELECT rs.resource_id, rs.service_id FROM oim.resource_service rs join oim.service s on rs.service_id = s.service_id where rs.active = 1 and rs.disable = 0";
+	        String sql = "SELECT rs.resource_id, rs.service_id FROM oim.resource_service rs join oim.service s on rs.service_id = s.service_id";// where rs.active = 1 and rs.disable = 0";
 	    	//logger.debug(sql);
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {

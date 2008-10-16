@@ -152,6 +152,8 @@ public class RSVOverallStatus implements RSVProcess {
 		for(Integer e : expires.values()) {
 			if(e <= endtime) {
 				expiration_points.add(e);
+			} else {
+				//logger.debug("ignoring possible expiration point at " + e);
 			}
 		}
 		
