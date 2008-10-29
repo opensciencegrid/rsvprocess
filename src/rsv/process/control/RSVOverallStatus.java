@@ -280,6 +280,7 @@ public class RSVOverallStatus implements RSVProcess {
 		int nullmetric = 0;
 		int unknown = 0;
 		int warning = 0;
+		int ok = 0;
 		
 		//hold some status details that are used to calculate the overall status.
 		String status_detail = "";
@@ -320,6 +321,7 @@ public class RSVOverallStatus implements RSVProcess {
 				status_detail += critical_metricdata.getID()+"=UNKNOWN ";
 				continue;
 			case Status.OK:
+				ok++;
 				status_detail += critical_metricdata.getID() + "=OK ";
 				continue;
 			}					
@@ -343,9 +345,12 @@ public class RSVOverallStatus implements RSVProcess {
 		} else if(warning > 0) {
 			new_status.status_id = Status.WARNING;
 			new_status.note = warning + " of " + critical.size() + " critical metrics are in WARNING status.";				
-		} else {
+		} else if(ok > 0) {
 			new_status.status_id = Status.OK;
 			new_status.note = "No issues found for this service.";						
+		} else {
+			new_status.status_id = Status.UNKNOWN;
+			new_status.note = "No metric status has been reported for this service.";
 		}
 		
 		//this is most likely for temporary, and once everything starts to working correctly, we wouldn't need this
@@ -400,6 +405,7 @@ public class RSVOverallStatus implements RSVProcess {
 		int unknown = 0;
 		int warning = 0;
 		int downtime = 0;
+		int ok = 0;
 		
 		//let's count
 		for(ServiceStatus s : current_service_statuses.values()) {
@@ -415,6 +421,9 @@ public class RSVOverallStatus implements RSVProcess {
 				continue;
 			case Status.DOWNTIME:
 				downtime++;
+				continue;
+			case Status.OK:
+				ok++;
 				continue;
 			}
 		}
@@ -434,9 +443,12 @@ public class RSVOverallStatus implements RSVProcess {
 		} else if(warning > 0) {
 			rs.status_id = Status.WARNING;
 			rs.note = warning + " of " + current_service_statuses.size() + " services are in WARNING status.";
-		} else {
+		} else if(ok > 0) {
 			rs.status_id = Status.OK;
 			rs.note = "No issues found for this resource.";		
+		} else {
+			rs.status_id = Status.UNKNOWN;
+			rs.note = "No service status has been reported.";
 		}
 		
 		return rs;
