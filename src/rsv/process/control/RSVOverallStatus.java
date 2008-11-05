@@ -93,9 +93,8 @@ public class RSVOverallStatus implements RSVProcess {
 					//D1. Pull metricdata inside ITP
 					MetricDataModel mdm = new MetricDataModel();
 					ArrayList<MetricData> mds = mdm.getMeticData(resource_id, tp.start, tp.end);//sorted by timestamp
-					
 					//add dummy metric data at expiration time for each metric data to recalculate status when metric expires.
-					ArrayList<MetricData> mds_with_dummy = addExpirationTriggers(mds, tp.end);
+					ArrayList<MetricData> mds_with_dummy = addExpirationTriggers(initial_rrs, mds, tp.end);
 
 					//D2. Calculate Service Status Changes inside this ITP.
 					service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
@@ -137,27 +136,32 @@ public class RSVOverallStatus implements RSVProcess {
 	}
 	
 	//from a list of metricdata, add dummymetricdata where the metricdata expires.
-	private ArrayList<MetricData> addExpirationTriggers(ArrayList<MetricData> mds, Integer endtime) throws SQLException 
+	private ArrayList<MetricData> addExpirationTriggers(RelevantRecordSet initial_rrs, ArrayList<MetricData> mds, Integer endtime) throws SQLException 
 	{
+		//logger.debug("endtime " + endtime);
+		
 		//create list of expiration_points that we will need to insert as DummyMetricData
 		TreeSet<Integer/*timestamp*/> expiration_points = new TreeSet<Integer>();
-		TreeMap<Integer/*metric_id*/, Integer/*expiration_times*/> expires = new TreeMap<Integer, Integer>();
-		for(MetricData md : mds) {
-			Integer e = expires.get(md.getMetricID());
-			if(e != null && e < md.getTimestamp()) {
-				expiration_points.add(e);
-			}
-			expires.put(md.getMetricID(), md.getTimestamp() + md.getFreshFor());
-		}
-		for(Integer e : expires.values()) {
+		
+		//add from initial_rrs
+		for(MetricData md : initial_rrs.getAllMetricData()) {
+			int e = md.getTimestamp() + md.getFreshFor();
 			if(e <= endtime) {
 				expiration_points.add(e);
-			} else {
-				//logger.debug("ignoring possible expiration point at " + e);
+				//logger.debug("candidate at " + md.getTimestamp() + " ex: " + e);
+			}
+		}	
+		
+		//add from mds
+		for(MetricData md : mds) {
+			int e = md.getTimestamp() + md.getFreshFor();
+			if(e <= endtime) {
+				expiration_points.add(e);
+				//logger.debug("candidate at " + md.getTimestamp() + " ex: " + e);
 			}
 		}
 		
-		//Now, we need to create a new list of metricdata with dummymetricdata in between..
+		//Now, optimize the expiration list by removing unneccessary "possible" expiration points.
 		ArrayList<MetricData> mds_with_dummy = new ArrayList<MetricData>();
 		Iterator<Integer> ep_it = expiration_points.iterator();
 		Iterator<MetricData> md_it = mds.iterator();
@@ -202,6 +206,13 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 		}
+		/*
+		//dump(2)
+		logger.debug("finally..");
+		for(MetricData m : mds_with_dummy) {
+			logger.debug("Dummy at " + m.getTimestamp() + " for " + m.getMetricID());
+		}
+		*/
 
 		return mds_with_dummy;
 	}
@@ -227,6 +238,9 @@ public class RSVOverallStatus implements RSVProcess {
 			critical_metrics.put(service_id, critical);
 		}
 		
+		//logger.debug("Initial RRS");
+		//rrs.dump();
+		
 		//iterate each metric data inside ITP
 		for(MetricData md : mds) {
 			
@@ -242,6 +256,8 @@ public class RSVOverallStatus implements RSVProcess {
 			for(Integer service_id : services) {
 				//calculate the service status (since a probe can influence multiple services - by OIM design)
 				ServiceStatus new_status = calculateServiceStatus(critical_metrics.get(service_id), rrs, md.getTimestamp());
+				
+				//logger.debug(new_status.note);
 				
 				//4. record status changes (if any)
 				ServiceStatus current_servicestatus = current_status.get(service_id);

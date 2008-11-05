@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import rsv.process.model.MetricDataModel;
 import rsv.process.model.OIMModel;
 import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Status;
 
 public class RelevantRecordSet {
+	private static final Logger logger = Logger.getLogger(RelevantRecordSet.class);	
 	
 	//services that the resource supports
 	ArrayList<Integer> services = null;
@@ -57,6 +60,24 @@ public class RelevantRecordSet {
 			}
 		}
 		current.put(md.getMetricID(), md);
+		
+		//dump current
+		//logger.debug("Updated " + md.getMetricID());
+		//dump();
+	}
+	
+	public void dump()
+	{
+		String dump = "";
+		for(int i = 1;i < current.lastKey(); ++i) {
+			if(current.containsKey(i)) {
+				MetricData d = current.get(i);
+				int t = d.getTimestamp();
+				dump += d.getID() + "(" + t + ")";
+			}
+			dump += ",";
+		}
+		logger.debug(dump);
 	}
 	/*
 	public TreeMap<Integer, MetricData> getCurrentRRS() 
