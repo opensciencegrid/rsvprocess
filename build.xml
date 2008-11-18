@@ -83,6 +83,16 @@
             </classpath>
         </java>
     </target>
+	<target name="availability_week" depends="jar">
+        <java fork="true" classname="${main-class}">
+            <arg value="availability"/>
+            <arg value="lastweek"/>
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
 	
     <target name="test-db" depends="jar">
         <java fork="true" classname="rsv.process.test.JDBCConnection">
