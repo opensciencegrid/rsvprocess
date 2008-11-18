@@ -78,6 +78,10 @@ public class RSVAvailability implements RSVProcess {
 			
 			allxml += "<Resources>";
 			for(Integer resource_id : resources.keySet()) {
+				
+				//debug
+				if(resource_id != 175) continue;
+				
 				allxml += "<Resource>";
 				ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
 				ArrayList<Integer> services = oim.getResourceService(resource_id);
@@ -123,10 +127,9 @@ public class RSVAvailability implements RSVProcess {
 				}
 				allxml += "</Services>";
 				allxml += "</Resource>";
-			
-				//if(resource_id >= 4) break;
 			}
 			allxml += "</Resources>";
+			allxml += "</ARCache>";
 			
 			//output all AR status cache
 			String filename_template = RSVMain.conf.getProperty(Configuration.aandr_cache);
@@ -208,7 +211,7 @@ public class RSVAvailability implements RSVProcess {
 				ArrayList<ServiceStatus> newlist = new ArrayList<ServiceStatus>();
 				ServiceStatus last = null;
 				for(ServiceStatus status : changes) {
-					if(status.timestamp < down_start && status.timestamp > down_end) {
+					if(status.timestamp < down_start || status.timestamp > down_end) {
 						newlist.add(status);
 					} else {
 						last = status;
