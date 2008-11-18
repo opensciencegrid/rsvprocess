@@ -80,7 +80,7 @@ public class RSVAvailability implements RSVProcess {
 			for(Integer resource_id : resources.keySet()) {
 				
 				//debug
-				if(resource_id != 175) continue;
+				//if(resource_id != 175) continue;
 				
 				allxml += "<Resource>";
 				ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
