@@ -97,7 +97,7 @@ public class RSVAvailability implements RSVProcess {
 			for(Integer resource_id : resources.keySet()) {
 				
 				//debug
-				//if(resource_id != 50) continue;
+				if(resource_id != 1) continue;
 				
 				allxml += "<Resource>";
 				ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
@@ -193,6 +193,10 @@ public class RSVAvailability implements RSVProcess {
 			current_time = new_status.timestamp;
 			current_status = new_status;
 		}
+		
+		//process last period
+		int remaining = end_time - current_time;
+		up_time += remaining;
 		
 		return up_time;
 	}
