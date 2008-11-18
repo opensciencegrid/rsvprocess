@@ -195,9 +195,13 @@ public class RSVAvailability implements RSVProcess {
 		}
 		
 		//process last period
-		int remaining = end_time - current_time;
-		up_time += remaining;
-		
+		switch(current_status.status_id) {
+		case Status.OK:
+		case Status.WARNING:
+		case Status.DOWNTIME:
+			up_time += end_time - current_time;
+		}
+
 		return up_time;
 	}
 	
