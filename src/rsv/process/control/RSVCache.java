@@ -58,7 +58,7 @@ public class RSVCache implements RSVProcess {
 			allxml += "<CurrentStatus>";
 			allxml += "<Timestamp>"+currenttime+"</Timestamp>";
 			
-			logger.info("Processing resources..");
+			logger.info("Processing current status cache for all resources..");
 			
 			for(Integer resource_id : resources.keySet()) {
 				

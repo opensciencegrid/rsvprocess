@@ -35,11 +35,13 @@ public class RSVPreprocess implements RSVProcess {
 			int last_dbid = lm.getLastGratiaIDProcessed();
 			logger.info("Resuming preprocess after Gratia DBID = " + last_dbid);
 			
+			/* -- Per Arvind's request, we are no longer doing this clear up.
 			//make sure what log says is true - or we will end of processing same records twice
 			int removed = mdetail.clearRecords(last_dbid);
 			if(removed != 0) {
 				logger.warn("Found "+removed+" records (total) with dbid larger than what we see in process log. Removing them for data integrity.");
 			}
+			*/
 			
 			//get gratia records
 			logger.info("Pulling upto " + maxrecords + " records from Gratia.MetricRecord");

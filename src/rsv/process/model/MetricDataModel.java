@@ -34,7 +34,6 @@ public class MetricDataModel extends ModelBase {
         	"group by metric_id) last "+
         	"where m.timestamp = last.last_timestamp and m.metric_id = last.metric_id and m.resource_id = " + resource_id +
         	" order by timestamp";
-        //logger.debug(sql);
         ResultSet rs = stmt.executeQuery(sql);
         while(rs.next()) {
         	Integer metric_id = rs.getInt("metric_id");
