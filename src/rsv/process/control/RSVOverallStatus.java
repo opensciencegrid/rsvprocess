@@ -3,7 +3,6 @@ package rsv.process.control;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ class DummyMetricData extends MetricData
 		timestamp = time;
 	}
 }
-
 
 public class RSVOverallStatus implements RSVProcess {
 	private static final Logger logger = Logger.getLogger(RSVOverallStatus.class);
@@ -81,7 +79,7 @@ public class RSVOverallStatus implements RSVProcess {
 				for(TimePeriod tp : ranges) {
 					Date start_date = new Date(tp.start*1000L);
 					Date end_date = new Date(tp.end*1000L);
-					logger.info("Processing resource ID " + resource_id + " between " + start_date.toString() + " and " + end_date.toString());
+					logger.info("Processing resource ID " + resource_id + " between " + tp.start + "(" + start_date.toString() + ") and " + tp.end + "(" + end_date.toString() + ")");
 					
 					//B. Retrieve Initial Status History (all statuschange_xxx tables)
 					LSCType initial_service_statuses = scm.getLastStatusChange_Service(resource_id, tp.start);
@@ -98,11 +96,24 @@ public class RSVOverallStatus implements RSVProcess {
 
 					//D2. Calculate Service Status Changes inside this ITP.
 					service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
-					all_service_statuschanges.addAll(service_statuschanges);
+					//now, the statuschange could contain status changes due to initial_rrs which could occur before tp.start
+					//We need to remove those or we will have duplicates.
+					for(ServiceStatus status : service_statuschanges) {
+						if(status.timestamp > tp.start) {
+							all_service_statuschanges.add(status);
+						}
+					}
+					//all_service_statuschanges.addAll(service_statuschanges);
 					
 					//D3. Calculate Resource Status Changes.
 					resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
-					all_resource_statuschanges.addAll(resource_statuschanges);
+					//filter same reason as service status
+					for(ResourceStatus status : resource_statuschanges) {
+						if(status.timestamp > tp.start) {
+							all_resource_statuschanges.add(status);
+						}
+					}
+					//all_resource_statuschanges.addAll(resource_statuschanges);
 				}
 			}
 			
@@ -115,8 +126,8 @@ public class RSVOverallStatus implements RSVProcess {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
 					java.util.Date start_date = new java.util.Date((long)tp.start * 1000);
 
-					logger.info("For resource " + resource_id + " - cleared " + removed + " records inside ITP of start: " + 
-							start_date.toString() + " (duration: " + (tp.end - tp.start)/60 + " minutes)");
+					logger.info("For resource " + resource_id + " - cleared total of " + removed + " records inside ITP of start: " + tp.start + "(" +
+							start_date + ") end: " + tp.end + " (duration: " + (tp.end - tp.start)/60 + " minutes)");
 				}
 			}
 			
@@ -126,7 +137,7 @@ public class RSVOverallStatus implements RSVProcess {
 			if(last_mdid != null) {
 				lm.updateLastMetricDataIDProcessed(last_mdid);	   
 			}
-			
+
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
 			ret = RSVMain.exitcode_error;
@@ -206,13 +217,6 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 		}
-		/*
-		//dump(2)
-		logger.debug("finally..");
-		for(MetricData m : mds_with_dummy) {
-			logger.debug("Dummy at " + m.getTimestamp() + " for " + m.getMetricID());
-		}
-		*/
 
 		return mds_with_dummy;
 	}
@@ -238,15 +242,9 @@ public class RSVOverallStatus implements RSVProcess {
 			critical_metrics.put(service_id, critical);
 		}
 		
-		//logger.debug("Initial RRS");
-		//rrs.dump();
-		
 		//iterate each metric data inside ITP
 		for(MetricData md : mds) {
-			
-			//ignore if this is not a critical metrics
-			//if(!all_critical_metrics.contains(md.getMetricID())) continue;
-			
+						
 			//first of all, update rrs with the new metric data unless it's dummy (for expiration test)
 			if(!(md instanceof DummyMetricData)) {
 				rrs.update(md);
@@ -276,7 +274,7 @@ public class RSVOverallStatus implements RSVProcess {
 					logger.debug("Resource " + resource_id + 
 							" Service Status for " + service_id + 
 							" has changed to " + new_status.status_id + 
-							" at " + change_date.toGMTString() + "(" + new_status.timestamp + ")" +
+							" at " + change_date.toString() + "(" + new_status.timestamp + ")" +
 							" reason: " + new_status.note);
 				}
 			}
@@ -313,11 +311,6 @@ public class RSVOverallStatus implements RSVProcess {
 			}
 			if(!oim.isFresh(critical_metricdata, timestamp)) {
 				expired++;
-				/*
-				if(first_expired_time == 0) {
-					first_expired_time = critical_metricdata.getTimestamp() + critical_metricdata.getFreshFor();
-				}
-				*/
 				status_detail += critical_metricdata.getID()+"=EXPIRED ";
 				continue;
 			}

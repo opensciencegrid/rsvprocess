@@ -139,4 +139,55 @@ public class StatusChangeModel extends ModelBase {
 		
 		return recs;		
 	}
+	
+	public ServiceStatus getInitServiceStatus(int resource_id, int service_id, int start) throws SQLException {
+		Statement stmt = ModelBase.db.createStatement();
+		String sql = "select * from statuschange_service where resource_id = " + resource_id + " and service_id = " + service_id + " and timestamp = coalesce(("+
+			" select max(timestamp) from statuschange_service where resource_id = " + resource_id + " and service_id = " + service_id + " and timestamp <= " + start +
+			"), 0)";
+		
+		ResultSet rs = stmt.executeQuery(sql);
+		if(rs.next()) {
+			ServiceStatus ss = new ServiceStatus();
+			ss.status_id = rs.getInt("status_id");
+			ss.timestamp = rs.getInt("timestamp");
+			return ss;
+		} else {
+			return null;
+		}
+	}
+	
+	public ArrayList<ServiceStatus> getServiceStatusChanges(int resource_id, int service_id, int begin, int end) throws SQLException {
+		ArrayList<ServiceStatus> ret = new ArrayList<ServiceStatus>();
+        Statement stmt = ModelBase.db.createStatement();
+        String sql = "select * from statuschange_service s "+
+        	"where resource_id = "+ resource_id + " and service_id = " + service_id +
+        	" and timestamp >= " + begin + " and timestamp < " + end +
+        	" order by timestamp";
+        ResultSet rs = stmt.executeQuery(sql);
+        while(rs.next()) {       	
+        	ServiceStatus ss = new ServiceStatus();
+        	ss.status_id = rs.getInt("status_id");
+			ss.timestamp = rs.getInt("timestamp");
+        	ret.add(ss);
+        }
+        return ret;
+	}
+	
+	public ArrayList<ResourceStatus> getStatusChanges_Resource(int resource_id, int begin, int end) throws SQLException {
+		ArrayList<ResourceStatus> ret = new ArrayList<ResourceStatus>();
+        Statement stmt = ModelBase.db.createStatement();
+        String sql = "select * from statuschange_resource s "+
+        	"where resource_id = "+ resource_id + 
+        	" and timestamp >= " + begin + " and timestamp < " + end +
+        	" order by timestamp";
+        ResultSet rs = stmt.executeQuery(sql);
+        while(rs.next()) {       	
+        	ResourceStatus r = new ResourceStatus();
+			r.timestamp = rs.getInt("timestamp");
+        	r.status_id = rs.getInt("status_id");
+        	ret.add(r);
+        }
+        return ret;
+	}
 }
