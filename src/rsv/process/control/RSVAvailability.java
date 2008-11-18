@@ -32,6 +32,23 @@ public class RSVAvailability implements RSVProcess {
 		if(args.length == 3) {
 			start_time = Integer.parseInt(args[1]);
 			end_time = Integer.parseInt(args[2]);
+		} else if(args.length == 2) {
+			if(args[1].compareTo("yesterday") == 0) {
+				Calendar cal = Calendar.getInstance();
+				Date current_date = cal.getTime();
+				int currenttime = (int) (current_date.getTime()/1000);
+				end_time = currenttime / 86400 * 86400;
+				start_time = end_time - 86400;
+			} else if(args[1].compareTo("lastweek") == 0) {
+				Calendar cal = Calendar.getInstance();
+				Date current_date = cal.getTime();
+				int currenttime = (int) (current_date.getTime()/1000);
+				end_time = currenttime / 86400 * 86400;
+				start_time = end_time - 86400*7;
+			} else {
+				logger.error("Unknown duration token: " + args[1]);
+				return RSVMain.exitcode_invalid_arg;
+			}
 		} else {
 			System.out.println("Please provide start & end time");
 			return RSVMain.exitcode_invalid_arg;
