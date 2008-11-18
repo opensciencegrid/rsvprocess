@@ -32,6 +32,23 @@ public class RSVAvailability implements RSVProcess {
 		if(args.length == 3) {
 			start_time = Integer.parseInt(args[1]);
 			end_time = Integer.parseInt(args[2]);
+		} else if(args.length == 2) {
+			if(args[1].compareTo("yesterday") == 0) {
+				Calendar cal = Calendar.getInstance();
+				Date current_date = cal.getTime();
+				int currenttime = (int) (current_date.getTime()/1000);
+				end_time = currenttime / 86400 * 86400;
+				start_time = end_time - 86400;
+			} else if(args[1].compareTo("lastweek") == 0) {
+				Calendar cal = Calendar.getInstance();
+				Date current_date = cal.getTime();
+				int currenttime = (int) (current_date.getTime()/1000);
+				end_time = currenttime / 86400 * 86400;
+				start_time = end_time - 86400*7;
+			} else {
+				logger.error("Unknown duration token: " + args[1]);
+				return RSVMain.exitcode_invalid_arg;
+			}
 		} else {
 			System.out.println("Please provide start & end time");
 			return RSVMain.exitcode_invalid_arg;
@@ -78,6 +95,10 @@ public class RSVAvailability implements RSVProcess {
 			
 			allxml += "<Resources>";
 			for(Integer resource_id : resources.keySet()) {
+				
+				//debug
+				//if(resource_id != 50) continue;
+				
 				allxml += "<Resource>";
 				ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
 				ArrayList<Integer> services = oim.getResourceService(resource_id);
@@ -123,10 +144,9 @@ public class RSVAvailability implements RSVProcess {
 				}
 				allxml += "</Services>";
 				allxml += "</Resource>";
-			
-				//if(resource_id >= 4) break;
 			}
 			allxml += "</Resources>";
+			allxml += "</ARCache>";
 			
 			//output all AR status cache
 			String filename_template = RSVMain.conf.getProperty(Configuration.aandr_cache);
@@ -183,6 +203,7 @@ public class RSVAvailability implements RSVProcess {
 	{
 		for(Downtime downtime : downtimes) {
 			ArrayList<Integer> service_ids = downtime.getServiceIDs();
+			if(service_ids == null) continue;
 			if(service_ids.contains(service_id)) {
 				int down_start = downtime.getStartTime();
 				int down_end = downtime.getEndTime();
@@ -208,7 +229,7 @@ public class RSVAvailability implements RSVProcess {
 				ArrayList<ServiceStatus> newlist = new ArrayList<ServiceStatus>();
 				ServiceStatus last = null;
 				for(ServiceStatus status : changes) {
-					if(status.timestamp < down_start && status.timestamp > down_end) {
+					if(status.timestamp < down_start || status.timestamp > down_end) {
 						newlist.add(status);
 					} else {
 						last = status;

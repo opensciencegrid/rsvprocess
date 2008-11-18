@@ -89,6 +89,8 @@ public class RSVMain {
 			process = new RSVVOMatrix();
 		}
 		if(process == null) {
+			logger.error("Unknown command specified: " + command);
+			showUsage();
 			return RSVMain.exitcode_invalid_arg;
 		} else {
 			return process.run(args);
@@ -106,7 +108,8 @@ public class RSVMain {
 					"Causes status recalculation on specific resource and specific time period. " + 
 					"This will not update the processlog.");
 		System.out.println("\tcache - Current status cache update process");
-		System.out.println("\tavailability - Availability, Reliability Number Calculation");
+		System.out.println("\tavailability - Calculate Availability, Reliability Number for all resources / services and create xml cache");
+		System.out.println("\t\t[start_time] [end_time]");
 		System.out.println("\tvomatrix - VO Matrix Processing");
 		return exitcode_ok;
 	}
