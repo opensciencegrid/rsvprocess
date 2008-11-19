@@ -11,9 +11,9 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import rsv.process.Configuration;
-import rsv.process.TimeRange;
 import rsv.process.model.DailyServiceAR;
 import rsv.process.model.OIMModel;
+import rsv.process.model.ServiceAR;
 import rsv.process.model.StatusChangeModel;
 import rsv.process.model.OIMModel.ResourcesType;
 import rsv.process.model.record.Downtime;
@@ -23,7 +23,7 @@ import rsv.process.model.record.Status;
 public class RSVAvailability implements RSVProcess {
 	private static final Logger logger = Logger.getLogger(RSVCache.class);
 	OIMModel oim = new OIMModel();
-	DailyServiceAR dsar = new DailyServiceAR();
+	ServiceAR sar = null;
 	StatusChangeModel scm = new StatusChangeModel();
 	
 	public int run(String args[]) {
@@ -41,12 +41,14 @@ public class RSVAvailability implements RSVProcess {
 				int currenttime = (int) (current_date.getTime()/1000);
 				end_time = currenttime / 86400 * 86400;
 				start_time = end_time - 86400;
+				sar = new DailyServiceAR();
 			} else if(args[1].compareTo("lastweek") == 0) {
 				Calendar cal = Calendar.getInstance();
 				Date current_date = cal.getTime();
 				int currenttime = (int) (current_date.getTime()/1000);
 				end_time = currenttime / 86400 * 86400;
 				start_time = end_time - 86400*7;
+				//sar = new WeeklyServiceAR();
 			} else {
 				logger.error("Unknown duration token: " + args[1]);
 				return RSVMain.exitcode_invalid_arg;
@@ -148,7 +150,9 @@ public class RSVAvailability implements RSVProcess {
 					allxml += "</Service>";
 					logger.debug("\t Reliable Time: " + reliable_time);
 					
-					dsar.insert(resource_id, service_id, availability, reliability, start_time);
+					if(sar != null) {
+						sar.insert(resource_id, service_id, availability, reliability, start_time);
+					}
 				}
 				allxml += "</Services>";
 				allxml += "</Resource>";
