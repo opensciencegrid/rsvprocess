@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import rsv.process.Configuration;
 import rsv.process.TimeRange;
+import rsv.process.model.DailyServiceAR;
 import rsv.process.model.OIMModel;
 import rsv.process.model.StatusChangeModel;
 import rsv.process.model.OIMModel.ResourcesType;
@@ -22,6 +23,7 @@ import rsv.process.model.record.Status;
 public class RSVAvailability implements RSVProcess {
 	private static final Logger logger = Logger.getLogger(RSVCache.class);
 	OIMModel oim = new OIMModel();
+	DailyServiceAR dsar = new DailyServiceAR();
 	StatusChangeModel scm = new StatusChangeModel();
 	
 	public int run(String args[]) {
@@ -90,14 +92,14 @@ public class RSVAvailability implements RSVProcess {
 			Date end_date = new Date();
 			end_date.setTime(end_time*1000L);
 			
-			logger.info("Resport Start Time: " + start_date + " ~ End Time: " + end_date);
-			logger.info("Resport Start Time: " + start_time + " ~ End Time: " + end_time);
+			logger.debug("Resport Start Time: " + start_date + " ~ End Time: " + end_date);
+			logger.debug("Resport Start Time: " + start_time + " ~ End Time: " + end_time);
 			
 			allxml += "<Resources>";
 			for(Integer resource_id : resources.keySet()) {
 				
 				//debug
-				//if(resource_id != 1) continue;
+				//if(resource_id != 56) continue;
 				
 				allxml += "<Resource>";
 				ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
@@ -108,20 +110,22 @@ public class RSVAvailability implements RSVProcess {
 				for(Integer service_id : services) {
 					allxml += "<Service>";
 					allxml += "<ServiceID>"+service_id+"</ServiceID>";				
-					logger.info(resource_id + " " + service_id);
+					logger.debug(resource_id + " " + service_id);
 					ServiceStatus init_status = scm.getInitServiceStatus(resource_id, service_id, start_time);
 					if(init_status == null) {
 						init_status = new ServiceStatus();
 						init_status.status_id = Status.UNKNOWN;
-						logger.info("\tNo initial status");
+						logger.debug("\tNo initial status");
 					} else {
-						logger.info("\tInitial Status: " + init_status.status_id);
+						logger.debug("\tInitial Status: " + init_status.status_id);
 					}
 					ArrayList<ServiceStatus> changes = scm.getServiceStatusChanges(resource_id, service_id, start_time, end_time);
 					int available_time = calculateUptime(init_status, changes, start_time, end_time);
-					logger.info("\t Available Time: " + available_time);
+					logger.debug("\t Available Time: " + available_time);
 					allxml += "<AvailableTime>"+available_time+"</AvailableTime>";	
-					allxml += "<Availability>"+((double)available_time/total_time)+"</Availability>";	
+					
+					double availability = ((double)available_time/total_time);
+					allxml += "<Availability>"+availability+"</Availability>";	
 					
 					int reliable_time;
 					if(downtimes != null) {
@@ -137,10 +141,14 @@ public class RSVAvailability implements RSVProcess {
  						reliable_time = available_time;
  					}
 					allxml += "<ReliableTime>"+reliable_time+"</ReliableTime>";	
-					allxml += "<Reliability>"+((double)reliable_time/total_time)+"</Reliability>";	
+					
+					double reliability = ((double)reliable_time/total_time);
+					allxml += "<Reliability>"+reliability+"</Reliability>";	
 					
 					allxml += "</Service>";
-					logger.info("\t Reliable Time: " + reliable_time);
+					logger.debug("\t Reliable Time: " + reliable_time);
+					
+					dsar.insert(resource_id, service_id, availability, reliability, start_time);
 				}
 				allxml += "</Services>";
 				allxml += "</Resource>";
