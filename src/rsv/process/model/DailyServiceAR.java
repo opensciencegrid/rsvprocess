@@ -12,7 +12,7 @@ import rsv.process.model.record.ServiceStatus;
 import rsv.process.model.record.ResourceStatus;
 
 //interfaces with StatusChange_XXX tables
-public class DailyServiceAR extends ModelBase {
+public class DailyServiceAR extends ModelBase implements ServiceAR {
 	private static final Logger logger = Logger.getLogger(DailyServiceAR.class);	
 	/*
 	@SuppressWarnings("serial")
