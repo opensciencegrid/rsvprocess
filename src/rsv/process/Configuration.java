@@ -3,9 +3,15 @@ package rsv.process;
 import java.util.Properties;
 
 public class Configuration extends Properties {
-	public static final String db_url = "db_url";
-	public static final String db_user = "db_user";	
-	public static final String db_pass = "db_pass";
+	//RSV DB
+	public static final String rsv_db_url = "rsv_db_url";
+	public static final String rsv_db_user = "rsv_db_user";	
+	public static final String rsv_db_pass = "rsv_db_pass";
+
+	//GRATIA DB
+	public static final String gratia_db_url = "gratia_db_url";
+	public static final String gratia_db_user = "gratia_db_user";	
+	public static final String gratia_db_pass = "gratia_db_pass";
 	
 	//register names here so that there will be no typos
 	public static final String common_filelock_prefix = "common_filelock_prefix";

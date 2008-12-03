@@ -7,7 +7,7 @@ import java.sql.Statement;
 import org.apache.log4j.Logger;
 
 import rsv.process.model.MetricDataModel;
-import rsv.process.model.ModelBase;
+import rsv.process.model.RSVDatabase;
 import rsv.process.model.OIMModel;
 
 public class VirtualOrganization {

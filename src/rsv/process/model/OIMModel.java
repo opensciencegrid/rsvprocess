@@ -13,7 +13,7 @@ import rsv.process.model.record.*;
 
 @SuppressWarnings("serial")
 
-public class OIMModel extends ModelBase {
+public class OIMModel extends RSVDatabase {
 	private static final Logger logger = Logger.getLogger(OIMModel.class);	
 	
 	private static HashMap<String, Integer> cache_resource_fqdn2id = null;
@@ -21,7 +21,7 @@ public class OIMModel extends ModelBase {
 	{
 		if(cache_resource_fqdn2id == null) {
 			cache_resource_fqdn2id = new HashMap<String, Integer>();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        ResultSet rs = stmt.executeQuery("select resource_id,fqdn from oim.resource where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Integer resource_id = rs.getInt("resource_id");
@@ -39,7 +39,7 @@ public class OIMModel extends ModelBase {
 	{
 		if(cache_resource_id2rec == null) {
 			cache_resource_id2rec = new ResourcesType();
-			Statement stmt = ModelBase.db.createStatement();
+			Statement stmt = RSVDatabase.db.createStatement();
 	        ResultSet rs = stmt.executeQuery("select resource_id,name from oim.resource where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Resource rec = new Resource();
@@ -60,7 +60,7 @@ public class OIMModel extends ModelBase {
 	{
 		if(cache_metric_name2id == null) {
 			cache_metric_name2id = new HashMap<String, Integer>();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        ResultSet rs = stmt.executeQuery("select metric_id,name from oim.metric where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Integer metric_id = rs.getInt("metric_id");
@@ -77,7 +77,7 @@ public class OIMModel extends ModelBase {
 	{
 		if(cache_status_name2id == null) {
 			cache_status_name2id = new HashMap<String, Integer>();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        ResultSet rs = stmt.executeQuery("select metric_status_id,metric_status_description from oim.metric_status");			
 	        while(rs.next()) {
 	        	Integer status_id = rs.getInt("metric_status_id");
@@ -105,7 +105,7 @@ public class OIMModel extends ModelBase {
 		if(cache_vo_name2id == null) {
 			//Remove CaseInsensitiveComparator once we sort out issues with VO names
 			cache_vo_name2id = new TreeMap<String, Integer>(new CaseInsensitiveComparator());
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        ResultSet rs = stmt.executeQuery("select vo_id,short_name from oim.virtualorganization where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Integer vo_id = rs.getInt("vo_id");
@@ -123,7 +123,7 @@ public class OIMModel extends ModelBase {
 		if(cache_vo_id2vo == null) {
 			//Remove CaseInsensitiveComparator once we sort out issues with VO names
 			cache_vo_id2vo = new TreeMap<Integer, VirtualOrganization>();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        ResultSet rs = stmt.executeQuery("select * from oim.virtualorganization where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	VirtualOrganization vo = new VirtualOrganization(rs);
@@ -139,7 +139,7 @@ public class OIMModel extends ModelBase {
 	{
 		if(cache_metric_id2freshfor == null) {
 			cache_metric_id2freshfor = new HashMap<Integer, Integer>();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        ResultSet rs = stmt.executeQuery("select metric_id, fresh_for from oim.metric where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Integer id = rs.getInt("metric_id");
@@ -164,7 +164,7 @@ public class OIMModel extends ModelBase {
 	public ArrayList<Integer> getResourceGroups(int resource_id) throws SQLException {
 		if(cache_rrg_id2gid == null) {
 			cache_rrg_id2gid = new GetResourceGroupsType();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "select * from oim.resource_resource_group";
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {
@@ -188,7 +188,7 @@ public class OIMModel extends ModelBase {
 	public ArrayList<Integer> getResourceService(Integer resource_id) throws SQLException {
 		if(cache_resourceservice_rid2sid == null) {
 			cache_resourceservice_rid2sid = new TreeMap<Integer, ArrayList<Integer>>();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "SELECT rs.resource_id, rs.service_id FROM oim.resource_service rs join oim.service s on rs.service_id = s.service_id";// where rs.active = 1 and rs.disable = 0";
 	    	//logger.debug(sql);
 	        ResultSet rs = stmt.executeQuery(sql);
@@ -213,7 +213,7 @@ public class OIMModel extends ModelBase {
 	public ArrayList<Integer> getCriticalMetrics(Integer service_id) throws SQLException{
 		if(cache_criticalmetric_id2ids == null) {
 			cache_criticalmetric_id2ids = new TreeMap<Integer, ArrayList<Integer>>();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "select metric_id, service_id from oim.metric_service where critical = 1";
 	        ResultSet rs = stmt.executeQuery(sql);		
 	        while(rs.next()) {
@@ -237,7 +237,7 @@ public class OIMModel extends ModelBase {
 	public ArrayList<Integer> getNonCriticalMetrics(Integer service_id) throws SQLException{
 		if(cache_non_criticalmetric_id2ids == null) {
 			cache_non_criticalmetric_id2ids = new TreeMap<Integer, ArrayList<Integer>>();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "select metric_id, service_id from oim.metric_service where critical = 0";
 	        ResultSet rs = stmt.executeQuery(sql);		
 	        while(rs.next()) {
@@ -261,7 +261,7 @@ public class OIMModel extends ModelBase {
 	public StatusType getStatus() throws SQLException {
 		if(cache_status_id2status == null) {
 			cache_status_id2status = new StatusType();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "select * from oim.resource_resource_group";
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {
@@ -278,7 +278,7 @@ public class OIMModel extends ModelBase {
 	public Metric getMetric(int metric_id) throws SQLException {
 		if(cache_status_id2metric == null) {
 			cache_status_id2metric = new MetricType();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "select * from oim.metric where active = 1 and disable = 0";
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {
@@ -295,7 +295,7 @@ public class OIMModel extends ModelBase {
 	public Service getService(Integer service_id) throws SQLException {
 		if(cache_service_id2service == null) {
 			cache_service_id2service = new ServiceType();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "select * from oim.service where active = 1 and disable = 0";
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {
@@ -312,7 +312,7 @@ public class OIMModel extends ModelBase {
 	public ArrayList<Downtime> getDowntimes(Integer resource_id) throws SQLException {
 		if(cache_downtime_id2downtime == null) {
 			cache_downtime_id2downtime = new DowntimeType();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "select *,  UNIX_Timestamp(start_time) as unix_start_time, UNIX_Timestamp(end_time) as unix_end_time " + 
 	        		"from oim.resource_downtime where disable = 0";
 	        ResultSet rs = stmt.executeQuery(sql);
@@ -335,7 +335,7 @@ public class OIMModel extends ModelBase {
 	public ArrayList<Integer> lookupResourceDowntimeService(Integer downtime_id) throws SQLException {
 		if(cache_downtimeservice_id2downtime == null) {
 			cache_downtimeservice_id2downtime = new DowntimeServiceType();
-	        Statement stmt = ModelBase.db.createStatement();
+	        Statement stmt = RSVDatabase.db.createStatement();
 	        String sql = "select * from oim.resource_downtime_service";
 	        ResultSet rs = stmt.executeQuery(sql);
 	        while(rs.next()) {

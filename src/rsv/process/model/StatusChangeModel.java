@@ -12,14 +12,14 @@ import rsv.process.model.record.ServiceStatus;
 import rsv.process.model.record.ResourceStatus;
 
 //interfaces with StatusChange_XXX tables
-public class StatusChangeModel extends ModelBase {
+public class StatusChangeModel extends RSVDatabase {
 	private static final Logger logger = Logger.getLogger(StatusChangeModel.class);	
 	
 	@SuppressWarnings("serial")
 	public static class LSCType extends TreeMap<Integer, ServiceStatus> {}//<service_id, status_is>
 	public LSCType getLastStatusChange_Service(int resource_id, Integer timestamp) throws SQLException {
 		LSCType ret = new LSCType();
-        Statement stmt = ModelBase.db.createStatement();
+        Statement stmt = RSVDatabase.db.createStatement();
         String where_timestamp = "";
         if(timestamp != null) {
         	where_timestamp = " and timestamp < " + timestamp + " ";
@@ -42,7 +42,7 @@ public class StatusChangeModel extends ModelBase {
 	}
 	
 	public ResourceStatus getLastStatusChange_Resource(int resource_id, Integer timestamp) throws SQLException {
-        Statement stmt = ModelBase.db.createStatement();
+        Statement stmt = RSVDatabase.db.createStatement();
         String where_timestamp = "";
         if(timestamp != null) {
         	where_timestamp = " and timestamp < " + timestamp + " ";
@@ -68,7 +68,7 @@ public class StatusChangeModel extends ModelBase {
 		
 		//statuschagne_service
 		String sql = "delete from rsvextra.statuschange_service where resource_id = ? and timestamp >= ? and timestamp <= ?";
-		PreparedStatement stmt = ModelBase.db.prepareStatement(sql);		
+		PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, resource_id);
 		stmt.setInt(2, start);
 	    stmt.setInt(3, end);
@@ -77,7 +77,7 @@ public class StatusChangeModel extends ModelBase {
 	    
 		//statuschagne_resource
 		sql = "delete from rsvextra.statuschange_resource where resource_id = ? and timestamp >= ? and timestamp <= ?";
-		stmt = ModelBase.db.prepareStatement(sql);		
+		stmt = RSVDatabase.db.prepareStatement(sql);		
 		stmt.setInt(1, resource_id);
 	    stmt.setInt(2, start);
 	    stmt.setInt(3, end);
@@ -92,7 +92,7 @@ public class StatusChangeModel extends ModelBase {
 	{
 		int note_max_length = 256;
 		String sql = "insert into rsvextra.statuschange_service (resource_id, service_id, status_id, timestamp, detail) values (?,?,?,?,?)";
-	    PreparedStatement stmt_data = ModelBase.db.prepareStatement(sql);
+	    PreparedStatement stmt_data = RSVDatabase.db.prepareStatement(sql);
 	    
 	    for(ServiceStatus s : service_statuschanges) {
 			stmt_data.setInt(1, s.resource_id);
@@ -118,7 +118,7 @@ public class StatusChangeModel extends ModelBase {
 	{
 		int note_max_length = 256;
 		String sql = "insert into rsvextra.statuschange_resource (resource_id, status_id, timestamp, detail) values (?,?,?,?)";
-	    PreparedStatement stmt_data = ModelBase.db.prepareStatement(sql);
+	    PreparedStatement stmt_data = RSVDatabase.db.prepareStatement(sql);
 	    
 	    for(ResourceStatus s : resource_statuschanges) {
 			stmt_data.setInt(1, s.resource_id);
@@ -141,7 +141,7 @@ public class StatusChangeModel extends ModelBase {
 	}
 	
 	public ServiceStatus getInitServiceStatus(int resource_id, int service_id, int start) throws SQLException {
-		Statement stmt = ModelBase.db.createStatement();
+		Statement stmt = RSVDatabase.db.createStatement();
 		String sql = "select * from statuschange_service where resource_id = " + resource_id + " and service_id = " + service_id + " and timestamp = coalesce(("+
 			" select max(timestamp) from statuschange_service where resource_id = " + resource_id + " and service_id = " + service_id + " and timestamp <= " + start +
 			"), 0)";
@@ -159,7 +159,7 @@ public class StatusChangeModel extends ModelBase {
 	
 	public ArrayList<ServiceStatus> getServiceStatusChanges(int resource_id, int service_id, int begin, int end) throws SQLException {
 		ArrayList<ServiceStatus> ret = new ArrayList<ServiceStatus>();
-        Statement stmt = ModelBase.db.createStatement();
+        Statement stmt = RSVDatabase.db.createStatement();
         String sql = "select * from statuschange_service s "+
         	"where resource_id = "+ resource_id + " and service_id = " + service_id +
         	" and timestamp >= " + begin + " and timestamp < " + end +
@@ -176,7 +176,7 @@ public class StatusChangeModel extends ModelBase {
 	
 	public ArrayList<ResourceStatus> getStatusChanges_Resource(int resource_id, int begin, int end) throws SQLException {
 		ArrayList<ResourceStatus> ret = new ArrayList<ResourceStatus>();
-        Statement stmt = ModelBase.db.createStatement();
+        Statement stmt = RSVDatabase.db.createStatement();
         String sql = "select * from statuschange_resource s "+
         	"where resource_id = "+ resource_id + 
         	" and timestamp >= " + begin + " and timestamp < " + end +

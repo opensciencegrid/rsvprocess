@@ -159,7 +159,6 @@ public class RSVOverallStatus implements RSVProcess {
 			int e = md.getTimestamp() + md.getFreshFor();
 			if(e <= endtime) {
 				expiration_points.add(e);
-				//logger.debug("candidate at " + md.getTimestamp() + " ex: " + e);
 			}
 		}	
 		
@@ -168,7 +167,7 @@ public class RSVOverallStatus implements RSVProcess {
 			int e = md.getTimestamp() + md.getFreshFor();
 			if(e <= endtime) {
 				expiration_points.add(e);
-				//logger.debug("candidate at " + md.getTimestamp() + " ex: " + e);
+				//logger.debug("candidate at " + md.getTimestamp() + " metric_id: " + md.getID() + " expired at : " + e);
 			}
 		}
 		
@@ -217,6 +216,15 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 		}
+		
+		//process last ones
+		if(ep_next != null) {
+			DummyMetricData dummy = new DummyMetricData(ep_next);
+			mds_with_dummy.add(dummy);
+		}
+		if(md_next != null) {
+			mds_with_dummy.add(md_next);
+		}
 
 		return mds_with_dummy;
 	}
@@ -235,10 +243,8 @@ public class RSVOverallStatus implements RSVProcess {
 		TreeMap<Integer/*service_id*/, ArrayList<Integer/*metric_id*/>> critical_metrics = 
 			new TreeMap<Integer, ArrayList<Integer>>();
 		ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
-		//TreeSet<Integer/*metric_id*/> all_critical_metrics = new TreeSet<Integer>();
 		for(Integer service_id : services) {
 			ArrayList<Integer> critical = oim.getCriticalMetrics(service_id);
-			//all_critical_metrics.addAll(critical);
 			critical_metrics.put(service_id, critical);
 		}
 		

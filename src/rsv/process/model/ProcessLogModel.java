@@ -7,12 +7,12 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-public class ProcessLogModel extends ModelBase {
+public class ProcessLogModel extends RSVDatabase {
 	private static final Logger logger = Logger.getLogger(ProcessLogModel.class);	
 	
 	private String getLastValueFor(String key) throws SQLException
 	{
-		PreparedStatement stmt = ModelBase.db.prepareStatement("select value from processlog p, "+
+		PreparedStatement stmt = RSVDatabase.db.prepareStatement("select value from processlog p, "+
 				"(select `key`, max(timestamp) as timestamp from processlog " +
 				"where `key` = ? group by `key`) l " +
 				"where p.`key` = l.`key` and p.timestamp = l.timestamp ");
@@ -27,7 +27,7 @@ public class ProcessLogModel extends ModelBase {
 	private void update(String key, String value) throws SQLException
 	{
 	    String sql = "insert into processlog (`key`, value, timestamp) values (?, ?, NOW())";
-	    PreparedStatement stmt = ModelBase.db.prepareStatement(sql);
+	    PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);
 		stmt.setString(1, key);
 	    stmt.setString(2, value);
 		stmt.execute();		
