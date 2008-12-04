@@ -22,6 +22,7 @@ import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Status;
 import rsv.process.model.record.ServiceStatus;
 import rsv.process.model.record.ResourceStatus;
+import rsv.process.model.OIMModel.ResourcesType;
 import rsv.process.model.StatusChangeModel.LSCType;
 
 class DummyMetricData extends MetricData
@@ -53,7 +54,16 @@ public class RSVOverallStatus implements RSVProcess {
 				//recalculate on specified resource, start, end.. via command line
 				TimeRange tr = new TimeRange();
 				tr.add(Integer.parseInt(args[2]), Integer.parseInt(args[3]));
-				itps.put(Integer.parseInt(args[1]), tr);
+				if(args[1].compareTo("all") == 0) {
+					ResourcesType resources = oim.getResources();
+					for(Integer resource_id : resources.keySet()) {
+						//if(resource_id %2 != 0) {
+							itps.put(resource_id, tr);
+						//}
+					}
+				} else {
+					itps.put(Integer.parseInt(args[1]), tr);
+				}
 			} else {			
 				//recalculate based on the latest metric records
 				TreeMap<Integer, TimeRange> itps_original = calculateITPs(); //resets last_mdid.. so that I can update log later.
