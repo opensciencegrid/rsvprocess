@@ -22,6 +22,7 @@ import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Status;
 import rsv.process.model.record.ServiceStatus;
 import rsv.process.model.record.ResourceStatus;
+import rsv.process.model.OIMModel.ResourcesType;
 import rsv.process.model.StatusChangeModel.LSCType;
 
 class DummyMetricData extends MetricData
@@ -53,7 +54,16 @@ public class RSVOverallStatus implements RSVProcess {
 				//recalculate on specified resource, start, end.. via command line
 				TimeRange tr = new TimeRange();
 				tr.add(Integer.parseInt(args[2]), Integer.parseInt(args[3]));
-				itps.put(Integer.parseInt(args[1]), tr);
+				if(args[1].compareTo("all") == 0) {
+					ResourcesType resources = oim.getResources();
+					for(Integer resource_id : resources.keySet()) {
+						//if(resource_id %2 != 0) {
+							itps.put(resource_id, tr);
+						//}
+					}
+				} else {
+					itps.put(Integer.parseInt(args[1]), tr);
+				}
 			} else {			
 				//recalculate based on the latest metric records
 				TreeMap<Integer, TimeRange> itps_original = calculateITPs(); //resets last_mdid.. so that I can update log later.
@@ -159,7 +169,6 @@ public class RSVOverallStatus implements RSVProcess {
 			int e = md.getTimestamp() + md.getFreshFor();
 			if(e <= endtime) {
 				expiration_points.add(e);
-				//logger.debug("candidate at " + md.getTimestamp() + " ex: " + e);
 			}
 		}	
 		
@@ -168,7 +177,7 @@ public class RSVOverallStatus implements RSVProcess {
 			int e = md.getTimestamp() + md.getFreshFor();
 			if(e <= endtime) {
 				expiration_points.add(e);
-				//logger.debug("candidate at " + md.getTimestamp() + " ex: " + e);
+				//logger.debug("candidate at " + md.getTimestamp() + " metric_id: " + md.getID() + " expired at : " + e);
 			}
 		}
 		
@@ -217,6 +226,15 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 		}
+		
+		//process last ones
+		if(ep_next != null) {
+			DummyMetricData dummy = new DummyMetricData(ep_next);
+			mds_with_dummy.add(dummy);
+		}
+		if(md_next != null) {
+			mds_with_dummy.add(md_next);
+		}
 
 		return mds_with_dummy;
 	}
@@ -235,10 +253,8 @@ public class RSVOverallStatus implements RSVProcess {
 		TreeMap<Integer/*service_id*/, ArrayList<Integer/*metric_id*/>> critical_metrics = 
 			new TreeMap<Integer, ArrayList<Integer>>();
 		ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
-		//TreeSet<Integer/*metric_id*/> all_critical_metrics = new TreeSet<Integer>();
 		for(Integer service_id : services) {
 			ArrayList<Integer> critical = oim.getCriticalMetrics(service_id);
-			//all_critical_metrics.addAll(critical);
 			critical_metrics.put(service_id, critical);
 		}
 		

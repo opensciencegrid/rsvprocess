@@ -1,7 +1,9 @@
 package rsv.process.control;
 
 import org.apache.log4j.Logger;
-import rsv.process.model.ModelBase;
+
+import rsv.process.model.GratiaDatabase;
+import rsv.process.model.RSVDatabase;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -66,7 +68,8 @@ public class RSVMain {
 	public static void exit(int ret)
 	{
 		printErrorCode(ret);
-		ModelBase.closeDB();
+		RSVDatabase.closeDB();
+		GratiaDatabase.closeDB();
 		
 		System.exit(ret);
 	}

@@ -12,7 +12,7 @@ import java.util.TreeMap;
 import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Resource;
 
-public class MetricDataModel extends ModelBase {
+public class MetricDataModel extends RSVDatabase {
 	private static final Logger logger = Logger.getLogger(MetricDataModel.class);	
 	
 	//pull the last metric data set before specified timestamp on specified resource
@@ -23,7 +23,7 @@ public class MetricDataModel extends ModelBase {
 	public class LMDType extends TreeMap<Integer, MetricData> {}
 	public LMDType getLastMetricDataSet(int resource_id, Integer timestamp) throws SQLException {
 		LMDType ret = new LMDType();
-        Statement stmt = ModelBase.db.createStatement();
+        Statement stmt = RSVDatabase.db.createStatement();
         String where_timestamp = "";
         if(timestamp != null) {
         	where_timestamp = " and timestamp < " + timestamp + " ";
@@ -44,7 +44,7 @@ public class MetricDataModel extends ModelBase {
 	}
 	
 	public String getDetail(int id) throws SQLException {
-        Statement stmt = ModelBase.db.createStatement();
+        Statement stmt = RSVDatabase.db.createStatement();
         ResultSet rs = stmt.executeQuery("select detail from metricdetail where metricdata_id = " + id);
         rs.next();
         return rs.getString(1);
@@ -52,7 +52,7 @@ public class MetricDataModel extends ModelBase {
 	
 	public ResultSet getMetricDataRecords(int start_dbid, int limit) throws SQLException
 	{
-        Statement stmt = ModelBase.db.createStatement();
+        Statement stmt = RSVDatabase.db.createStatement();
         
         ResultSet rs = stmt.executeQuery("select * from rsvextra.metricdata" + 
         		" where id > " + start_dbid + 
@@ -65,7 +65,7 @@ public class MetricDataModel extends ModelBase {
 	public MetricData getLastNonUnknownMetricData(int resource_id, int metric_id, int timestamp) throws SQLException
 	{
 		String sql = "select * from metricdata where resource_id = ? and metric_id = ? and timestamp < ? order by timestamp desc limit 1";
-		PreparedStatement stmt = ModelBase.db.prepareStatement(sql);		
+		PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, resource_id);
 	    stmt.setInt(2, metric_id);
 	    stmt.setInt(3, timestamp);
@@ -82,7 +82,7 @@ public class MetricDataModel extends ModelBase {
 	{
 		ArrayList<MetricData> mds = new ArrayList<MetricData>();
 		String sql = "select * from metricdata where resource_id = ? and timestamp >= ? and timestamp <= ? order by timestamp";
-		PreparedStatement stmt = ModelBase.db.prepareStatement(sql);		
+		PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, resource_id);
 	    stmt.setInt(2, start);
 	    stmt.setInt(3, end);

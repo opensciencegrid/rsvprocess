@@ -6,13 +6,13 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-public class GratiaModel extends ModelBase {
+public class GratiaModel extends GratiaDatabase {
 	
 	private static final Logger logger = Logger.getLogger(GratiaModel.class);	
 	
 	public ResultSet getMetricRecords(int start_dbid, int limit) throws SQLException
 	{
-        Statement stmt = ModelBase.db.createStatement();
+        Statement stmt = GratiaDatabase.db.createStatement();
         ResultSet rs = stmt.executeQuery("select *, UNIX_Timestamp(Timestamp) as utimestamp from gratia.MetricRecord" + 
         		" where dbid > " + start_dbid + 
         		" order by dbid" +  //TODO - is this necessary?

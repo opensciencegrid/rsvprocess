@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 import rsv.process.control.RSVPreprocess;
 
-public class MetricInserter extends ModelBase {
+public class MetricInserter extends RSVDatabase {
 	private static final Logger logger = Logger.getLogger(MetricInserter.class);
 	
 	//private PreparedStatement prepStmt = null;
@@ -20,10 +20,10 @@ public class MetricInserter extends ModelBase {
 	{
 		try {
 			String sql = "insert into rsvextra.metricdata (id, timestamp, resource_id, metric_id, metric_status_id) values (?,?,?,?,?)";
-		    stmt_data = ModelBase.db.prepareStatement(sql);
+		    stmt_data = RSVDatabase.db.prepareStatement(sql);
 		    
 			sql = "insert into rsvextra.metricdetail (metricdata_id, detail) values (?, ?)";
-		    stmt_detail = ModelBase.db.prepareStatement(sql);
+		    stmt_detail = RSVDatabase.db.prepareStatement(sql);
 
 		} catch (SQLException e) {
 			logger.error("failed to prepare for butch insert", e);
@@ -35,13 +35,13 @@ public class MetricInserter extends ModelBase {
 	{
 		int recs = 0;
 		String sql = "delete from rsvextra.metricdetail where metricdata_id > ?";
-		PreparedStatement stmt = ModelBase.db.prepareStatement(sql);		
+		PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, last_dbid);
 	    stmt.execute();
 	    recs += stmt.getUpdateCount();
 	    
 		sql = "delete from rsvextra.metricdata where id > ?";
-		stmt = ModelBase.db.prepareStatement(sql);		
+		stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, last_dbid);
 	    stmt.execute();
 	    recs += stmt.getUpdateCount();	   

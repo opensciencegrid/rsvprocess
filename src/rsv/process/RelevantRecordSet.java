@@ -41,6 +41,7 @@ public class RelevantRecordSet {
 					}
 				}
 			}
+			//logger.debug("Initial RRS Metric" + metric_id + " " + md.getID());
 			current.put(metric_id, md);
 		}
 	}
