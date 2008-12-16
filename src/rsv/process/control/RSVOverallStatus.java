@@ -116,7 +116,7 @@ public class RSVOverallStatus implements RSVProcess {
 					//now, the statuschange could contain status changes due to initial_rrs which could occur before tp.start
 					//We need to remove those or we will have duplicates.
 					for(ServiceStatus status : service_statuschanges) {
-						if(status.timestamp > tp.start) {
+						if(status.timestamp >= tp.start) {
 							all_service_statuschanges.add(status);
 						}
 					}
@@ -125,7 +125,7 @@ public class RSVOverallStatus implements RSVProcess {
 					resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
 					//filter same reason as service status
 					for(ResourceStatus status : resource_statuschanges) {
-						if(status.timestamp > tp.start) {
+						if(status.timestamp >= tp.start) {
 							all_resource_statuschanges.add(status);
 						}
 					}
@@ -138,8 +138,8 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
+					
 					java.util.Date start_date = new java.util.Date((long)tp.start * 1000);
-
 					logger.debug("For resource " + resource_id + " - cleared total of " + removed + " records inside ITP of start: " + tp.start + "(" +
 							start_date + ") end: " + tp.end + " (duration: " + (tp.end - tp.start)/60 + " minutes)");
 				}
@@ -152,6 +152,7 @@ public class RSVOverallStatus implements RSVProcess {
 			}
 			
 			//Step 5. Recalculate current status cache - assuming that the latest status has been changed for this resource
+			logger.debug("Updating current status cache files on " + itps.size() + " resources.");
 			ResourcesType resources = oim.getResources();
 			for(Integer resource_id : itps.keySet()) {
 				updateCurrentStatusCache(resources.get(resource_id));
