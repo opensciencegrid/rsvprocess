@@ -82,9 +82,6 @@ public class RSVMain {
 		if(command.compareToIgnoreCase("overallstatus") == 0) {
 			process = new RSVOverallStatus();
 		}
-		if(command.compareToIgnoreCase("cache") == 0) {
-			process = new RSVCache();
-		}
 		if(command.compareToIgnoreCase("availability") == 0) {
 			process = new RSVAvailability();
 		}

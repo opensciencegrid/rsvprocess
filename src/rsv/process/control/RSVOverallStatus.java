@@ -1,7 +1,11 @@
 package rsv.process.control;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -17,8 +21,11 @@ import rsv.process.model.MetricDataModel;
 import rsv.process.model.StatusChangeModel;
 import rsv.process.TimeRange.TimePeriod;
 import rsv.process.*;
+import rsv.process.model.record.Downtime;
 import rsv.process.model.record.Metric;
 import rsv.process.model.record.MetricData;
+import rsv.process.model.record.Resource;
+import rsv.process.model.record.Service;
 import rsv.process.model.record.Status;
 import rsv.process.model.record.ServiceStatus;
 import rsv.process.model.record.ResourceStatus;
@@ -77,7 +84,7 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 			
-			//Step 2: For each resource we found...
+			//Step 2: For each resource in itp...
 			for(Integer resource_id : itps.keySet()) {
 				
 				ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
@@ -85,11 +92,11 @@ public class RSVOverallStatus implements RSVProcess {
 				TimeRange itp = itps.get(resource_id);
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				
-				//for each ranges (currently there is only 1 range per resource, but we can improve this later)
+				//and for each itp ranges (currently there is only 1 range per resource, but we can improve this later)
 				for(TimePeriod tp : ranges) {
 					Date start_date = new Date(tp.start*1000L);
 					Date end_date = new Date(tp.end*1000L);
-					logger.info("Processing resource ID " + resource_id + " between " + tp.start + "(" + start_date.toString() + ") and " + tp.end + "(" + end_date.toString() + ")");
+					logger.debug("Processing resource ID " + resource_id + " between " + tp.start + "(" + start_date.toString() + ") and " + tp.end + "(" + end_date.toString() + ")");
 					
 					//B. Retrieve Initial Status History (all statuschange_xxx tables)
 					LSCType initial_service_statuses = scm.getLastStatusChange_Service(resource_id, tp.start);
@@ -109,51 +116,194 @@ public class RSVOverallStatus implements RSVProcess {
 					//now, the statuschange could contain status changes due to initial_rrs which could occur before tp.start
 					//We need to remove those or we will have duplicates.
 					for(ServiceStatus status : service_statuschanges) {
-						if(status.timestamp > tp.start) {
+						if(status.timestamp >= tp.start) {
 							all_service_statuschanges.add(status);
 						}
 					}
-					//all_service_statuschanges.addAll(service_statuschanges);
 					
 					//D3. Calculate Resource Status Changes.
 					resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
 					//filter same reason as service status
 					for(ResourceStatus status : resource_statuschanges) {
-						if(status.timestamp > tp.start) {
+						if(status.timestamp >= tp.start) {
 							all_resource_statuschanges.add(status);
 						}
 					}
-					//all_resource_statuschanges.addAll(resource_statuschanges);
 				}
 			}
 			
-			//pre-E. Clear ITP window 
+			//Step 3. Clear ITP window 
 			for(Integer resource_id : itps.keySet()) {
-				
 				TimeRange itp = itps.get(resource_id);
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
+					
 					java.util.Date start_date = new java.util.Date((long)tp.start * 1000);
-
-					logger.info("For resource " + resource_id + " - cleared total of " + removed + " records inside ITP of start: " + tp.start + "(" +
+					logger.debug("For resource " + resource_id + " - cleared total of " + removed + " records inside ITP of start: " + tp.start + "(" +
 							start_date + ") end: " + tp.end + " (duration: " + (tp.end - tp.start)/60 + " minutes)");
 				}
 			}
-			
-			//E. Write out any status changes recorded		
+			//Step 4. Write out any status changes recorded		
 			scm.outputServiceStatusChanges(all_service_statuschanges);
 			scm.outputResourceStatusChanges(all_resource_statuschanges);
 			if(last_mdid != null) {
 				lm.updateLastMetricDataIDProcessed(last_mdid);	   
 			}
+			
+			//Step 5. Recalculate current status cache - assuming that the latest status has been changed for this resource
+			logger.debug("Updating current status cache files on " + itps.size() + " resources.");
+			ResourcesType resources = oim.getResources();
+			for(Integer resource_id : itps.keySet()) {
+				updateCurrentStatusCache(resources.get(resource_id));
+			}
 
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
 			ret = RSVMain.exitcode_error;
+		} catch (IOException e) {
+			logger.error("IO Exception", e);
+			ret = RSVMain.exitcode_error;
 		}
 		
 		return ret;
+	}
+	
+	private void updateCurrentStatusCache(Resource r) throws SQLException, IOException 
+	{	
+		Calendar cal = Calendar.getInstance();
+		Date current_date = cal.getTime();
+		int currenttime = (int) (current_date.getTime()/1000);
+		int resource_id = r.getID();
+		
+		//load RRS				
+		RelevantRecordSet rrs = new RelevantRecordSet(resource_id, currenttime);
+			
+		//place holder for resource specific xml
+		String xml = "<?xml version=\"1.0\"?>\n";
+		xml += "<CurrentResourceStatus>";
+		xml += "<Timestamp>"+currenttime+"</Timestamp>";
+		
+		LSCType service_statues = new LSCType();
+		
+		//for each service..
+		xml += "<Services>";
+		ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
+		for(Integer service_id : services) {
+			xml += "<Service>";
+			xml += "<ServiceID>"+service_id+"</ServiceID>";
+			Service s = oim.getService(service_id);
+			xml += "<ServiceName>"+s.getName()+"</ServiceName>";					
+			xml += "<ServiceDescription>"+s.getDescription()+"</ServiceDescription>";	
+			
+			ArrayList<Integer> critical_metrics = oim.getCriticalMetrics(service_id);
+			ArrayList<Integer> non_critical_metrics = oim.getNonCriticalMetrics(service_id);
+		
+			//find service status ...
+			ServiceStatus status = null;
+			Downtime down = getDownTime(resource_id, service_id, currenttime);
+			if(down != null) {
+				//this service is in downtime
+				status = new ServiceStatus();
+				status.status_id = Status.DOWNTIME;
+				status.note = "This service is currently under maintenance. ";
+				status.note += "Maintenance Summary: " + down.getSummary();
+				Date from = new Date(down.getStartTime()*1000L);
+				Date to = new Date(down.getEndTime()*1000L);
+				status.note += " (From " + from + " to " + to + ")";
+			} else {
+				//calculate service status
+				status = calculateServiceStatus(critical_metrics, rrs, currenttime);			
+			}
+			service_statues.put(service_id, status);	
+			xml += "<Status>"+Status.getStatus(status.status_id)+"</Status>";
+			xml += "<Note>"+status.note+"</Note>";	
+			
+			//output critical metric details
+			xml += "<CriticalMetrics>";
+			xml += outputMetricXML(critical_metrics, rrs);
+			xml += "</CriticalMetrics>";
+			
+			//output non-critical metric details
+			xml += "<NonCriticalMetrics>";
+			xml += outputMetricXML(non_critical_metrics, rrs);
+			xml += "</NonCriticalMetrics>";
+			
+			xml += "</Service>";
+		}
+		xml += "</Services>";
+		
+		//calculate resource status
+		ResourceStatus rstatus = calculateResourceStatus(service_statues);
+		
+		String resource_detail = "";
+		resource_detail += "<ResourceID>"+resource_id+"</ResourceID>";
+		resource_detail += "<ResourceName>"+r.getName()+"</ResourceName>";
+		resource_detail += "<Status>"+Status.getStatus(rstatus.status_id)+"</Status>";	
+		resource_detail += "<Note>"+rstatus.note+"</Note>";
+		xml += resource_detail;
+		
+		xml += "</CurrentResourceStatus>";
+		
+		//output resource specific XML to configured location
+    	String filename_template = RSVMain.conf.getProperty(Configuration.current_resource_status_xml_cache);
+    	String filename = filename_template.replaceFirst("<ResourceID>", String.valueOf(resource_id));
+    	
+    	//update A&R
+    	//TODO---
+
+    	FileWriter fstream = new FileWriter(filename);
+    	BufferedWriter out = new BufferedWriter(fstream);
+    	out.write(xml);
+    	out.close();
+	}
+	
+	private String outputMetricXML(ArrayList<Integer> critical_metrics, RelevantRecordSet rrs) throws SQLException
+	{
+		String xml = "";
+		for(Integer metric_id : critical_metrics) {
+			Metric m = oim.getMetric(metric_id);
+			
+			xml += "<Metric>";
+			xml += "<MetricID>"+metric_id+"</MetricID>";
+			xml += "<MetricName>"+m.getName()+"</MetricName>";
+			xml += "<MetricCommonName>"+m.getCommonName()+"</MetricCommonName>";
+			xml += "<MetricDescription>"+m.getDescription()+"</MetricDescription>";
+			xml += "<MetricFreshFor>"+m.getFreshFor()+"</MetricFreshFor>";
+			
+			MetricData md = rrs.getCurrent(metric_id);
+			
+			if(md == null) {
+				xml += "<Status/>";
+				xml += "<Timestamp/>";
+				xml += "<Detail/>";			
+				xml += "<MetricDataID/>";
+			} else {
+				xml += "<Status>"+Status.getStatus(md.getStatusID())+"</Status>";
+				xml += "<Timestamp>"+md.getTimestamp()+"</Timestamp>";
+				xml += "<Detail><![CDATA["+md.fetchDetail()+"]]></Detail>";
+				xml += "<MetricDataID>"+md.getID()+"</MetricDataID>";
+			}
+			xml += "</Metric>";
+		}
+		return xml;
+	}
+	
+	private Downtime getDownTime(int resource_id, int service_id, int timestamp) throws SQLException 
+	{
+		ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
+		if(downtimes != null) {
+			for(Downtime downtime : downtimes) {
+				//TODO - check boundary case policies.
+				if(downtime.getStartTime() < timestamp && downtime.getEndTime() > timestamp) {
+					ArrayList<Integer/*service_id*/> services = downtime.getServiceIDs();
+					if(services.contains(service_id)) {
+						return downtime;
+					}
+				}
+			}
+		}	
+		return null;
 	}
 	
 	//from a list of metricdata, add dummymetricdata where the metricdata expires.

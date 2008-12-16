@@ -21,7 +21,7 @@ import rsv.process.model.record.ServiceStatus;
 import rsv.process.model.record.Status;
 
 public class RSVAvailability implements RSVProcess {
-	private static final Logger logger = Logger.getLogger(RSVCache.class);
+	private static final Logger logger = Logger.getLogger(RSVAvailability.class);
 	OIMModel oim = new OIMModel();
 	ServiceAR sar = new ServiceAR();
 	StatusChangeModel scm = new StatusChangeModel();
