@@ -104,7 +104,6 @@ public class RSVOverallStatus implements RSVProcess {
 					
 					//C. Retrieve Initial Relevant Record Set (RRS)
 					RelevantRecordSet initial_rrs = new RelevantRecordSet(resource_id, tp.start);
-					initial_rrs.dump();
 					
 					//D1. Pull metricdata inside ITP
 					MetricDataModel mdm = new MetricDataModel();
@@ -114,21 +113,14 @@ public class RSVOverallStatus implements RSVProcess {
 
 					//D2. Calculate Service Status Changes inside this ITP.
 					service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
-					//now, the statuschange could contain status changes due to initial_rrs which could occur before tp.start
-					//We need to remove those or we will have duplicates.
 					for(ServiceStatus status : service_statuschanges) {
-						if(status.timestamp >= tp.start) {
-							all_service_statuschanges.add(status);
-						}
+						all_service_statuschanges.add(status);
 					}
 					
 					//D3. Calculate Resource Status Changes.
 					resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
-					//filter same reason as service status
 					for(ResourceStatus status : resource_statuschanges) {
-						if(status.timestamp >= tp.start) {
-							all_resource_statuschanges.add(status);
-						}
+						all_resource_statuschanges.add(status);
 					}
 				}
 			}
@@ -152,11 +144,26 @@ public class RSVOverallStatus implements RSVProcess {
 				lm.updateLastMetricDataIDProcessed(last_mdid);	   
 			}
 			
-			//Step 5. Recalculate current status cache - assuming that the latest status has been changed for this resource
-			logger.debug("Updating current status cache files on " + itps.size() + " resources.");
+			//Step 5. Recalculate current status cache if there is any update *near* currenttime
+			Calendar cal = Calendar.getInstance();
+			Date current_date = cal.getTime();
+			int currenttime = (int) (current_date.getTime()/1000);
 			ResourcesType resources = oim.getResources();
 			for(Integer resource_id : itps.keySet()) {
-				updateCurrentStatusCache(resources.get(resource_id));
+				TimeRange itp = itps.get(resource_id);
+				ArrayList<TimePeriod> ranges = itp.getRanges();
+				boolean calculate = false;
+				for(TimePeriod tp : ranges) {
+					//if tp.end is *close* to currenttime, then re-calculate
+					if(tp.end >= currenttime - 600) {
+						calculate = true;
+						break;
+					}
+				}
+				if(calculate) {
+					logger.debug("Updating current status cache files for resource " + resource_id);
+					updateCurrentStatusCache(resources.get(resource_id), currenttime);
+				}
 			}
 
 		} catch (SQLException e) {
@@ -170,11 +177,8 @@ public class RSVOverallStatus implements RSVProcess {
 		return ret;
 	}
 	
-	private void updateCurrentStatusCache(Resource r) throws SQLException, IOException 
+	private void updateCurrentStatusCache(Resource r, int currenttime) throws SQLException, IOException 
 	{	
-		Calendar cal = Calendar.getInstance();
-		Date current_date = cal.getTime();
-		int currenttime = (int) (current_date.getTime()/1000);
 		int resource_id = r.getID();
 		
 		//load RRS				
@@ -310,8 +314,6 @@ public class RSVOverallStatus implements RSVProcess {
 	//from a list of metricdata, add dummymetricdata where the metricdata expires.
 	private ArrayList<MetricData> addExpirationTriggers(RelevantRecordSet initial_rrs, ArrayList<MetricData> mds, TimePeriod tp) throws SQLException 
 	{
-		//logger.debug("endtime " + endtime);
-		
 		//create list of expiration_points that we will need to insert as DummyMetricData
 		TreeSet<Integer/*timestamp*/> expiration_points = new TreeSet<Integer>();
 		
@@ -332,7 +334,7 @@ public class RSVOverallStatus implements RSVProcess {
 			}
 		}
 		
-		//Now, optimize the expiration list by removing unneccessary "possible" expiration points.
+		//merge expiration points and mds and create our final mds_with_dummy list.
 		ArrayList<MetricData> mds_with_dummy = new ArrayList<MetricData>();
 		Iterator<Integer> ep_it = expiration_points.iterator();
 		Iterator<MetricData> md_it = mds.iterator();
