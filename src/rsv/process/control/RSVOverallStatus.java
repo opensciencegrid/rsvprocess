@@ -104,12 +104,13 @@ public class RSVOverallStatus implements RSVProcess {
 					
 					//C. Retrieve Initial Relevant Record Set (RRS)
 					RelevantRecordSet initial_rrs = new RelevantRecordSet(resource_id, tp.start);
+					initial_rrs.dump();
 					
 					//D1. Pull metricdata inside ITP
 					MetricDataModel mdm = new MetricDataModel();
 					ArrayList<MetricData> mds = mdm.getMeticData(resource_id, tp.start, tp.end);//sorted by timestamp
 					//add dummy metric data at expiration time for each metric data to recalculate status when metric expires.
-					ArrayList<MetricData> mds_with_dummy = addExpirationTriggers(initial_rrs, mds, tp.end);
+					ArrayList<MetricData> mds_with_dummy = addExpirationTriggers(initial_rrs, mds, tp);
 
 					//D2. Calculate Service Status Changes inside this ITP.
 					service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
@@ -307,7 +308,7 @@ public class RSVOverallStatus implements RSVProcess {
 	}
 	
 	//from a list of metricdata, add dummymetricdata where the metricdata expires.
-	private ArrayList<MetricData> addExpirationTriggers(RelevantRecordSet initial_rrs, ArrayList<MetricData> mds, Integer endtime) throws SQLException 
+	private ArrayList<MetricData> addExpirationTriggers(RelevantRecordSet initial_rrs, ArrayList<MetricData> mds, TimePeriod tp) throws SQLException 
 	{
 		//logger.debug("endtime " + endtime);
 		
@@ -317,7 +318,7 @@ public class RSVOverallStatus implements RSVProcess {
 		//add from initial_rrs
 		for(MetricData md : initial_rrs.getAllMetricData()) {
 			int e = md.getTimestamp() + md.getFreshFor();
-			if(e <= endtime) {
+			if(e >= tp.start && e <= tp.end) {
 				expiration_points.add(e);
 			}
 		}	
@@ -325,7 +326,7 @@ public class RSVOverallStatus implements RSVProcess {
 		//add from mds
 		for(MetricData md : mds) {
 			int e = md.getTimestamp() + md.getFreshFor();
-			if(e <= endtime) {
+			if(e >= tp.start && e <= tp.end) {
 				expiration_points.add(e);
 				//logger.debug("candidate at " + md.getTimestamp() + " metric_id: " + md.getID() + " expired at : " + e);
 			}
@@ -376,7 +377,6 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 		}
-		
 		//process last ones
 		if(ep_next != null) {
 			DummyMetricData dummy = new DummyMetricData(ep_next);
