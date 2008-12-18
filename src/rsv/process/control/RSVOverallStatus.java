@@ -64,9 +64,9 @@ public class RSVOverallStatus implements RSVProcess {
 				if(args[1].compareTo("all") == 0) {
 					ResourcesType resources = oim.getResources();
 					for(Integer resource_id : resources.keySet()) {
-						//if(resource_id %2 != 0) {
+						if(resource_id %2 != 1) {
 							itps.put(resource_id, tr);
-						//}
+						}
 					}
 				} else {
 					itps.put(Integer.parseInt(args[1]), tr);
@@ -144,26 +144,14 @@ public class RSVOverallStatus implements RSVProcess {
 				lm.updateLastMetricDataIDProcessed(last_mdid);	   
 			}
 			
-			//Step 5. Recalculate current status cache if there is any update *near* currenttime
+			//Step 5. Recalculate current status cache for resources that we have dealt with
 			Calendar cal = Calendar.getInstance();
 			Date current_date = cal.getTime();
 			int currenttime = (int) (current_date.getTime()/1000);
 			ResourcesType resources = oim.getResources();
+			logger.debug("Updating current status cache files for " + itps.size() + "resources.");
 			for(Integer resource_id : itps.keySet()) {
-				TimeRange itp = itps.get(resource_id);
-				ArrayList<TimePeriod> ranges = itp.getRanges();
-				boolean calculate = false;
-				for(TimePeriod tp : ranges) {
-					//if tp.end is *close* to currenttime, then re-calculate
-					if(tp.end >= currenttime - 600) {
-						calculate = true;
-						break;
-					}
-				}
-				if(calculate) {
-					logger.debug("Updating current status cache files for resource " + resource_id);
-					updateCurrentStatusCache(resources.get(resource_id), currenttime);
-				}
+				updateCurrentStatusCache(resources.get(resource_id), currenttime);
 			}
 
 		} catch (SQLException e) {
