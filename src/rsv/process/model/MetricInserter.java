@@ -19,10 +19,10 @@ public class MetricInserter extends RSVDatabase {
 	public MetricInserter()
 	{
 		try {
-			String sql = "insert into rsvextra.metricdata (id, timestamp, resource_id, metric_id, metric_status_id) values (?,?,?,?,?)";
+			String sql = "insert into rsvextra.metricdata (id, timestamp, resource_id, metric_id, metric_status_id, detail_id) values (?,?,?,?,?,?)";
 		    stmt_data = RSVDatabase.db.prepareStatement(sql);
 		    
-			sql = "insert into rsvextra.metricdetail (metricdata_id, detail) values (?, ?)";
+			sql = "insert into rsvextra.metricdetail (id, detail) values (?, ?)";
 		    stmt_detail = RSVDatabase.db.prepareStatement(sql);
 
 		} catch (SQLException e) {
@@ -55,6 +55,7 @@ public class MetricInserter extends RSVDatabase {
 		stmt_data.setInt(3, resource_id);
 		stmt_data.setInt(4, metric_id);
 		stmt_data.setInt(5, status_id);
+		stmt_data.setInt(6, id);
 		stmt_data.addBatch();
 		
 		stmt_detail.setInt(1, id);

@@ -43,11 +43,13 @@ public class MetricDataModel extends RSVDatabase {
         return ret;
 	}
 	
-	public String getDetail(int id) throws SQLException {
+	public String getDetail(int detail_id) throws SQLException {
         Statement stmt = RSVDatabase.db.createStatement();
-        ResultSet rs = stmt.executeQuery("select detail from metricdetail where metricdata_id = " + id);
-        rs.next();
-        return rs.getString(1);
+        ResultSet rs = stmt.executeQuery("select detail from metricdetail where id = " + detail_id);
+        if(rs.next()) {
+        	return rs.getString(1);
+        }
+        return null;
 	}
 	
 	public ResultSet getMetricDataRecords(int start_dbid, int limit) throws SQLException

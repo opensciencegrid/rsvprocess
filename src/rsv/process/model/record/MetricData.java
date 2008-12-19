@@ -19,6 +19,7 @@ public class MetricData {
 	protected int resource_id;
 	protected int timestamp;
 	protected int status_id;
+	protected int detail_id;
 	
 	private String note = "";
 	
@@ -29,6 +30,7 @@ public class MetricData {
 			resource_id = rs.getInt("resource_id");
 			status_id = rs.getInt("metric_status_id");
 			timestamp = rs.getInt("timestamp");
+			detail_id = rs.getInt("detail_id");
 		} catch (SQLException e) {
 			logger.error("Failed to inialize MetricData record from given resultset", e);
 		}
@@ -43,10 +45,11 @@ public class MetricData {
 	public int getResourceID() { return resource_id; }	
 	public int getMetricID() { return metric_id; }
 	public int getTimestamp() { return timestamp; }	
+	public int getDetailID() { return detail_id; }	
 	
 	public String fetchDetail() throws SQLException {
 		MetricDataModel mdm = new MetricDataModel();
-		return mdm.getDetail(getID());
+		return mdm.getDetail(getDetailID());
 	}
 
 	public int getFreshFor() throws SQLException {
