@@ -144,16 +144,16 @@ public class RSVOverallStatus implements RSVProcess {
 				lm.updateLastMetricDataIDProcessed(last_mdid);	   
 			}
 			
-			//Step 5. Recalculate current status cache for resources that we have dealt with
+			//Step 5. Recalculate current status cache for all resources
 			Calendar cal = Calendar.getInstance();
 			Date current_date = cal.getTime();
 			int currenttime = (int) (current_date.getTime()/1000);
 			ResourcesType resources = oim.getResources();
-			logger.debug("Updating current status cache files for " + itps.size() + "resources.");
-			for(Integer resource_id : itps.keySet()) {
+			logger.debug("Updating current status cache files for " + resources.size() + " resources.");
+			for(Integer resource_id : resources.keySet()) {
 				updateCurrentStatusCache(resources.get(resource_id), currenttime);
 			}
-
+			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
 			ret = RSVMain.exitcode_error;

@@ -93,7 +93,9 @@ public class RSVMain {
 			showUsage();
 			return RSVMain.exitcode_invalid_arg;
 		} else {
-			return process.run(args);
+			int ret = process.run(args);
+			logger.info("Process Ended with return code " + ret);
+			return ret;
 		}
 	}
 	
