@@ -70,12 +70,6 @@ public class RSVAvailability implements RSVProcess {
 			int currenttime = (int) (current_date.getTime()/1000);
 			int total_time = end_time - start_time;
 			
-			//String allxml = "<?xml version=\"1.0\"?>\n";
-			//allxml += "<ARCache>";
-			//allxml += "<CalculateTimestamp>"+currenttime+"</CalculateTimestamp>";
-			//allxml += "<ReportStartTime>"+start_time+"</ReportStartTime>";			
-			//allxml += "<ReportEndTime>"+end_time+"</ReportEndTime>";	
-			//allxml += "<ReportTotalTime>"+total_time+"</ReportTotalTime>";	
 			logger.info("Calculating Availability and reliability for all resources/services");
 			
 			Date start_date = new Date();
@@ -114,10 +108,8 @@ public class RSVAvailability implements RSVProcess {
 					ArrayList<ServiceStatus> changes = scm.getServiceStatusChanges(resource_id, service_id, start_time, end_time);
 					int available_time = calculateUptime(init_status, changes, start_time, end_time);
 					logger.debug("\t Available Time: " + available_time);
-					//allxml += "<AvailableTime>"+available_time+"</AvailableTime>";	
 					
 					double availability = ((double)available_time/total_time);
-					//allxml += "<Availability>"+availability+"</Availability>";	
 					
 					int reliable_time;
 					if(downtimes != null) {
@@ -132,40 +124,15 @@ public class RSVAvailability implements RSVProcess {
  						//if there are no downtime info..
  						reliable_time = available_time;
  					}
-					//allxml += "<ReliableTime>"+reliable_time+"</ReliableTime>";	
 					
 					double reliability = ((double)reliable_time/total_time);
-					//allxml += "<Reliability>"+reliability+"</Reliability>";	
-					
-					//allxml += "</Service>";
 					logger.debug("\t Reliable Time: " + reliable_time);
 					
 					if(sar != null) {
 						sar.insert(resource_id, service_id, availability, reliability, start_time);
 					}
 				}
-				//allxml += "</Services>";
-				//allxml += "</Resource>";
 			}
-			//allxml += "</Resources>";
-			//allxml += "</ARCache>";
-			
-			/*
-			//output all AR status cache
-			String filename_template = RSVMain.conf.getProperty(Configuration.aandr_cache);
-			filename_template = filename_template.replaceFirst("<start_time>", String.valueOf(start_time));
-	    	String filename = filename_template.replaceFirst("<end_time>", String.valueOf(end_time));
-	    	FileWriter fstream;
-			try {
-				fstream = new FileWriter(filename);
-		    	BufferedWriter out = new BufferedWriter(fstream);
-		    	out.write(allxml);
-		    	out.close();
-		    } catch (IOException e) {
-	    		logger.error("Caught exception while outputing xml cache: " + filename, e);
-				ret = RSVMain.exitcode_error;
-			}
-			*/
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
 			ret = RSVMain.exitcode_error;

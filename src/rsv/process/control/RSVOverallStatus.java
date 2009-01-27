@@ -199,11 +199,11 @@ public class RSVOverallStatus implements RSVProcess {
 				//this service is in downtime
 				status = new ServiceStatus();
 				status.status_id = Status.DOWNTIME;
-				status.note = "This service is currently under maintenance. ";
-				status.note += "Maintenance Summary: " + down.getSummary();
+				status.note = "This service is currently under maintenance.\n";
+				status.note += "Maintenance Summary: " + down.getSummary()+"\n";
 				Date from = new Date(down.getStartTime()*1000L);
 				Date to = new Date(down.getEndTime()*1000L);
-				status.note += " (From " + from + " to " + to + ")";
+				status.note += " \n(From " + from + " to " + to + ")";
 			} else {
 				//calculate service status
 				status = calculateServiceStatus(critical_metrics, rrs, currenttime);			
@@ -499,8 +499,6 @@ public class RSVOverallStatus implements RSVProcess {
 		} else if(expired > 0) {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = expired + " of " + critical.size() + " critical metrics have expired.";
-			//reset effective time to be first_expired_time
-			//new_status.timestamp = first_expired_time;
 		} else if(nullmetric > 0) {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = nullmetric + " of " + critical.size() + " critical metrics have not been reported.";
@@ -555,7 +553,6 @@ public class RSVOverallStatus implements RSVProcess {
 						" overall status has changed to " + rs.status_id + 
 						" at " + rs.timestamp +
 						" reason: " + rs.note);
-						//" service responsible: " + rs.responsible_service_id);
 			}
 		}
 		
