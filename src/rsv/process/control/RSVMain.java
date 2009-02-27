@@ -2,6 +2,7 @@ package rsv.process.control;
 
 import org.apache.log4j.Logger;
 
+import rsv.process.lib.SendMail;
 import rsv.process.model.GratiaDatabase;
 import rsv.process.model.RSVDatabase;
 import java.io.FileInputStream;
@@ -45,7 +46,7 @@ public class RSVMain {
 					} catch (Exception e) {
 						logger.error("Unhandled exception" , e);
 						//TODO - send email to GOC?
-						ret = exitcode_error;
+						ret = exitcode_warning;
 					}
 					fl.release();
 				} else {
@@ -56,9 +57,11 @@ public class RSVMain {
 			}
 		} catch (FileNotFoundException e) {
 			logger.error("rsvprocess.conf not found in currernt directory.", e);
+			SendMail.sendErrorEmail(e);
 			ret = exitcode_error;
 		} catch (IOException e) {
 			logger.error("Failed to read rsvprocess.conf", e);
+			SendMail.sendErrorEmail(e);
 			ret = exitcode_error;
 		}
 		
