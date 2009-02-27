@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -87,8 +89,8 @@ public class RSVOverallStatus implements RSVProcess {
 			//Step 2: For each resource in itp...
 			for(Integer resource_id : itps.keySet()) {
 				
-				ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
-				ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();	
+				//ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
+				//ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();	
 				TimeRange itp = itps.get(resource_id);
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				
@@ -112,16 +114,12 @@ public class RSVOverallStatus implements RSVProcess {
 					ArrayList<MetricData> mds_with_dummy = addExpirationTriggers(initial_rrs, mds, tp);
 
 					//D2. Calculate Service Status Changes inside this ITP.
-					service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
-					for(ServiceStatus status : service_statuschanges) {
-						all_service_statuschanges.add(status);
-					}
+					ArrayList<ServiceStatus> service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
+					all_service_statuschanges.addAll(service_statuschanges);
 					
 					//D3. Calculate Resource Status Changes.
-					resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
-					for(ResourceStatus status : resource_statuschanges) {
-						all_resource_statuschanges.add(status);
-					}
+					ArrayList<ResourceStatus> resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
+					all_resource_statuschanges.addAll(resource_statuschanges);
 				}
 			}
 			
@@ -199,11 +197,11 @@ public class RSVOverallStatus implements RSVProcess {
 				//this service is in downtime
 				status = new ServiceStatus();
 				status.status_id = Status.DOWNTIME;
-				status.note = "This service is currently under maintenance. ";
-				status.note += "Maintenance Summary: " + down.getSummary();
+				status.note = "This service is currently under maintenance.\n";
+				status.note += "Maintenance Summary: " + down.getSummary()+"\n";
 				Date from = new Date(down.getStartTime()*1000L);
 				Date to = new Date(down.getEndTime()*1000L);
-				status.note += " (From " + from + " to " + to + ")";
+				status.note += " \n(From " + from + " to " + to + ")";
 			} else {
 				//calculate service status
 				status = calculateServiceStatus(critical_metrics, rrs, currenttime);			
@@ -499,8 +497,6 @@ public class RSVOverallStatus implements RSVProcess {
 		} else if(expired > 0) {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = expired + " of " + critical.size() + " critical metrics have expired.";
-			//reset effective time to be first_expired_time
-			//new_status.timestamp = first_expired_time;
 		} else if(nullmetric > 0) {
 			new_status.status_id = Status.UNKNOWN;
 			new_status.note = nullmetric + " of " + critical.size() + " critical metrics have not been reported.";
@@ -555,7 +551,6 @@ public class RSVOverallStatus implements RSVProcess {
 						" overall status has changed to " + rs.status_id + 
 						" at " + rs.timestamp +
 						" reason: " + rs.note);
-						//" service responsible: " + rs.responsible_service_id);
 			}
 		}
 		
