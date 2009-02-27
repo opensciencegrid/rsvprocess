@@ -51,7 +51,6 @@ public class RSVMain {
 					fl.release();
 				} else {
 					System.out.println("Failed to obtain filelock on " + lock_filename);
-					ret = exitcode_error;
 				}
 				fos.close();
 			}
