@@ -29,7 +29,7 @@ public class SendMail {
 		
 		Properties props = new Properties();
 		props.put("mail.smtp.host", "localhost");
-		props.put("mail.smtp.port", "465");
+		props.put("mail.smtp.port", "25");
 		
 		Session mailSession = Session.getDefaultInstance(props);
 		Message simpleMessage = new MimeMessage(mailSession);
