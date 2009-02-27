@@ -4,5 +4,11 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.6-bin.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="lib/mail.jar"/>
+	<classpathentry kind="lib" path="lib/javamail-lib/dsn.jar"/>
+	<classpathentry kind="lib" path="lib/javamail-lib/imap.jar"/>
+	<classpathentry kind="lib" path="lib/javamail-lib/mailapi.jar"/>
+	<classpathentry kind="lib" path="lib/javamail-lib/pop3.jar"/>
+	<classpathentry kind="lib" path="lib/javamail-lib/smtp.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

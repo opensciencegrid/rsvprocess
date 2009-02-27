@@ -1,5 +1,6 @@
 package rsv.process.control;
 
+import rsv.process.lib.SendMail;
 import rsv.process.model.GratiaModel;
 import rsv.process.model.MetricInserter;
 import rsv.process.model.OIMModel;
@@ -121,8 +122,8 @@ public class RSVPreprocess implements RSVProcess {
 			logger.info("Updated process log with last dbid of " + last_dbid);
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			logger.error("SQL Error", e);
+			SendMail.sendErrorEmail(e);
 			ret = RSVMain.exitcode_error;
 		}
 
