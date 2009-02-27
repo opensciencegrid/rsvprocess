@@ -16,7 +16,7 @@ public class StatusChangeModel extends RSVDatabase {
 	private static final Logger logger = Logger.getLogger(StatusChangeModel.class);	
 	
 	@SuppressWarnings("serial")
-	public static class LSCType extends TreeMap<Integer, ServiceStatus> {}//<service_id, status_is>
+	public static class LSCType extends TreeMap<Integer, ServiceStatus> {}//LSC - Last Status Change <service_id, status_is>
 	public LSCType getLastStatusChange_Service(int resource_id, Integer timestamp) throws SQLException {
 		LSCType ret = new LSCType();
         Statement stmt = RSVDatabase.db.createStatement();

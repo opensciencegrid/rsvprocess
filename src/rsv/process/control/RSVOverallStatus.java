@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -87,8 +89,8 @@ public class RSVOverallStatus implements RSVProcess {
 			//Step 2: For each resource in itp...
 			for(Integer resource_id : itps.keySet()) {
 				
-				ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
-				ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();	
+				//ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
+				//ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();	
 				TimeRange itp = itps.get(resource_id);
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				
@@ -112,16 +114,12 @@ public class RSVOverallStatus implements RSVProcess {
 					ArrayList<MetricData> mds_with_dummy = addExpirationTriggers(initial_rrs, mds, tp);
 
 					//D2. Calculate Service Status Changes inside this ITP.
-					service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
-					for(ServiceStatus status : service_statuschanges) {
-						all_service_statuschanges.add(status);
-					}
+					ArrayList<ServiceStatus> service_statuschanges = calculateServiceStatusChanges(resource_id, initial_service_statuses, initial_rrs, mds_with_dummy);
+					all_service_statuschanges.addAll(service_statuschanges);
 					
 					//D3. Calculate Resource Status Changes.
-					resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
-					for(ResourceStatus status : resource_statuschanges) {
-						all_resource_statuschanges.add(status);
-					}
+					ArrayList<ResourceStatus> resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
+					all_resource_statuschanges.addAll(resource_statuschanges);
 				}
 			}
 			
