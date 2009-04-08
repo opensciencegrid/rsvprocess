@@ -192,22 +192,24 @@ public class RSVOverallStatus implements RSVProcess {
 			
 			ArrayList<Integer> critical_metrics = oim.getCriticalMetrics(service_id);
 			ArrayList<Integer> non_critical_metrics = oim.getNonCriticalMetrics(service_id);
-		
-			//find service status ...
-			ServiceStatus status = null;
+
+			//calculate service status
+			ServiceStatus status = calculateServiceStatus(critical_metrics, rrs, currenttime);	
+			
+			//is this in downtime?
 			Downtime down = getDownTime(resource_id, service_id, currenttime);
 			if(down != null) {
-				//this service is in downtime
-				status = new ServiceStatus();
-				status.status_id = Status.DOWNTIME;
-				status.note = "This service is currently under maintenance.\n";
-				status.note += "Maintenance Summary: " + down.getSummary()+"\n";
+				xml += "<DowntimeNote>";
+				xml += "<InternalStatus>"+Status.getStatus(status.status_id)+"</InternalStatus>";
+				xml += "<Note>This service is currently under maintenance</Note>";
+				xml += "<MaintenanceSummary>" + down.getSummary()+"</MaintenanceSummary>";
 				Date from = new Date(down.getStartTime()*1000L);
 				Date to = new Date(down.getEndTime()*1000L);
-				status.note += " \n(From " + from + " to " + to + ")";
-			} else {
-				//calculate service status
-				status = calculateServiceStatus(critical_metrics, rrs, currenttime);			
+				xml += "<From>" + from + "</From><To>" + to + "</To>";
+				xml += "</DowntimeNote>";
+				
+				//override status with DOWMTIME
+				status.status_id = Status.DOWNTIME;
 			}
 			service_statues.put(service_id, status);	
 			xml += "<Status>"+Status.getStatus(status.status_id)+"</Status>";
