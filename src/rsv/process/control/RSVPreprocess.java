@@ -5,7 +5,6 @@ import rsv.process.model.GratiaModel;
 import rsv.process.model.MetricInserter;
 import rsv.process.model.OIMModel;
 import rsv.process.model.ProcessLogModel;
-import rsv.process.model.RecentMetricInserter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,7 +24,6 @@ public class RSVPreprocess implements RSVProcess {
 		OIMModel oim = new OIMModel();
 		GratiaModel grartia = new GratiaModel();	
 		MetricInserter mdetail = new MetricInserter();
-		RecentMetricInserter recent_detail = new RecentMetricInserter();
 		ProcessLogModel lm = new ProcessLogModel();
 		int maxrecords = Integer.parseInt(RSVMain.conf.getProperty(Configuration.preprocess_gratia_record_count));
 		
@@ -46,8 +44,6 @@ public class RSVPreprocess implements RSVProcess {
 				logger.warn("Found "+removed+" records (total) with dbid larger than what we see in process log. Removing them for data integrity.");
 			}
 			*/
-			//clear old record from recent_metric table
-			recent_detail.clearOldRecords();
 			
 			//get gratia records
 			logger.info("Pulling upto " + maxrecords + " records from Gratia.MetricRecord");
@@ -108,10 +104,7 @@ public class RSVPreprocess implements RSVProcess {
 	            
 	            //all good. request for insertions
 	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
-	            
-	            //store raw data to recent_metricdata table
-	            recent_detail.add(dbid, resourcefqdn, metricname, metricstatus, utimestamp, metricdetail);
-	            
+	         
 	            records_added++;
 	        }
 
@@ -126,8 +119,6 @@ public class RSVPreprocess implements RSVProcess {
 	        
 	        //now, let's commit all changes..
 			mdetail.commit();
-			recent_detail.commit();
-			
 			lm.updateLastGratiaIDProcessed(last_dbid);	 
 			
 			logger.info("Updated process log with last dbid of " + last_dbid);
