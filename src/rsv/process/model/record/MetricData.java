@@ -54,7 +54,11 @@ public class MetricData {
 
 	public int getFreshFor() throws SQLException {
 		OIMModel oim = new OIMModel();
-		return oim.lookupFreshFor(metric_id);
+		Integer i = oim.lookupFreshFor(metric_id);
+		if(i == null) {
+			logger.error("Metric ID: " +metric_id + " has no fresh for value (letting it null-pointer-ed)");
+		}
+		return i;
 	}
 	
 	public void addNote(String _note) {
