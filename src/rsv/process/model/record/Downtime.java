@@ -21,7 +21,7 @@ public class Downtime {
 	
 	public Downtime(ResultSet rs) {
 		try {
-			id = rs.getInt("downtime_id");
+			id = rs.getInt("id");
 			start_time = rs.getInt("unix_start_time");
 			end_time = rs.getInt("unix_end_time");
 			summary = rs.getString("downtime_summary");
