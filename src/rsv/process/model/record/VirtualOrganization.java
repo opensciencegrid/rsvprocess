@@ -21,8 +21,8 @@ public class VirtualOrganization {
 	
 	public VirtualOrganization(ResultSet rs) {
 		try {
-			vo_id = rs.getInt("vo_id");
-			short_name = rs.getString("short_name");
+			vo_id = rs.getInt("id");
+			short_name = rs.getString("name");
 			long_name = rs.getString("long_name");
 		} catch (SQLException e) {
 			logger.error("Failed to inialize VirtualOrganization record from given resultset", e);

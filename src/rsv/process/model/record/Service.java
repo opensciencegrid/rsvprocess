@@ -15,7 +15,7 @@ public class Service {
 	
 	public Service(ResultSet rs) {
 		try {
-			id = rs.getInt("service_id");
+			id = rs.getInt("id");
 			name = rs.getString("name");
 			description = rs.getString("description");
 		} catch (SQLException e) {

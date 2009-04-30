@@ -17,7 +17,7 @@ public class Metric {
 	
 	public Metric(ResultSet rs) {
 		try {
-			metric_id = rs.getInt("metric_id");
+			metric_id = rs.getInt("id");
 			name = rs.getString("name");
 			common_name = rs.getString("common_name");
 			description = rs.getString("description");

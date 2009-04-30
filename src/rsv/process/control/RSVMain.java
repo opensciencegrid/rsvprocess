@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import rsv.process.lib.SendMail;
 import rsv.process.model.GratiaDatabase;
+import rsv.process.model.OIMDatabase;
 import rsv.process.model.RSVDatabase;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -72,6 +73,7 @@ public class RSVMain {
 		printErrorCode(ret);
 		RSVDatabase.closeDB();
 		GratiaDatabase.closeDB();
+		OIMDatabase.closeDB();
 		
 		System.exit(ret);
 	}
@@ -111,7 +113,6 @@ public class RSVMain {
 		System.out.println("\t\t optional arguments: [resource_id] [start_time] [end_time] -- " + 
 					"Causes status recalculation on specific resource and specific time period. " + 
 					"This will not update the processlog.");
-		System.out.println("\tcache - Current status cache update process");
 		System.out.println("\tavailability - Calculate Availability, Reliability Number for all resources / services and create xml cache");
 		System.out.println("\t\t[start_time] [end_time]");
 		System.out.println("\tvomatrix - VO Matrix Processing");
