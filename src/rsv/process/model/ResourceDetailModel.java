@@ -11,7 +11,7 @@ public class ResourceDetailModel extends RSVDatabase {
 	public void update(int resource_id, int metric_id, String xml) throws SQLException
 	{
 		//find current record
-		String sql = "select id from resource_detail where resource_id = ? and metric_id = ?";
+		String sql = "select * from resource_detail where resource_id = ? and metric_id = ?";
 	    PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);
 		stmt.setInt(1, resource_id);
 	    stmt.setInt(2, metric_id);
