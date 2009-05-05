@@ -2,12 +2,8 @@ package rsv.process.model.record;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-
 import org.apache.log4j.Logger;
-
 import rsv.process.model.MetricDataModel;
-import rsv.process.model.RSVDatabase;
 import rsv.process.model.OIMModel;
 
 public class MetricData {

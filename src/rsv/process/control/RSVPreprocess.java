@@ -5,10 +5,12 @@ import rsv.process.model.GratiaModel;
 import rsv.process.model.MetricInserter;
 import rsv.process.model.OIMModel;
 import rsv.process.model.ProcessLogModel;
+import rsv.process.model.ResourceDetailModel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import rsv.process.Configuration;
@@ -24,6 +26,7 @@ public class RSVPreprocess implements RSVProcess {
 		OIMModel oim = new OIMModel();
 		GratiaModel grartia = new GratiaModel();	
 		MetricInserter mdetail = new MetricInserter();
+		ResourceDetailModel resourcedetail = new ResourceDetailModel();
 		ProcessLogModel lm = new ProcessLogModel();
 		int maxrecords = Integer.parseInt(RSVMain.conf.getProperty(Configuration.preprocess_gratia_record_count));
 		
@@ -79,6 +82,18 @@ public class RSVPreprocess implements RSVProcess {
 	            	count_invalid_metric_id++;
 	            	continue;
 	            }
+	            ArrayList<Integer/*service_id*/> services = oim.getServicesCriticalFor(metric_id);
+	            if(services.size() > 0) {
+	            	//this metric is critical for at least one service. check the gathered at
+	            	String gatheredat = rs.getString("GatheredAt");
+	            	if(!gatheredat.matches("rsv-client\\d.grid.iu.edu")) {
+	            		//critical metric must come from our central server reject..
+	            		count_invalid_metric_id++;
+	            		continue;
+	            	}
+	            	//TODO - we need to store critical metric somewhere else so that we can 
+	            	//be sure that metric really came from GatheredAt
+	            }
 	            
 	            //lookup status_id
 	            String metricstatus = rs.getString("MetricStatus");
@@ -103,8 +118,11 @@ public class RSVPreprocess implements RSVProcess {
 	            }
 	            
 	            //all good. request for insertions
-	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
-	         
+	            if(metric_id == 25) {
+	            	resourcedetail.update(resource_id, metric_id, metricdetail);
+	            } else {
+	            	mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
+	            }
 	            records_added++;
 	        }
 
