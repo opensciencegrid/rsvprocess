@@ -31,6 +31,7 @@ public class ResourceDetailModel extends RSVDatabase {
 		    stmt.setInt(2, metric_id);
 			stmt.setString(3, xml);
 		}
+        logger.info("Upserted resource_detail for resource " + resource_id + " for metric " + metric_id);
 		stmt.execute();		
 	}
 }
