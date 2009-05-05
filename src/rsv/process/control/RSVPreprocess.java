@@ -55,6 +55,7 @@ public class RSVPreprocess implements RSVProcess {
 			//error counters
 			int count_invalid_resource_id = 0;
 			int count_invalid_metric_id = 0;
+			int count_invalid_gatheredat = 0;
 			int count_invalid_status_id = 0;
 			int count_invalid_timestamp = 0;
 			int count_invalid_detail = 0;
@@ -88,7 +89,7 @@ public class RSVPreprocess implements RSVProcess {
 	            	String gatheredat = rs.getString("GatheredAt");
 	            	if(!gatheredat.matches("rsv-client\\d.grid.iu.edu")) {
 	            		//critical metric must come from our central server reject..
-	            		count_invalid_metric_id++;
+	            		count_invalid_gatheredat++;
 	            		continue;
 	            	}
 	            	//TODO - we need to store critical metric somewhere else so that we can 
@@ -118,8 +119,13 @@ public class RSVPreprocess implements RSVProcess {
 	            }
 	            
 	            //all good. request for insertions
-	            if(metric_id == 25) {
-	            	resourcedetail.update(resource_id, metric_id, metricdetail);
+	            if(metric_id == 0) { //0 = org.osg.general.remote-env
+	            	if(status_id == 1) { // 1 == ok
+	            		resourcedetail.update(resource_id, metric_id, metricdetail);
+	            	} else {
+	            		//store it to metric data (for now.. maybe a bad idea..)
+		            	mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
+	            	}
 	            } else {
 	            	mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
 	            }
@@ -131,6 +137,7 @@ public class RSVPreprocess implements RSVProcess {
 	        logger.info("Valid records being sent to MetricData/MetricDetail Tables: " + records_added);
 	        logger.info("\tRecords with invalid resource_id: " + count_invalid_resource_id);
 	        logger.info("\tRecords with invalid metric_id: " + count_invalid_metric_id);
+	        logger.info("\tRecords with count_invalid_gatheredat: " + count_invalid_gatheredat);
 	        logger.info("\tRecords with invalid status_id: " + count_invalid_status_id);
 	        logger.info("\tRecords with invalid timestamp: " + count_invalid_timestamp);
 	        logger.info("\tRecords with invalid detail: " + count_invalid_detail);
