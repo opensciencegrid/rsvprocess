@@ -54,7 +54,7 @@ public class MetricData {
 		if(i == null) {
 			logger.error("Metric ID: " +metric_id + " has no fresh for value (letting it null-pointer-ed)");
 		}
-		return i;
+		return 0; //good invalid value?
 	}
 	
 	public void addNote(String _note) {
