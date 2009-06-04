@@ -84,7 +84,7 @@ public class RSVPreprocess implements RSVProcess {
 	            	continue;
 	            }
 	            ArrayList<Integer/*service_id*/> services = oim.getServicesCriticalFor(metric_id);
-	            if(services.size() > 0) {
+	            if(services.contains(1) || services.contains(5)) {
 	            	//this metric is critical for at least one service. check the gathered at
 	            	String gatheredat = rs.getString("GatheredAt");
 	            	if(!gatheredat.matches("rsv-client\\d.grid.iu.edu")) {
@@ -150,7 +150,7 @@ public class RSVPreprocess implements RSVProcess {
 			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = RSVMain.exitcode_error;
 		}
 

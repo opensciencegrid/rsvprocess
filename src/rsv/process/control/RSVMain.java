@@ -58,15 +58,15 @@ public class RSVMain {
 			}
 		} catch (FileNotFoundException e) {
 			logger.error("rsvprocess.conf not found in currernt directory.", e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = exitcode_error;
 		} catch (IOException e) {
 			logger.error("Failed to read rsvprocess.conf", e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = exitcode_error;
 		} catch (Exception e) {
 			logger.error(e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = exitcode_error;			
 		}
 		

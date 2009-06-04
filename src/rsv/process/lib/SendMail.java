@@ -57,11 +57,11 @@ public class SendMail {
 		}		
 	}
 	
-	static public void sendErrorEmail(Exception e) {
+	static public void sendErrorEmail(String content) {
 		String from = "goc@opensciencegrid.org";
-		String to = "hayashis@indiana.edu";
-		String subject = "RSV Process Error";
-		String message = "RSV Process has detected an error\r\n" + e.getMessage();
+		String to = "oim-dev@opensciencegrid.org";
+		String subject = "OIM Error";
+		String message = "RSV Process has detected an error\r\n" + content;
 
 		SendMail sendMail = new SendMail(from, to, subject, message);
 		sendMail.send();

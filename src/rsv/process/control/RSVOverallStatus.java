@@ -155,11 +155,11 @@ public class RSVOverallStatus implements RSVProcess {
 			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = RSVMain.exitcode_error;
 		} catch (IOException e) {
 			logger.error("IO Exception", e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = RSVMain.exitcode_error;
 		}
 		
