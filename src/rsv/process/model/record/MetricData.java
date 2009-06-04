@@ -53,8 +53,9 @@ public class MetricData {
 		Integer i = oim.lookupFreshFor(metric_id);
 		if(i == null) {
 			logger.error("Metric ID: " +metric_id + " has no fresh for value (letting it null-pointer-ed)");
+			return 0; //good default value?
 		}
-		return 0; //good invalid value?
+		return i;
 	}
 	
 	public void addNote(String _note) {
