@@ -148,8 +148,11 @@ CREATE TABLE `statuschange_service` (
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
---
--- Current Database: `rsvextra`
---
 
-USE `rsvextra`;
+DROP TABLE IF EXISTS `resource_detail`;
+CREATE TABLE `resource_detail` (
+  `resource_id` varchar(45) NOT NULL,
+  `metric_id` varchar(45) NOT NULL,
+  `xml` text NOT NULL,
+  PRIMARY KEY  (`resource_id`,`metric_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

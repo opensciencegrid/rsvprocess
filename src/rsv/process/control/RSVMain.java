@@ -25,9 +25,10 @@ public class RSVMain {
 
 	public static void main(String[] args) {
 		int ret = exitcode_ok;		
-		logger.info("Initializing RSV Process");
-		conf = new Configuration();
 		try {
+			logger.info("Initializing RSV Process");
+			conf = new Configuration();
+			
 			conf.load(new FileInputStream("rsvprocess.conf"));
 			RSVMain app = new RSVMain();
 			
@@ -57,12 +58,16 @@ public class RSVMain {
 			}
 		} catch (FileNotFoundException e) {
 			logger.error("rsvprocess.conf not found in currernt directory.", e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = exitcode_error;
 		} catch (IOException e) {
 			logger.error("Failed to read rsvprocess.conf", e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = exitcode_error;
+		} catch (Exception e) {
+			logger.error(e);
+			SendMail.sendErrorEmail(e.getMessage());
+			ret = exitcode_error;			
 		}
 		
 		exit(ret);

@@ -2,12 +2,8 @@ package rsv.process.model.record;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-
 import org.apache.log4j.Logger;
-
 import rsv.process.model.MetricDataModel;
-import rsv.process.model.RSVDatabase;
 import rsv.process.model.OIMModel;
 
 public class MetricData {
@@ -57,6 +53,7 @@ public class MetricData {
 		Integer i = oim.lookupFreshFor(metric_id);
 		if(i == null) {
 			logger.error("Metric ID: " +metric_id + " has no fresh for value (letting it null-pointer-ed)");
+			return 0; //good default value?
 		}
 		return i;
 	}

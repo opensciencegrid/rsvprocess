@@ -247,24 +247,32 @@ public class OIMModel extends OIMDatabase {
 		if(list == null) return new ArrayList<Integer>();
 		return list;
 	}
-/*
-	public static class StatusType extends TreeMap<Integer, String> {}//<service_id, status_is>
-	private static StatusType cache_status_id2status = null;
-	public StatusType getStatus() throws SQLException {
-		if(cache_status_id2status == null) {
-			cache_status_id2status = new StatusType();
+	
+	//return list of service_ids that a given metric_id is critical for (inverse of getCriticalMetrics)
+	private static TreeMap<Integer/*metric_id*/, ArrayList<Integer/*service_id*/>> 
+		cache_servicecritical_metricids2serviceids = null;
+	public ArrayList<Integer> getServicesCriticalFor(Integer metric_id) throws SQLException{
+		if(cache_servicecritical_metricids2serviceids == null) {
+			cache_servicecritical_metricids2serviceids = new TreeMap<Integer, ArrayList<Integer>>();
 	        Statement stmt = OIMDatabase.db.createStatement();
-	        String sql = "select * from oim.resource_resource_group";
-	        ResultSet rs = stmt.executeQuery(sql);
+	        String sql = "select metric_id, service_id from metric_service where critical = 1";
+	        ResultSet rs = stmt.executeQuery(sql);		
 	        while(rs.next()) {
-	        	Integer id = rs.getInt("metric_status_id");
-	        	String desc = rs.getString("metric_status_description");
-	        	cache_status_id2status.put(id, desc);
+	        	Integer mid = rs.getInt("metric_id");
+	        	Integer sid = rs.getInt("service_id");
+	        	ArrayList<Integer> list = cache_servicecritical_metricids2serviceids.get(mid);
+	        	if(list == null) {
+	        		list = new ArrayList<Integer>();
+	        		cache_servicecritical_metricids2serviceids.put(mid, list);
+	        	}
+	        	list.add(sid);
 	        }
 		}
-        return cache_status_id2status;
+		ArrayList<Integer> list = cache_servicecritical_metricids2serviceids.get(metric_id);
+		if(list == null) return new ArrayList<Integer>();
+		return list;
 	}
-*/
+	
 	public static class MetricType extends TreeMap<Integer/*metric_id*/, Metric> {}
 	private static MetricType cache_status_id2metric = null;
 	public Metric getMetric(int metric_id) throws SQLException {

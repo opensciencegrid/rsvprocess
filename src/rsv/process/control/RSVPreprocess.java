@@ -5,10 +5,12 @@ import rsv.process.model.GratiaModel;
 import rsv.process.model.MetricInserter;
 import rsv.process.model.OIMModel;
 import rsv.process.model.ProcessLogModel;
+import rsv.process.model.ResourceDetailModel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import rsv.process.Configuration;
@@ -24,6 +26,7 @@ public class RSVPreprocess implements RSVProcess {
 		OIMModel oim = new OIMModel();
 		GratiaModel grartia = new GratiaModel();	
 		MetricInserter mdetail = new MetricInserter();
+		ResourceDetailModel resourcedetail = new ResourceDetailModel();
 		ProcessLogModel lm = new ProcessLogModel();
 		int maxrecords = Integer.parseInt(RSVMain.conf.getProperty(Configuration.preprocess_gratia_record_count));
 		
@@ -52,6 +55,7 @@ public class RSVPreprocess implements RSVProcess {
 			//error counters
 			int count_invalid_resource_id = 0;
 			int count_invalid_metric_id = 0;
+			int count_invalid_gatheredat = 0;
 			int count_invalid_status_id = 0;
 			int count_invalid_timestamp = 0;
 			int count_invalid_detail = 0;
@@ -79,6 +83,17 @@ public class RSVPreprocess implements RSVProcess {
 	            	count_invalid_metric_id++;
 	            	continue;
 	            }
+	            ArrayList<Integer/*service_id*/> services = oim.getServicesCriticalFor(metric_id);
+	            //if(services.contains(1) || services.contains(5)) {
+	           	if(services.contains(1)) {
+	            	//this metric is critical for at least one service. check the gathered at
+	            	String gatheredat = rs.getString("GatheredAt");
+	            	if(!gatheredat.matches("rsv-client\\d.grid.iu.edu")) {
+	            		//critical metric must come from our central server reject..
+	            		count_invalid_gatheredat++;
+	            		continue;
+	            	}
+	            }
 	            
 	            //lookup status_id
 	            String metricstatus = rs.getString("MetricStatus");
@@ -103,8 +118,16 @@ public class RSVPreprocess implements RSVProcess {
 	            }
 	            
 	            //all good. request for insertions
-	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
-	         
+	            if(metric_id == 0) { //0 = org.osg.general.remote-env
+	            	if(status_id == 1) { // 1 == ok
+	            		resourcedetail.update(resource_id, metric_id, metricdetail);
+	            	} else {
+	            		//store it to metric data (for now.. maybe a bad idea..)
+		            	mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
+	            	}
+	            } else {
+	            	mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
+	            }
 	            records_added++;
 	        }
 
@@ -113,6 +136,7 @@ public class RSVPreprocess implements RSVProcess {
 	        logger.info("Valid records being sent to MetricData/MetricDetail Tables: " + records_added);
 	        logger.info("\tRecords with invalid resource_id: " + count_invalid_resource_id);
 	        logger.info("\tRecords with invalid metric_id: " + count_invalid_metric_id);
+	        logger.info("\tRecords with count_invalid_gatheredat: " + count_invalid_gatheredat);
 	        logger.info("\tRecords with invalid status_id: " + count_invalid_status_id);
 	        logger.info("\tRecords with invalid timestamp: " + count_invalid_timestamp);
 	        logger.info("\tRecords with invalid detail: " + count_invalid_detail);
@@ -125,7 +149,7 @@ public class RSVPreprocess implements RSVProcess {
 			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
-			SendMail.sendErrorEmail(e);
+			SendMail.sendErrorEmail(e.getMessage());
 			ret = RSVMain.exitcode_error;
 		}
 
