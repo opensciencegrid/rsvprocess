@@ -59,8 +59,8 @@ public class SendMail {
 	
 	static public void sendErrorEmail(String content) {
 		String from = "goc@opensciencegrid.org";
-		String to = "oim-dev@opensciencegrid.org";
-		String subject = "OIM Error";
+		String to = "hayashis@opensciencegrid.org";
+		String subject = "RSV Process Error";
 		String message = "RSV Process has detected an error\r\n" + content;
 
 		SendMail sendMail = new SendMail(from, to, subject, message);

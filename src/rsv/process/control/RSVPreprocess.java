@@ -84,7 +84,8 @@ public class RSVPreprocess implements RSVProcess {
 	            	continue;
 	            }
 	            ArrayList<Integer/*service_id*/> services = oim.getServicesCriticalFor(metric_id);
-	            if(services.contains(1) || services.contains(5)) {
+	            //if(services.contains(1) || services.contains(5)) {
+	           	if(services.contains(1)) {
 	            	//this metric is critical for at least one service. check the gathered at
 	            	String gatheredat = rs.getString("GatheredAt");
 	            	if(!gatheredat.matches("rsv-client\\d.grid.iu.edu")) {
@@ -92,8 +93,6 @@ public class RSVPreprocess implements RSVProcess {
 	            		count_invalid_gatheredat++;
 	            		continue;
 	            	}
-	            	//TODO - we need to store critical metric somewhere else so that we can 
-	            	//be sure that metric really came from GatheredAt
 	            }
 	            
 	            //lookup status_id
