@@ -102,7 +102,7 @@ public class RSVOverallStatus implements RSVProcess {
 					logger.debug("Processing resource ID " + resource_id + " between " + tp.start + "(" + start_date.toString() + ") and " + tp.end + "(" + end_date.toString() + ")");
 					
 					//B. Retrieve Initial Status History (all statuschange_xxx tables)
-					LSCType initial_service_statuses = scm.getLastStatusChange_Service(resource_id, tp.start);
+					LSCType initial_service_statuses = scm.getLastStatusChange_Service(resource_id, tp.start, oim.getResourceService(resource_id));
 					ResourceStatus initial_resource_status = scm.getLastStatusChange_Resource(resource_id, tp.start);
 					
 					//C. Retrieve Initial Relevant Record Set (RRS)
@@ -520,7 +520,7 @@ public class RSVOverallStatus implements RSVProcess {
 		}
 		
 		//this is most likely for temporary, and once everything starts to working correctly, we wouldn't need this
-		new_status.note += "\n" + status_detail;
+		//new_status.note += "\n" + status_detail;
 		
 		return new_status;
 	}
