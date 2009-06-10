@@ -17,7 +17,7 @@ public class StatusChangeModel extends RSVDatabase {
 	
 	@SuppressWarnings("serial")
 	public static class LSCType extends TreeMap<Integer, ServiceStatus> {}//LSC - Last Status Change <service_id, status_is>
-	public LSCType getLastStatusChange_Service(int resource_id, Integer timestamp) throws SQLException {
+	public LSCType getLastStatusChange_Service(int resource_id, Integer timestamp, ArrayList<Integer> services) throws SQLException {
 		LSCType ret = new LSCType();
         Statement stmt = RSVDatabase.db.createStatement();
         String where_timestamp = "";
@@ -33,10 +33,12 @@ public class StatusChangeModel extends RSVDatabase {
         ResultSet rs = stmt.executeQuery(sql);
         while(rs.next()) {
         	Integer service_id = rs.getInt("service_id");
-        	
-        	ServiceStatus ss = new ServiceStatus();
-        	ss.status_id = rs.getInt("status_id");
-        	ret.put(service_id, ss);
+        	//only store service_id that this resource has (if someone removes service, then we need to filter removed ones)
+        	if(services.contains(service_id)) {
+	        	ServiceStatus ss = new ServiceStatus();
+	        	ss.status_id = rs.getInt("status_id");
+	        	ret.put(service_id, ss);
+        	}
         }
         return ret;
 	}
