@@ -32,6 +32,38 @@ public class OIMModel extends OIMDatabase {
 		return cache_resource_fqdn2id.get(fqdn);
 	}
 	
+	private static HashMap<String, Integer> cache_resource_alias2id = null;
+	public Integer lookupResourceAlias(String alias) throws SQLException
+	{
+		if(cache_resource_alias2id == null) {
+			cache_resource_alias2id = new HashMap<String, Integer>();
+	        Statement stmt = OIMDatabase.db.createStatement();
+	        ResultSet rs = stmt.executeQuery("select * from resource_alias");			
+	        while(rs.next()) {
+	        	Integer resource_id = rs.getInt("resource_id");
+	        	String resource_alias = rs.getString("resource_alias");
+	        	cache_resource_alias2id.put(resource_alias, resource_id);
+	        }
+		}
+		return cache_resource_alias2id.get(alias);
+	}
+	
+	private static HashMap<String, Integer> cache_resource_service2id = null;
+	public Integer lookupServiceEndpointOverride(String override) throws SQLException
+	{
+		if(cache_resource_service2id == null) {
+			cache_resource_service2id = new HashMap<String, Integer>();
+	        Statement stmt = OIMDatabase.db.createStatement();
+	        ResultSet rs = stmt.executeQuery("select * from resource_service");			
+	        while(rs.next()) {
+	        	Integer resource_id = rs.getInt("resource_id");
+	        	String endpoint_override = rs.getString("endpoint_override");
+	        	cache_resource_service2id.put(endpoint_override, resource_id);
+	        }
+		}
+		return cache_resource_service2id.get(override);
+	}
+	
 	public static class ResourcesType extends TreeMap<Integer/*resource_id*/, Resource> {}
 	private static ResourcesType cache_resource_id2rec = null;
 	public ResourcesType getResources() throws SQLException
