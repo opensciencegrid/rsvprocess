@@ -69,11 +69,23 @@ public class RSVPreprocess implements RSVProcess {
 	            last_dbid = dbid;
 	        	
 	            //lookup resource_id
-	            String resourcefqdn = rs.getString("ServiceUri");
-	            Integer resource_id = oim.lookupResourceID(resourcefqdn);	   
+	            String serviceuri = rs.getString("ServiceUri");
+	            Integer resource_id = oim.lookupResourceID(serviceuri);	   
 	            if(resource_id == null) {
-	            	count_invalid_resource_id++;
-	            	continue;
+	            	//if not found, lookup resource alias
+	    	        logger.info("Looking up resource id from alias table for " + serviceuri);
+	            	resource_id = oim.lookupResourceAlias(serviceuri);
+	            	if(resource_id == null) {
+	            		//if not found, lookup service uri:port
+		    	        logger.info("Looking up resource id from service override table for " + serviceuri);
+		            	resource_id = oim.lookupServiceEndpointOverride(serviceuri);
+		            	if(resource_id == null) {
+		            		//well, then we should really reject this
+			    	        logger.info("Failed to find " + serviceuri);
+		            		count_invalid_resource_id++;
+		            		continue;
+		            	}
+	            	}
 	            }
 	           
 	            //lookup metric_id
