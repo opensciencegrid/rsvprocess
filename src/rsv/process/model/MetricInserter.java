@@ -19,10 +19,10 @@ public class MetricInserter extends RSVDatabase {
 	public MetricInserter()
 	{
 		try {
-			String sql = "insert into rsvextra.metricdata (id, timestamp, resource_id, metric_id, metric_status_id, detail_id) values (?,?,?,?,?,?)";
+			String sql = "insert into metricdata (id, timestamp, resource_id, metric_id, metric_status_id, detail_id) values (?,?,?,?,?,?)";
 		    stmt_data = RSVDatabase.db.prepareStatement(sql);
 		    
-			sql = "insert into rsvextra.metricdetail (id, detail) values (?, ?)";
+			sql = "insert into metricdetail (id, detail) values (?, ?)";
 		    stmt_detail = RSVDatabase.db.prepareStatement(sql);
 
 		} catch (SQLException e) {
@@ -34,13 +34,13 @@ public class MetricInserter extends RSVDatabase {
 	public int clearRecords(int last_dbid) throws SQLException
 	{
 		int recs = 0;
-		String sql = "delete from rsvextra.metricdetail where metricdata_id > ?";
+		String sql = "delete from metricdetail where metricdata_id > ?";
 		PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, last_dbid);
 	    stmt.execute();
 	    recs += stmt.getUpdateCount();
 	    
-		sql = "delete from rsvextra.metricdata where id > ?";
+		sql = "delete from metricdata where id > ?";
 		stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, last_dbid);
 	    stmt.execute();

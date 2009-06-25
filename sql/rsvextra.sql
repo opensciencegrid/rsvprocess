@@ -19,9 +19,9 @@
 -- Current Database: `rsvextra`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `rsvextra` /*!40100 DEFAULT CHARACTER SET latin1 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `myosg` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
-USE `rsvextra`;
+USE `myosg`;
 
 --
 -- Table structure for table `Tbl_SamUploadFlagDesc`

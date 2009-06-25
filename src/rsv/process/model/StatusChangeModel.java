@@ -69,7 +69,7 @@ public class StatusChangeModel extends RSVDatabase {
 		int recs = 0;
 		
 		//statuschagne_service
-		String sql = "delete from rsvextra.statuschange_service where resource_id = ? and timestamp >= ? and timestamp <= ?";
+		String sql = "delete from statuschange_service where resource_id = ? and timestamp >= ? and timestamp <= ?";
 		PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, resource_id);
 		stmt.setInt(2, start);
@@ -78,7 +78,7 @@ public class StatusChangeModel extends RSVDatabase {
 	    recs += stmt.getUpdateCount();
 	    
 		//statuschagne_resource
-		sql = "delete from rsvextra.statuschange_resource where resource_id = ? and timestamp >= ? and timestamp <= ?";
+		sql = "delete from statuschange_resource where resource_id = ? and timestamp >= ? and timestamp <= ?";
 		stmt = RSVDatabase.db.prepareStatement(sql);		
 		stmt.setInt(1, resource_id);
 	    stmt.setInt(2, start);
@@ -93,7 +93,7 @@ public class StatusChangeModel extends RSVDatabase {
 	public int outputServiceStatusChanges(ArrayList<ServiceStatus> service_statuschanges) throws SQLException
 	{
 		int note_max_length = 256;
-		String sql = "insert into rsvextra.statuschange_service (resource_id, service_id, status_id, timestamp, detail) values (?,?,?,?,?)";
+		String sql = "insert into statuschange_service (resource_id, service_id, status_id, timestamp, detail) values (?,?,?,?,?)";
 	    PreparedStatement stmt_data = RSVDatabase.db.prepareStatement(sql);
 	    
 	    for(ServiceStatus s : service_statuschanges) {
@@ -119,7 +119,7 @@ public class StatusChangeModel extends RSVDatabase {
 	public int outputResourceStatusChanges(ArrayList<ResourceStatus> resource_statuschanges) throws SQLException
 	{
 		int note_max_length = 256;
-		String sql = "insert into rsvextra.statuschange_resource (resource_id, status_id, timestamp, detail) values (?,?,?,?)";
+		String sql = "insert into statuschange_resource (resource_id, status_id, timestamp, detail) values (?,?,?,?)";
 	    PreparedStatement stmt_data = RSVDatabase.db.prepareStatement(sql);
 	    
 	    for(ResourceStatus s : resource_statuschanges) {

@@ -11,6 +11,7 @@ public class JDBCConnection implements Base {
 
 	public void run() {
 		System.out.println("Test JDBC Connection");	
+		/*
 	    try {
 	    	//connect to mysql
 	        String url = "jdbc:mysql://rsv-itb.grid.iu.edu:49152/rsvextra";
@@ -34,5 +35,6 @@ public class JDBCConnection implements Base {
 	    } catch( Exception e ) {
 	            e.printStackTrace();  
 	    }
+	    */
 	}
 }

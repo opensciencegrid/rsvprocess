@@ -56,7 +56,7 @@ public class MetricDataModel extends RSVDatabase {
 	{
         Statement stmt = RSVDatabase.db.createStatement();
         
-        ResultSet rs = stmt.executeQuery("select * from rsvextra.metricdata" + 
+        ResultSet rs = stmt.executeQuery("select * from metricdata" + 
         		" where id > " + start_dbid + 
         		" order by id " +
         		" limit " + limit); 

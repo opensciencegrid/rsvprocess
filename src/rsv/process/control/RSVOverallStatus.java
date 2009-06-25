@@ -631,7 +631,7 @@ public class RSVOverallStatus implements RSVProcess {
 		logger.info("Resuming overall status calculation after MetricData ID = " + last_id);
 		
 		//get new metricdata records
-		logger.info("Pulling upto " + maxrecords + " records from rsvextra.metricdata");
+		logger.info("Pulling upto " + maxrecords + " records from metricdata");
 		ResultSet rs = mdm.getMetricDataRecords(last_id, maxrecords);
 		
 		//compute ITP (Invalidated Time Period)

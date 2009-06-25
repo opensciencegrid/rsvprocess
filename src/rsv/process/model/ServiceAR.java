@@ -21,7 +21,7 @@ public class ServiceAR extends RSVDatabase {
 		int recs = 0;
 		
 		//clear previous data (just in case)
-		String sql = "delete from rsvextra.service_ar where resource_id = ? and service_id = ? and timestamp = ?";
+		String sql = "delete from service_ar where resource_id = ? and service_id = ? and timestamp = ?";
 		PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, resource_id);
 		stmt.setInt(2, service_id);
@@ -29,7 +29,7 @@ public class ServiceAR extends RSVDatabase {
 	    stmt.execute();
 	    recs += stmt.getUpdateCount();
 	    
-		sql = "insert into rsvextra.service_ar (resource_id, service_id, availability, reliability, timestamp) values (?, ?, ?, ?, ?)";
+		sql = "insert into service_ar (resource_id, service_id, availability, reliability, timestamp) values (?, ?, ?, ?, ?)";
 		stmt = RSVDatabase.db.prepareStatement(sql);		
 	    stmt.setInt(1, resource_id);
 		stmt.setInt(2, service_id);
