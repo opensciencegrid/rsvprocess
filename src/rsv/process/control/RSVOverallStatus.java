@@ -568,7 +568,12 @@ public class RSVOverallStatus implements RSVProcess {
 			if(note.length() != 0) {
 				note += ", ";
 			}
-			note += s.getName();
+			if(s == null) {
+				note += "UNKNOWN SERVICE";
+				logger.error("Uknown Service with service ID: " + service_id);
+			} else {
+				note += s.getName();
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
