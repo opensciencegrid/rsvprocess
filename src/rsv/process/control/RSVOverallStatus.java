@@ -562,6 +562,19 @@ public class RSVOverallStatus implements RSVProcess {
 		return resource_statuschanges;
 	}
 	
+	public void addServiceNameList(String note, int service_id) {
+		try {
+			Service s = oim.getService(service_id);
+			if(note.length() != 0) {
+				note += ", ";
+			}
+			note += s.getName();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	//this function is used by RSVCache as well..
 	public ResourceStatus calculateResourceStatus(LSCType current_service_statuses)
 	{
@@ -572,20 +585,30 @@ public class RSVOverallStatus implements RSVProcess {
 		int downtime = 0;
 		int ok = 0;
 		
+		String critical_note = "";
+		String unknown_note = "";
+		String warning_note = "";
+		String downtime_note = "";
+	
+		
 		//let's count
 		for(ServiceStatus s : current_service_statuses.values()) {
 			switch(s.status_id) {
 			case Status.CRITICAL:
 				critical++;
+				addServiceNameList(critical_note, s.service_id);
 				continue;
 			case Status.WARNING:
 				warning++;
+				addServiceNameList(warning_note, s.service_id);
 				continue;
 			case Status.UNKNOWN:
 				unknown++;
+				addServiceNameList(unknown_note, s.service_id);
 				continue;
 			case Status.DOWNTIME:
 				downtime++;
+				addServiceNameList(downtime_note, s.service_id);
 				continue;
 			case Status.OK:
 				ok++;
@@ -598,16 +621,16 @@ public class RSVOverallStatus implements RSVProcess {
 		//analyze..
 		if(critical > 0) {
 			rs.status_id = Status.CRITICAL;
-			rs.note = critical + " of " + current_service_statuses.size() + " services are in CRITICAL status.";
+			rs.note = critical_note + " service is in CRITICAL status.";
 		} else if(downtime > 0) {
 			rs.status_id = Status.DOWNTIME;
-			rs.note = downtime + " of " + current_service_statuses.size() + " services are in maintenance.";
+			rs.note = downtime_note + " service is in maintenance.";
 		} else if(unknown > 0) {
 			rs.status_id = Status.UNKNOWN;
-			rs.note = unknown + " of " + current_service_statuses.size() + " services are in UNKNOWN status.";
+			rs.note = unknown_note + " service is in UNKNOWN status.";
 		} else if(warning > 0) {
 			rs.status_id = Status.WARNING;
-			rs.note = warning + " of " + current_service_statuses.size() + " services are in WARNING status.";
+			rs.note = warning_note + " service is in WARNING status.";
 		} else if(ok > 0) {
 			rs.status_id = Status.OK;
 			rs.note = "No issues found for this resource.";		
