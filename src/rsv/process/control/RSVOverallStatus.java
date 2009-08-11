@@ -569,8 +569,7 @@ public class RSVOverallStatus implements RSVProcess {
 				note += ", ";
 			}
 			if(s == null) {
-				note += "UNKNOWN SERVICE";
-				logger.error("Uknown Service with service ID: " + service_id);
+				note += "UNKNOWN SERVICE (" + service_id + ")";
 			} else {
 				note += s.getName();
 			}
@@ -595,7 +594,6 @@ public class RSVOverallStatus implements RSVProcess {
 		String warning_note = "";
 		String downtime_note = "";
 	
-		
 		//let's count
 		for(ServiceStatus s : current_service_statuses.values()) {
 			switch(s.status_id) {

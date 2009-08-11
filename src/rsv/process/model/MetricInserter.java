@@ -1,6 +1,7 @@
 package rsv.process.model;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
@@ -15,6 +16,7 @@ public class MetricInserter extends RSVDatabase {
 	//private PreparedStatement prepStmt = null;
 	private PreparedStatement stmt_data = null;
 	private PreparedStatement stmt_detail = null;	
+	private PreparedStatement stmt_detail_check = null;
 	
 	public MetricInserter()
 	{
@@ -24,6 +26,9 @@ public class MetricInserter extends RSVDatabase {
 		    
 			sql = "insert into metricdetail (id, detail) values (?, ?)";
 		    stmt_detail = RSVDatabase.db.prepareStatement(sql);
+		    
+		    sql = "select id from metricdetail where detail = ? limit 1";
+		    stmt_detail_check = RSVDatabase.db.prepareStatement(sql);
 
 		} catch (SQLException e) {
 			logger.error("failed to prepare for butch insert", e);
@@ -49,7 +54,22 @@ public class MetricInserter extends RSVDatabase {
 	    return recs;
 	}
 	
-	public void add(int id, int timestamp, int resource_id, int metric_id, int status_id, String detail) throws SQLException {
+	public void add(int id, int timestamp, int resource_id, int metric_id, int status_id, String detail) throws SQLException 
+	{	
+		//look up to see if the same detail already exists
+		stmt_detail_check.setString(1, detail);
+		ResultSet res = stmt_detail_check.executeQuery();
+		Integer detail_id = id;
+		if(res.next()) {
+			detail_id = res.getInt(1);
+		} else {
+			//doesn't exist. insert new detail
+			stmt_detail.setInt(1, id);
+			stmt_detail.setString(2, detail);
+			stmt_detail.addBatch();
+		}
+
+		//insert metricdata
 		stmt_data.setInt(1, id);
 		stmt_data.setInt(2, timestamp);
 		stmt_data.setInt(3, resource_id);
@@ -57,10 +77,6 @@ public class MetricInserter extends RSVDatabase {
 		stmt_data.setInt(5, status_id);
 		stmt_data.setInt(6, id);
 		stmt_data.addBatch();
-		
-		stmt_detail.setInt(1, id);
-		stmt_detail.setString(2, detail);
-		stmt_detail.addBatch();
 	}
 	
 	//returns number of records inserted
