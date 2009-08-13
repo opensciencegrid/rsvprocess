@@ -1,8 +1,8 @@
 -- MySQL dump 10.11
 --
--- Host: localhost    Database: rsvextra
+-- Host: localhost    Database: rsvprocess
 -- ------------------------------------------------------
--- Server version	5.0.41
+-- Server version	5.0.45
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,7 +16,7 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `rsvextra`
+-- Current Database: `rsvprocess`
 --
 
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `rsvprocess` /*!40100 DEFAULT CHARACTER SET latin1 */;
@@ -48,29 +48,21 @@ CREATE TABLE `Tbl_SamUploadStatus` (
   CONSTRAINT `Tbl_SamUploadStatus_ibfk_1` FOREIGN KEY (`flagid`) REFERENCES `Tbl_SamUploadFlagDesc` (`flagid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Table structure for table `metricdata`
+--
+
 DROP TABLE IF EXISTS `metricdata`;
 CREATE TABLE `metricdata` (
   `id` int(11) NOT NULL default '0',
   `timestamp` int(11) NOT NULL default '0',
-  `resource_id` smallint(4) unsigned NOT NULL default '0',
-  `metric_id` smallint(4) unsigned NOT NULL default '0',
-  `metric_status_id` tinyint(1) unsigned NOT NULL default '0',
-  `detail_id` int(10) unsigned NOT NULL,
+  `resource_id` smallint(5) unsigned NOT NULL default '0',
+  `metric_id` smallint(5) unsigned NOT NULL default '0',
+  `metric_status_id` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `for_latest_grab` (`metric_id`,`resource_id`,`timestamp`),
   KEY `timestamp` USING BTREE (`timestamp`,`resource_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='<strong><u>Rsvextra.Rsv_result</u></strong>: This entirty is';
-
---
--- Table structure for table `metricdetail`
---
-
-DROP TABLE IF EXISTS `metricdetail`;
-CREATE TABLE `metricdetail` (
-  `id` int(10) unsigned NOT NULL default '0',
-  `detail` text NOT NULL,
-  PRIMARY KEY  USING BTREE (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 680960 kB';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='<strong><u>Rsvextra.Rsv_result</u></strong>: This entirty is';
 
 --
 -- Table structure for table `processlog`
@@ -78,11 +70,22 @@ CREATE TABLE `metricdetail` (
 
 DROP TABLE IF EXISTS `processlog`;
 CREATE TABLE `processlog` (
-  `id` int(10) unsigned NOT NULL auto_increment,
   `timestamp` timestamp NOT NULL default '0000-00-00 00:00:00' on update CURRENT_TIMESTAMP,
   `key` varchar(128) NOT NULL,
   `value` varchar(1024) NOT NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  USING BTREE (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `resource_detail`
+--
+
+DROP TABLE IF EXISTS `resource_detail`;
+CREATE TABLE `resource_detail` (
+  `resource_id` varchar(45) NOT NULL,
+  `metric_id` varchar(45) NOT NULL,
+  `xml` text NOT NULL,
+  PRIMARY KEY  (`resource_id`,`metric_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -116,7 +119,7 @@ CREATE TABLE `service_ar` (
   PRIMARY KEY  (`id`),
   KEY `resource_service` (`resource_id`,`service_id`),
   KEY `timestamp` (`timestamp`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=232 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `statuschange_resource`
@@ -131,7 +134,7 @@ CREATE TABLE `statuschange_resource` (
   `detail` varchar(256) NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `timestamp` (`timestamp`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=41670 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `statuschange_service`
@@ -146,13 +149,15 @@ CREATE TABLE `statuschange_service` (
   `timestamp` int(10) unsigned NOT NULL,
   `detail` varchar(256) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=52316 DEFAULT CHARSET=latin1;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-DROP TABLE IF EXISTS `resource_detail`;
-CREATE TABLE `resource_detail` (
-  `resource_id` varchar(45) NOT NULL,
-  `metric_id` varchar(45) NOT NULL,
-  `xml` text NOT NULL,
-  PRIMARY KEY  (`resource_id`,`metric_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+-- Dump completed on 2009-08-13  0:52:12
