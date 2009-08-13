@@ -27,7 +27,7 @@ public class ProcessLogModel extends RSVDatabase {
 		if(getValue(key) == null) {
 			sql = "insert into processlog (value, `key`, timestamp) values (?, ?, NOW())";
 		} else {
-			sql = "update processlog set value = ?, timestamp = NOW() where key = ?";
+			sql = "update processlog set value = ?, timestamp = NOW() where `key` = ?";
 		}
 	    PreparedStatement stmt = RSVDatabase.db.prepareStatement(sql);
 		stmt.setString(1, value);
