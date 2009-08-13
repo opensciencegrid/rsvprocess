@@ -42,7 +42,7 @@ public class MetricDataModel extends RSVDatabase {
         }
         return ret;
 	}
-	
+	/*
 	public String getDetail(int detail_id) throws SQLException {
         Statement stmt = RSVDatabase.db.createStatement();
         ResultSet rs = stmt.executeQuery("select detail from metricdetail where id = " + detail_id);
@@ -51,6 +51,7 @@ public class MetricDataModel extends RSVDatabase {
         }
         return null;
 	}
+	*/
 	
 	public ResultSet getMetricDataRecords(int start_dbid, int limit) throws SQLException
 	{
