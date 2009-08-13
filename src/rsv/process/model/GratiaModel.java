@@ -23,7 +23,7 @@ public class GratiaModel extends GratiaDatabase {
 	public String getDetail(int id) throws SQLException
 	{
         Statement stmt = GratiaDatabase.db.createStatement();
-        ResultSet rs = stmt.executeQuery("select MetricDetail from gratia.MetricRecord where dbid = " + id);
+        ResultSet rs = stmt.executeQuery("select DetailsData from gratia.MetricRecord where dbid = " + id);
         if(rs.next()) {
         	return rs.getString(1);
         }

@@ -9,7 +9,6 @@ import rsv.process.model.ResourceDetailModel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
