@@ -551,11 +551,12 @@ public class RSVOverallStatus implements RSVProcess {
 				
 				current_resource_status = rs;
 				resource_statuschanges.add(rs);
-				
+				/*
 				logger.debug("Resource " + resource_id + 
 						" overall status has changed to " + rs.status_id + 
 						" at " + rs.timestamp +
 						" reason: " + rs.note);
+				*/
 			}
 		}
 		
