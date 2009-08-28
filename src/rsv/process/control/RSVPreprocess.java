@@ -9,7 +9,6 @@ import rsv.process.model.ResourceDetailModel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -58,7 +57,7 @@ public class RSVPreprocess implements RSVProcess {
 			int count_invalid_gatheredat = 0;
 			int count_invalid_status_id = 0;
 			int count_invalid_timestamp = 0;
-			int count_invalid_detail = 0;
+			//int count_invalid_detail = 0;
 			
 			//process each records
 			while(rs.next()){
@@ -127,25 +126,8 @@ public class RSVPreprocess implements RSVProcess {
 	            	count_invalid_timestamp++;
 	            	continue;
 	            }
-	            
-	            //lookup metricdetail
-	            String metricdetail = rs.getString("DetailsData");
-	            if(metricdetail == null) {
-	            	count_invalid_detail++;
-	            	continue;
-	            }
-	            
-	            //all good. request for insertions
-	            if(metric_id == 0) { //0 = org.osg.general.remote-env
-	            	if(status_id == 1) { // 1 == ok
-	            		resourcedetail.update(resource_id, metric_id, metricdetail);
-	            	} else {
-	            		//store it to metric data (for now.. maybe a bad idea..)
-		            	mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
-	            	}
-	            } else {
-	            	mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, metricdetail);
-	            }
+	         
+	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id);
 	            records_added++;
 	        }
 
@@ -157,7 +139,7 @@ public class RSVPreprocess implements RSVProcess {
 	        logger.info("\tRecords with count_invalid_gatheredat: " + count_invalid_gatheredat);
 	        logger.info("\tRecords with invalid status_id: " + count_invalid_status_id);
 	        logger.info("\tRecords with invalid timestamp: " + count_invalid_timestamp);
-	        logger.info("\tRecords with invalid detail: " + count_invalid_detail);
+	        //logger.info("\tRecords with invalid detail: " + count_invalid_detail);
 	        
 	        //now, let's commit all changes..
 			mdetail.commit();

@@ -132,8 +132,10 @@ public class RSVOverallStatus implements RSVProcess {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
 					
 					java.util.Date start_date = new java.util.Date((long)tp.start * 1000);
+					/*
 					logger.debug("For resource " + resource_id + " - cleared total of " + removed + " records inside ITP of start: " + tp.start + "(" +
 							start_date + ") end: " + tp.end + " (duration: " + (tp.end - tp.start)/60 + " minutes)");
+					*/
 				}
 			}
 			//Step 4. Write out any status changes recorded		
@@ -430,11 +432,13 @@ public class RSVOverallStatus implements RSVProcess {
 					current_status.put(service_id, new_status);
 					statuschanges.add(new_status);
 					Date change_date = new Date(new_status.timestamp*1000L);
+					/*
 					logger.debug("Resource " + resource_id + 
 							" Service Status for " + service_id + 
 							" has changed to " + new_status.status_id + 
 							" at " + change_date.toString() + "(" + new_status.timestamp + ")" +
 							" reason: " + new_status.note);
+					*/
 				}
 			}
 		}
@@ -551,11 +555,12 @@ public class RSVOverallStatus implements RSVProcess {
 				
 				current_resource_status = rs;
 				resource_statuschanges.add(rs);
-				
+				/*
 				logger.debug("Resource " + resource_id + 
 						" overall status has changed to " + rs.status_id + 
 						" at " + rs.timestamp +
 						" reason: " + rs.note);
+				*/
 			}
 		}
 		

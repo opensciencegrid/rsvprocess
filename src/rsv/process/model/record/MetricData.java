@@ -3,6 +3,8 @@ package rsv.process.model.record;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.log4j.Logger;
+
+import rsv.process.model.GratiaModel;
 import rsv.process.model.MetricDataModel;
 import rsv.process.model.OIMModel;
 
@@ -15,7 +17,7 @@ public class MetricData {
 	protected int resource_id;
 	protected int timestamp;
 	protected int status_id;
-	protected int detail_id;
+	//protected int detail_id;
 	
 	private String note = "";
 	
@@ -26,7 +28,7 @@ public class MetricData {
 			resource_id = rs.getInt("resource_id");
 			status_id = rs.getInt("metric_status_id");
 			timestamp = rs.getInt("timestamp");
-			detail_id = rs.getInt("detail_id");
+			//detail_id = rs.getInt("detail_id");
 		} catch (SQLException e) {
 			logger.error("Failed to inialize MetricData record from given resultset", e);
 		}
@@ -41,13 +43,13 @@ public class MetricData {
 	public int getResourceID() { return resource_id; }	
 	public int getMetricID() { return metric_id; }
 	public int getTimestamp() { return timestamp; }	
-	public int getDetailID() { return detail_id; }	
-	
-	public String fetchDetail() throws SQLException {
-		MetricDataModel mdm = new MetricDataModel();
-		return mdm.getDetail(getDetailID());
-	}
+	//public int getDetailID() { return detail_id; }	
 
+	public String fetchDetail() throws SQLException {
+		GratiaModel mdm = new GratiaModel();
+		return mdm.getDetail(getID());
+	}
+	
 	public int getFreshFor() throws SQLException {
 		OIMModel oim = new OIMModel();
 		Integer i = oim.lookupFreshFor(metric_id);
