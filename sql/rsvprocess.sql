@@ -166,6 +166,6 @@ CREATE TABLE `downtime_publish_wlcg` (
   `comment` text,
   PRIMARY KEY  (`downtime_id`,`downtime_action_id`),
   KEY `downtime_action_downtime_publish_wlcg` (`downtime_action_id`),
-  CONSTRAINT `downtime_action_downtime_publish_wlcg` FOREIGN KEY (`downtime_action_id`) REFERENCES `oimnew`.`downtime_action` (`id`),
-  CONSTRAINT `resource_downtime_downtime_publish_wlcg` FOREIGN KEY (`downtime_id`) REFERENCES `oimnew`.`resource_downtime` (`id`)
+  CONSTRAINT `downtime_action_downtime_publish_wlcg` FOREIGN KEY (`downtime_action_id`) REFERENCES `oim`.`downtime_action` (`id`),
+  CONSTRAINT `resource_downtime_downtime_publish_wlcg` FOREIGN KEY (`downtime_id`) REFERENCES `oim`.`resource_downtime` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
