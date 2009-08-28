@@ -156,4 +156,16 @@ CREATE TABLE `statuschange_service` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-08-13  0:52:12
+DROP TABLE IF EXISTS `downtime_publish_wlcg`;
+CREATE TABLE `downtime_publish_wlcg` (
+  `downtime_id` int(11) NOT NULL,
+  `downtime_action_id` int(11) NOT NULL,
+  `publish_status` int(11) default '0' COMMENT 'This will be NULL initially unless set to some value. So for example, value 100 could be success; while 1,2,3, ... 99 could be the number of failed attempts made to publish.',
+  `timestamp` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `disable` tinyint(1) NOT NULL COMMENT 'Disable field to supersede value of publish_status. If this is set to TRUE, then record will never be published.',
+  `comment` text,
+  PRIMARY KEY  (`downtime_id`,`downtime_action_id`),
+  KEY `downtime_action_downtime_publish_wlcg` (`downtime_action_id`),
+  CONSTRAINT `downtime_action_downtime_publish_wlcg` FOREIGN KEY (`downtime_action_id`) REFERENCES `oimnew`.`downtime_action` (`id`),
+  CONSTRAINT `resource_downtime_downtime_publish_wlcg` FOREIGN KEY (`downtime_id`) REFERENCES `oimnew`.`resource_downtime` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
