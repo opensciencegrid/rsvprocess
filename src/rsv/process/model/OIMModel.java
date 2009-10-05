@@ -49,7 +49,7 @@ public class OIMModel extends OIMDatabase {
 	}
 	
 	private static HashMap<String, Integer> cache_resource_service2id = null;
-	public Integer lookupServiceEndpointOverride(String override) throws SQLException
+	public Integer lookupServiceHostEndpointOverride(String override) throws SQLException
 	{
 		if(cache_resource_service2id == null) {
 			cache_resource_service2id = new HashMap<String, Integer>();
@@ -58,10 +58,28 @@ public class OIMModel extends OIMDatabase {
 	        while(rs.next()) {
 	        	Integer resource_id = rs.getInt("resource_id");
 	        	String endpoint_override = rs.getString("endpoint_override");
-	        	cache_resource_service2id.put(endpoint_override, resource_id);
+	        	cache_resource_service2id.put(OIMModel.pullHostname(endpoint_override), resource_id);
 	        }
 		}
 		return cache_resource_service2id.get(override);
+	}
+	
+	//convert "se1.accre.vanderbilt.edu:6288/foo/xxx" into "se1.accre.vanderbilt.edu"
+	public static String pullHostname(String uri)
+	{
+		if(uri == null) return null;
+		
+		int pos = uri.lastIndexOf(':');		
+		if(pos == -1) {
+			//if I can't find :, then look for / just in case
+			int slash_pos = uri.lastIndexOf('/');
+			if(slash_pos == -1) {
+				//all good..
+				return uri;
+			}
+			pos = slash_pos;
+		}
+		return uri.substring(0, pos);
 	}
 	
 	public static class ResourcesType extends TreeMap<Integer/*resource_id*/, Resource> {}

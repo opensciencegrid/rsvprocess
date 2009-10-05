@@ -73,6 +73,9 @@ public class RSVPreprocess implements RSVProcess {
             		count_invalid_resource_id++;
             		continue;	
 	            }
+	            
+	            //strip port, and other garbage
+	            serviceuri = OIMModel.pullHostname(serviceuri);
 	            //lookup resource_id
 	            Integer resource_id = oim.lookupResourceID(serviceuri);	   
 	            if(resource_id == null) {
@@ -82,7 +85,7 @@ public class RSVPreprocess implements RSVProcess {
 	            	if(resource_id == null) {
 	            		//if not found, lookup service uri:port
 		    	        //logger.info("Looking up resource id from service override table for " + serviceuri);
-		            	resource_id = oim.lookupServiceEndpointOverride(serviceuri);
+		            	resource_id = oim.lookupServiceHostEndpointOverride(serviceuri);
 		            	if(resource_id == null) {
 		            		//well, then we should really reject this
 			    	        //logger.info("Failed to find " + serviceuri);
@@ -155,5 +158,4 @@ public class RSVPreprocess implements RSVProcess {
 
 		return ret;
 	}
-
 }
