@@ -197,6 +197,7 @@ public class RSVOverallStatus implements RSVProcess {
 
 			//calculate service status
 			ServiceStatus status = calculateServiceStatus(critical_metrics, rrs, currenttime);	
+			status.service_id = service_id;
 			
 			//is this in downtime?
 			Downtime down = getDownTime(resource_id, service_id, currenttime);
