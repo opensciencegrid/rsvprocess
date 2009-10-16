@@ -567,7 +567,7 @@ public class RSVOverallStatus implements RSVProcess {
 		return resource_statuschanges;
 	}
 	
-	public void addServiceNameList(String note, int service_id) {
+	public String addServiceNameList(String note, int service_id) {
 		try {
 			Service s = oim.getService(service_id);
 			if(note.length() != 0) {
@@ -582,6 +582,8 @@ public class RSVOverallStatus implements RSVProcess {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		return note;
 	}
 	
 	//this function is used by RSVCache as well..
@@ -604,19 +606,19 @@ public class RSVOverallStatus implements RSVProcess {
 			switch(s.status_id) {
 			case Status.CRITICAL:
 				critical++;
-				addServiceNameList(critical_note, s.service_id);
+				critical_note = addServiceNameList(critical_note, s.service_id);
 				continue;
 			case Status.WARNING:
 				warning++;
-				addServiceNameList(warning_note, s.service_id);
+				warning_note = addServiceNameList(warning_note, s.service_id);
 				continue;
 			case Status.UNKNOWN:
 				unknown++;
-				addServiceNameList(unknown_note, s.service_id);
+				unknown_note = addServiceNameList(unknown_note, s.service_id);
 				continue;
 			case Status.DOWNTIME:
 				downtime++;
-				addServiceNameList(downtime_note, s.service_id);
+				downtime_note = addServiceNameList(downtime_note, s.service_id);
 				continue;
 			case Status.OK:
 				ok++;
