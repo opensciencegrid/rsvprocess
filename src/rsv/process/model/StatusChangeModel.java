@@ -37,6 +37,7 @@ public class StatusChangeModel extends RSVDatabase {
         	if(services.contains(service_id)) {
 	        	ServiceStatus ss = new ServiceStatus();
 	        	ss.status_id = rs.getInt("status_id");
+	        	ss.timestamp = rs.getInt("timestamp");
 	        	ret.put(service_id, ss);
         	}
         }

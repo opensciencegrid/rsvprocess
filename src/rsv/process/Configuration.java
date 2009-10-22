@@ -3,6 +3,10 @@ package rsv.process;
 import java.util.Properties;
 
 public class Configuration extends Properties {
+	
+	public static final String debug = "debug";
+	
+	
 	//RSV DB
 	public static final String rsv_db_url = "rsv_db_url";
 	public static final String rsv_db_user = "rsv_db_user";	

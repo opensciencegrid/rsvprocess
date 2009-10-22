@@ -22,6 +22,8 @@ public class RSVMain {
 	
 	private static final Logger logger = Logger.getLogger(RSVMain.class);
 	public static Configuration conf = null;
+	
+	public static boolean debug = false;
 
 	public static void main(String[] args) {
 		int ret = exitcode_ok;		
@@ -31,6 +33,10 @@ public class RSVMain {
 			
 			conf.load(new FileInputStream("rsvprocess.conf"));
 			RSVMain app = new RSVMain();
+			
+			if(RSVMain.conf.getProperty(Configuration.debug).equals("true")) {
+				debug = true;
+			}
 			
 			if(args.length == 0) {
 				showUsage();

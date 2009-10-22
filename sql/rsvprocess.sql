@@ -65,7 +65,7 @@ CREATE TABLE `metricdata` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='<strong><u>Rsvextra.Rsv_result</u></strong>: This entirty is';
 
 DROP TABLE IF EXISTS `processlog`;
-CREATE TABLE  `rsvprocess`.`processlog` (
+CREATE TABLE  `processlog` (
   `timestamp` timestamp NOT NULL default '0000-00-00 00:00:00' on update CURRENT_TIMESTAMP,
   `key` varchar(128) NOT NULL,
   `value` varchar(1024) NOT NULL,

@@ -49,7 +49,7 @@ public class RSVOverallStatus implements RSVProcess {
 	private StatusChangeModel scm = new StatusChangeModel();
 	private ProcessLogModel lm = new ProcessLogModel();
 	private Integer last_mdid = null;
-	
+		
 	public int run(String args[]) {
 		int ret = RSVMain.exitcode_ok;
 		ArrayList<ServiceStatus> all_service_statuschanges = new ArrayList<ServiceStatus>();
@@ -89,6 +89,12 @@ public class RSVOverallStatus implements RSVProcess {
 			
 			//Step 2: For each resource in itp...
 			for(Integer resource_id : itps.keySet()) {
+				/*
+				//only process resource_id = 5
+				if(RSVMain.debug) {
+					if(!resource_id.equals(5)) continue;
+				}
+				*/
 				
 				//ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
 				//ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();	
@@ -130,9 +136,9 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
-					
-					java.util.Date start_date = new java.util.Date((long)tp.start * 1000);
 					/*
+					java.util.Date start_date = new java.util.Date((long)tp.start * 1000);
+					
 					logger.debug("For resource " + resource_id + " - cleared total of " + removed + " records inside ITP of start: " + tp.start + "(" +
 							start_date + ") end: " + tp.end + " (duration: " + (tp.end - tp.start)/60 + " minutes)");
 					*/
@@ -539,11 +545,28 @@ public class RSVOverallStatus implements RSVProcess {
 		LSCType current_service_statuses = (LSCType) initial_service_statuses.clone();
 		ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();
 		
+		//first, let's make sure that the current resource status is consistent with the current service status 
+		//this situation should never happen, but it does and I can't figure out why... so for now this is an extremely dirty
+		//patch..
+		ResourceStatus rs = calculateResourceStatus(initial_service_statuses);
+		if(current_resource_status != null && rs.status_id != current_resource_status.status_id) {
+			rs.resource_id = resource_id;
+			rs.timestamp = 0;
+			//find the earliest timestamp for service_status (TODO - not sure if this logic is correct..)
+			for(ServiceStatus st : initial_service_statuses.values()) {
+				if(rs.timestamp == 0 || st.timestamp < rs.timestamp) {
+					rs.timestamp = st.timestamp;
+				}
+			}
+			logger.error("Current resource status for "+resource_id+" is inconsistent with the current service status. Fixing..");
+			resource_statuschanges.add(rs);
+		}
+		
 		for(ServiceStatus change : service_statuschanges) {
 			//update current list
 			current_service_statuses.put(change.service_id, change);
 			
-			ResourceStatus rs = calculateResourceStatus(current_service_statuses);
+			rs = calculateResourceStatus(current_service_statuses);
 			
 			//record if any status change has occured
 			if(current_resource_status == null ||
@@ -601,7 +624,7 @@ public class RSVOverallStatus implements RSVProcess {
 		String unknown_note = "";
 		String warning_note = "";
 		String downtime_note = "";
-	
+		
 		//let's count
 		for(ServiceStatus s : current_service_statuses.values()) {
 			switch(s.status_id) {
@@ -648,7 +671,7 @@ public class RSVOverallStatus implements RSVProcess {
 		} else {
 			rs.status_id = Status.UNKNOWN;
 			rs.note = "No service status has been reported.";
-		}
+		} 
 		
 		return rs;
 	}
