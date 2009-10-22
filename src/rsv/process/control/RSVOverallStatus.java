@@ -90,9 +90,9 @@ public class RSVOverallStatus implements RSVProcess {
 			//Step 2: For each resource in itp...
 			for(Integer resource_id : itps.keySet()) {
 				/*
-				//only process resource_id = 5
+				//only process certain resource for test..
 				if(RSVMain.debug) {
-					if(!resource_id.equals(5)) continue;
+					if(!resource_id.equals(171)) continue;
 				}
 				*/
 				
