@@ -133,7 +133,12 @@ public class RSVPreprocess implements RSVProcess {
 	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id);
 	            records_added++;
 	        }
+			
+            //mdetail.add(20000003, 1000, 123, 1, 1);
+            //mdetail.add(20000004, 1000, 123, 1, 2);
 
+			//ALTER IGNORE TABLE `metricdata` ADD UNIQUE INDEX `unique_records`(`timestamp`, `resource_id`, `metric_id`);
+			
 	        //do some reporting
 	        logger.info("Records pulled from Gratia: " + records_pulled);
 	        logger.info("Valid records being sent to MetricData/MetricDetail Tables: " + records_added);

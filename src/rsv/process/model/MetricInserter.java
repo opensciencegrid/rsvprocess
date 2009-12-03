@@ -1,5 +1,6 @@
 package rsv.process.model;
 
+import java.sql.BatchUpdateException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +27,7 @@ public class MetricInserter extends RSVDatabase {
 		    stmt_data = RSVDatabase.db.prepareStatement(sql);
 		    
 		} catch (SQLException e) {
-			logger.error("failed to prepare for butch insert", e);
+			logger.error("failed to prepare for batch insert", e);
 		}
 	}
 	/*
@@ -64,16 +65,20 @@ public class MetricInserter extends RSVDatabase {
 	{
 		logger.info("Executing Insert Batch");
 		int recs = 0;
-		int[] numUpdates = stmt_data.executeBatch();    
-		for(int i = 0;i < numUpdates.length; ++i) {
-			recs += numUpdates[i];
-		}
-		logger.info(recs + " records were inserted to newmetrics");
-		
-		//has any warning?
-		SQLWarning w = stmt_data.getWarnings();
-		if(w != null) {
-			logger.warn(w.getMessage());
+		try {
+			int[] numUpdates = stmt_data.executeBatch();    
+			for(int i = 0;i < numUpdates.length; ++i) {
+				recs += numUpdates[i];
+			}
+			logger.info(recs + " records were inserted to newmetrics");
+			
+			//has any warning?
+			SQLWarning w = stmt_data.getWarnings();
+			if(w != null) {
+				logger.warn(w.getMessage());
+			}
+		} catch (BatchUpdateException e) {
+			logger.error(e);
 		}
 	}
 
