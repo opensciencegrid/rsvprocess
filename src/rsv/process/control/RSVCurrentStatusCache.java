@@ -162,12 +162,12 @@ public class RSVCurrentStatusCache implements RSVProcess {
 			if(md == null) {
 				xml += "<Status/>";
 				xml += "<Timestamp/>";
-				//xml += "<Detail/>";			
+				xml += "<Detail/>";			
 				xml += "<MetricDataID/>";
 			} else {
 				xml += "<Status>"+Status.getStatus(md.getStatusID())+"</Status>";
 				xml += "<Timestamp>"+md.getTimestamp()+"</Timestamp>";
-				//xml += "<Detail><![CDATA["+md.fetchDetail()+"]]></Detail>";
+				xml += "<Detail><![CDATA["+md.fetchDetail()+"]]></Detail>";
 				xml += "<MetricDataID>"+md.getID()+"</MetricDataID>";
 			}
 			xml += "</Metric>";
