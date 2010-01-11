@@ -137,7 +137,7 @@ public class RSVOverallStatus implements RSVProcess {
 			if(last_mdid != null) {
 				lm.updateLastMetricDataIDProcessed(last_mdid);	   
 			}
-			
+			/*
 			//Step 5. Recalculate current status cache for all resources
 			Calendar cal = Calendar.getInstance();
 			Date current_date = cal.getTime();
@@ -147,20 +147,16 @@ public class RSVOverallStatus implements RSVProcess {
 			for(Integer resource_id : resources.keySet()) {
 				updateCurrentStatusCache(resources.get(resource_id), currenttime);
 			}
-			
+			*/			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
 			SendMail.sendErrorEmail(e.getMessage());
 			ret = RSVMain.exitcode_error;
-		} catch (IOException e) {
-			logger.error("IO Exception", e);
-			SendMail.sendErrorEmail(e.getMessage());
-			ret = RSVMain.exitcode_error;
-		}
-		
+		} 
 		return ret;
 	}
 	
+	/*
 	private void updateCurrentStatusCache(Resource r, int currenttime) throws SQLException, IOException 
 	{	
 		int resource_id = r.getID();
@@ -177,7 +173,7 @@ public class RSVOverallStatus implements RSVProcess {
 		
 		//for each service..
 		xml += "<Services>";
-		ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
+		ArrayList<Integer/> services = oim.getResourceService(resource_id); 
 		for(Integer service_id : services) {
 			xml += "<Service>";
 			xml += "<ServiceID>"+service_id+"</ServiceID>";
@@ -249,7 +245,8 @@ public class RSVOverallStatus implements RSVProcess {
     	out.write(xml);
     	out.close();
 	}
-	
+	*/
+	/*
 	private String outputMetricXML(ArrayList<Integer> critical_metrics, RelevantRecordSet rrs) throws SQLException
 	{
 		String xml = "";
@@ -280,6 +277,7 @@ public class RSVOverallStatus implements RSVProcess {
 		}
 		return xml;
 	}
+
 	
 	private Downtime getDownTime(int resource_id, int service_id, int timestamp) throws SQLException 
 	{
@@ -288,7 +286,7 @@ public class RSVOverallStatus implements RSVProcess {
 			for(Downtime downtime : downtimes) {
 				//TODO - check boundary case policies.
 				if(downtime.getStartTime() < timestamp && downtime.getEndTime() > timestamp) {
-					ArrayList<Integer/*service_id*/> services = downtime.getServiceIDs();
+					ArrayList<Integer> services = downtime.getServiceIDs();
 					if(services.contains(service_id)) {
 						return downtime;
 					}
@@ -297,6 +295,7 @@ public class RSVOverallStatus implements RSVProcess {
 		}	
 		return null;
 	}
+	*/
 	
 	//from a list of metricdata, add dummymetricdata where the metricdata expires.
 	private ArrayList<MetricData> addExpirationTriggers(RelevantRecordSet initial_rrs, ArrayList<MetricData> mds, TimePeriod tp) throws SQLException 
