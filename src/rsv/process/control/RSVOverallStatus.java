@@ -88,14 +88,7 @@ public class RSVOverallStatus implements RSVProcess {
 			}
 			
 			//Step 2: For each resource in itp...
-			for(Integer resource_id : itps.keySet()) {
-				/*
-				//only process certain resource for test..
-				if(RSVMain.debug) {
-					if(!resource_id.equals(171)) continue;
-				}
-				*/
-				
+			for(Integer resource_id : itps.keySet()) {				
 				//ArrayList<ServiceStatus> service_statuschanges = new ArrayList<ServiceStatus>();
 				//ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();	
 				TimeRange itp = itps.get(resource_id);
@@ -136,12 +129,6 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
-					/*
-					java.util.Date start_date = new java.util.Date((long)tp.start * 1000);
-					
-					logger.debug("For resource " + resource_id + " - cleared total of " + removed + " records inside ITP of start: " + tp.start + "(" +
-							start_date + ") end: " + tp.end + " (duration: " + (tp.end - tp.start)/60 + " minutes)");
-					*/
 				}
 			}
 			//Step 4. Write out any status changes recorded		
@@ -202,7 +189,7 @@ public class RSVOverallStatus implements RSVProcess {
 			ArrayList<Integer> non_critical_metrics = oim.getNonCriticalMetrics(service_id);
 
 			//calculate service status
-			ServiceStatus status = calculateServiceStatus(critical_metrics, rrs, currenttime);	
+			ServiceStatus status = calculateServiceStatus(oim, critical_metrics, rrs, currenttime);	
 			status.service_id = service_id;
 			
 			//is this in downtime?
@@ -239,7 +226,7 @@ public class RSVOverallStatus implements RSVProcess {
 		xml += "</Services>";
 		
 		//calculate resource status
-		ResourceStatus rstatus = calculateResourceStatus(service_statues);
+		ResourceStatus rstatus = calculateResourceStatus(oim, service_statues);
 		
 		String resource_detail = "";
 		resource_detail += "<ResourceID>"+resource_id+"</ResourceID>";
@@ -421,7 +408,7 @@ public class RSVOverallStatus implements RSVProcess {
 			//for each service,
 			for(Integer service_id : services) {
 				//calculate the service status (since a probe can influence multiple services - by OIM design)
-				ServiceStatus new_status = calculateServiceStatus(critical_metrics.get(service_id), rrs, md.getTimestamp());
+				ServiceStatus new_status = calculateServiceStatus(oim, critical_metrics.get(service_id), rrs, md.getTimestamp());
 				
 				//logger.debug(new_status.note);
 				
@@ -438,8 +425,8 @@ public class RSVOverallStatus implements RSVProcess {
 					//service status has changed
 					current_status.put(service_id, new_status);
 					statuschanges.add(new_status);
-					Date change_date = new Date(new_status.timestamp*1000L);
 					/*
+					 * 
 					logger.debug("Resource " + resource_id + 
 							" Service Status for " + service_id + 
 							" has changed to " + new_status.status_id + 
@@ -454,7 +441,7 @@ public class RSVOverallStatus implements RSVProcess {
 	}
 	
 	//this function is used by RSVCache as well..
-	public ServiceStatus calculateServiceStatus(ArrayList<Integer/*metric_id*/> critical, RelevantRecordSet rrs, int timestamp) throws SQLException
+	public static ServiceStatus calculateServiceStatus(OIMModel oim, ArrayList<Integer/*metric_id*/> critical, RelevantRecordSet rrs, int timestamp) throws SQLException
 	{
 		ServiceStatus new_status = new ServiceStatus();
 		
@@ -548,7 +535,7 @@ public class RSVOverallStatus implements RSVProcess {
 		//first, let's make sure that the current resource status is consistent with the current service status 
 		//this situation should never happen, but it does and I can't figure out why... so for now this is an extremely dirty
 		//patch..
-		ResourceStatus rs = calculateResourceStatus(initial_service_statuses);
+		ResourceStatus rs = calculateResourceStatus(oim, initial_service_statuses);
 		if(current_resource_status != null && rs.status_id != current_resource_status.status_id) {
 			rs.resource_id = resource_id;
 			rs.timestamp = 0;
@@ -566,7 +553,7 @@ public class RSVOverallStatus implements RSVProcess {
 			//update current list
 			current_service_statuses.put(change.service_id, change);
 			
-			rs = calculateResourceStatus(current_service_statuses);
+			rs = calculateResourceStatus(oim, current_service_statuses);
 			
 			//record if any status change has occured
 			if(current_resource_status == null ||
@@ -591,7 +578,7 @@ public class RSVOverallStatus implements RSVProcess {
 		return resource_statuschanges;
 	}
 	
-	public String addServiceNameList(String note, int service_id) {
+	static String addServiceNameList(OIMModel oim, String note, int service_id) {
 		try {
 			Service s = oim.getService(service_id);
 			if(note.length() != 0) {
@@ -611,7 +598,7 @@ public class RSVOverallStatus implements RSVProcess {
 	}
 	
 	//this function is used by RSVCache as well..
-	public ResourceStatus calculateResourceStatus(LSCType current_service_statuses)
+	public static ResourceStatus calculateResourceStatus(OIMModel oim, LSCType current_service_statuses)
 	{
 		//prepare counter
 		int critical = 0;
@@ -630,19 +617,19 @@ public class RSVOverallStatus implements RSVProcess {
 			switch(s.status_id) {
 			case Status.CRITICAL:
 				critical++;
-				critical_note = addServiceNameList(critical_note, s.service_id);
+				critical_note = addServiceNameList(oim, critical_note, s.service_id);
 				continue;
 			case Status.WARNING:
 				warning++;
-				warning_note = addServiceNameList(warning_note, s.service_id);
+				warning_note = addServiceNameList(oim, warning_note, s.service_id);
 				continue;
 			case Status.UNKNOWN:
 				unknown++;
-				unknown_note = addServiceNameList(unknown_note, s.service_id);
+				unknown_note = addServiceNameList(oim, unknown_note, s.service_id);
 				continue;
 			case Status.DOWNTIME:
 				downtime++;
-				downtime_note = addServiceNameList(downtime_note, s.service_id);
+				downtime_note = addServiceNameList(oim, downtime_note, s.service_id);
 				continue;
 			case Status.OK:
 				ok++;

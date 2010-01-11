@@ -90,19 +90,22 @@ public class RSVMain {
 	}
 	
 	public int dispatch(String command, String args[]) {
+
+		//determine which process to run
 		RSVProcess process = null;
 		if(command.compareToIgnoreCase("preprocess") == 0) {
 			process = new RSVPreprocess();
-		}
-		if(command.compareToIgnoreCase("overallstatus") == 0) {
+		} else if(command.compareToIgnoreCase("overallstatus") == 0) {
 			process = new RSVOverallStatus();
-		}
-		if(command.compareToIgnoreCase("availability") == 0) {
+		} else if(command.compareToIgnoreCase("availability") == 0) {
 			process = new RSVAvailability();
-		}
-		if(command.compareToIgnoreCase("vomatrix") == 0) {
+		} else if(command.compareToIgnoreCase("vomatrix") == 0) {
 			process = new RSVVOMatrix();
+		} else if(command.compareToIgnoreCase("cache") == 0) {
+			process = new RSVCurrentStatusCache();
 		}
+			
+		//then run it
 		if(process == null) {
 			logger.error("Unknown command specified: " + command);
 			showUsage();
