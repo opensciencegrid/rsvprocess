@@ -36,6 +36,7 @@ public class StatusChangeModel extends RSVDatabase {
         	//only store service_id that this resource has (if someone removes service, then we need to filter removed ones)
         	if(services.contains(service_id)) {
 	        	ServiceStatus ss = new ServiceStatus();
+	        	ss.service_id = service_id;
 	        	ss.status_id = rs.getInt("status_id");
 	        	ss.timestamp = rs.getInt("timestamp");
 	        	ret.put(service_id, ss);

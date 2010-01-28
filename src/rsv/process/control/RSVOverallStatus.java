@@ -441,9 +441,7 @@ public class RSVOverallStatus implements RSVProcess {
 	
 	//this function is used by RSVCache as well..
 	public static ServiceStatus calculateServiceStatus(OIMModel oim, ArrayList<Integer/*metric_id*/> critical, RelevantRecordSet rrs, int timestamp) throws SQLException
-	{
-		ServiceStatus new_status = new ServiceStatus();
-		
+	{	
 		//reset counters
 		int expired = 0;
 		int non_expired_critical = 0;
@@ -493,6 +491,7 @@ public class RSVOverallStatus implements RSVProcess {
 		}	
 		
 		//let's analyze
+		ServiceStatus new_status = new ServiceStatus();
 		if(non_expired_critical > 0) {
 			new_status.status_id = Status.CRITICAL;
 			new_status.note = non_expired_critical + " of " + critical.size() + " critical metrics are in CRITICAL status.";
@@ -584,7 +583,7 @@ public class RSVOverallStatus implements RSVProcess {
 				note += ", ";
 			}
 			if(s == null) {
-				note += "UNKNOWN SERVICE (" + service_id + ")";
+				note += "UNKNOWN (" + service_id + ")";
 			} else {
 				note += s.getName();
 			}
