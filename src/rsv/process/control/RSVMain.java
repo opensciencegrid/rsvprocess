@@ -103,8 +103,8 @@ public class RSVMain {
 			process = new RSVVOMatrix();
 		} else if(command.compareToIgnoreCase("cache") == 0) {
 			process = new RSVCurrentStatusCache();
-		}
-			
+		} 
+		
 		//then run it
 		if(process == null) {
 			logger.error("Unknown command specified: " + command);
