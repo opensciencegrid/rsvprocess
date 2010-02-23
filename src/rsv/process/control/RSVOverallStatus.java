@@ -544,7 +544,8 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 			logger.error("Current resource status for "+resource_id+" is inconsistent with the current service status. Fixing..");
-			resource_statuschanges.add(rs);
+			//temporarily disabling this to see what is going on..
+			//resource_statuschanges.add(rs);
 		}
 		
 		for(ServiceStatus change : service_statuschanges) {
