@@ -530,6 +530,8 @@ public class RSVOverallStatus implements RSVProcess {
 		LSCType current_service_statuses = (LSCType) initial_service_statuses.clone();
 		ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();
 		
+		Boolean dump = false;
+		
 		//first, let's make sure that the current resource status is consistent with the current service status 
 		//this situation should never happen, but it does and I can't figure out why... so for now this is an extremely dirty
 		//patch..
@@ -544,16 +546,9 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 			logger.warn("Current resource status for "+resource_id+" is inconsistent with the current service status.");
-
-			//temporarily disabling this to see what is going on..
+			logger.warn("  -- adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
 			resource_statuschanges.add(rs);			
-			logger.warn("adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
-
-			logger.warn("Dumping resource status change records");
-			for(ResourceStatus it : resource_statuschanges) {
-				logger.warn("timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
-			}
-
+			dump = true;
 		}
 		
 		for(ServiceStatus change : service_statuschanges) {
@@ -579,6 +574,13 @@ public class RSVOverallStatus implements RSVProcess {
 						" at " + rs.timestamp +
 						" reason: " + rs.note);
 				*/
+			}
+		}
+		
+		if(dump) {
+			logger.warn("Dumping resource status change records");
+			for(ResourceStatus it : resource_statuschanges) {
+				logger.warn("timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
 			}
 		}
 		
