@@ -537,16 +537,23 @@ public class RSVOverallStatus implements RSVProcess {
 		//patch..
 		ResourceStatus rs = calculateResourceStatus(oim, initial_service_statuses);
 		if(current_resource_status != null && rs.status_id != current_resource_status.status_id) {
+
+			logger.warn("Current resource status: "+current_resource_status.timestamp);
+			logger.warn(" status_id:"+current_resource_status.status_id);
+			logger.warn(" resource_id:"+resource_id+" is inconsistent with calculated status id of:" + rs.status_id);
+			logger.warn(" calculated from following service statuses.");
+			
 			rs.resource_id = resource_id;
 			rs.timestamp = 0;
 			//find the earliest timestamp for service_status (TODO - not sure if this logic is correct..)
 			for(ServiceStatus st : initial_service_statuses.values()) {
+				logger.warn("    timestamp: "+st.timestamp + " service_id:" + st.service_id + " note:" + st.note);
 				if(rs.timestamp == 0 || st.timestamp < rs.timestamp) {
 					rs.timestamp = st.timestamp;
 				}
 			}
-			logger.warn("Current resource status for "+resource_id+" is inconsistent with the current service status.");
-			logger.warn("  -- adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
+
+			logger.warn("  adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
 			resource_statuschanges.add(rs);			
 			dump = true;
 		}
@@ -578,7 +585,7 @@ public class RSVOverallStatus implements RSVProcess {
 		}
 		
 		if(dump) {
-			logger.warn("Dumping resource status change records");
+			logger.warn("  Dumping resource status change records to be inserted");
 			for(ResourceStatus it : resource_statuschanges) {
 				logger.warn("timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
 			}
