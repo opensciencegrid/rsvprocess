@@ -539,7 +539,7 @@ public class RSVOverallStatus implements RSVProcess {
 		if(current_resource_status != null && rs.status_id != current_resource_status.status_id) {
 
 			logger.warn("Current resource status:: resource_id:" + current_resource_status.resource_id + " status_id:"+current_resource_status.status_id + " timestamp:"+current_resource_status.timestamp + " note:"+current_resource_status.note);
-			logger.warn("Calculated status:: resource_id:"+rs.resource_id+" status_id:" + rs.status_id + " timestamp:" + rs.timestamp + " note:" + rs.note);
+			logger.warn("Calculated status:: resource_id:"+resource_id+" status_id:" + rs.status_id + " note:" + rs.note);
 			logger.warn("Calculated from following service statuses --");
 			
 			rs.resource_id = resource_id;
