@@ -538,23 +538,26 @@ public class RSVOverallStatus implements RSVProcess {
 		ResourceStatus rs = calculateResourceStatus(oim, initial_service_statuses);
 		if(current_resource_status != null && rs.status_id != current_resource_status.status_id) {
 
-			logger.warn("Current resource status: "+current_resource_status.timestamp);
-			logger.warn(" status_id:"+current_resource_status.status_id);
-			logger.warn(" resource_id:"+resource_id+" is inconsistent with calculated status id of:" + rs.status_id);
-			logger.warn(" calculated from following service statuses.");
+			logger.warn("Current resource status:: resource_id:" + current_resource_status.resource_id + " status_id:"+current_resource_status.status_id + " timestamp:"+current_resource_status.timestamp + " note:"+current_resource_status.note);
+			logger.warn("Calculated status:: resource_id:"+rs.resource_id+" status_id:" + rs.status_id + " timestamp:" + rs.timestamp + " note:" + rs.note);
+			logger.warn("Calculated from following service statuses --");
 			
 			rs.resource_id = resource_id;
 			rs.timestamp = 0;
 			//find the earliest timestamp for service_status (TODO - not sure if this logic is correct..)
 			for(ServiceStatus st : initial_service_statuses.values()) {
-				logger.warn("    timestamp: "+st.timestamp + " service_id:" + st.service_id + " note:" + st.note);
+				logger.warn("    timestamp: "+st.timestamp + " service_id:" + st.service_id + " note:" + st.note + " status_id:" + st.status_id);
 				if(rs.timestamp == 0 || st.timestamp < rs.timestamp) {
 					rs.timestamp = st.timestamp;
 				}
 			}
 
-			logger.warn("  adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
+			logger.warn("Adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
 			resource_statuschanges.add(rs);			
+			
+			logger.warn("Resetting current_resource_status with newly calculated result");
+			current_resource_status = rs;
+			
 			dump = true;
 		}
 		
