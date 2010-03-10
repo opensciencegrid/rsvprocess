@@ -538,9 +538,9 @@ public class RSVOverallStatus implements RSVProcess {
 		ResourceStatus rs = calculateResourceStatus(oim, initial_service_statuses);
 		if(current_resource_status != null && rs.status_id != current_resource_status.status_id) {
 
-			logger.warn("Current resource status:: resource_id:" + current_resource_status.resource_id + " status_id:"+current_resource_status.status_id + " timestamp:"+current_resource_status.timestamp + " note:"+current_resource_status.note);
-			logger.warn("Calculated status:: resource_id:"+resource_id+" status_id:" + rs.status_id + " note:" + rs.note);
-			logger.warn("Calculated from following service statuses --");
+			logger.warn("Current resource status conflict on resource_id:" + resource_id + " status_id:"+current_resource_status.status_id + " timestamp:"+current_resource_status.timestamp + " note:"+current_resource_status.note);
+			logger.warn("  Calculated status_id:" + rs.status_id + " note:" + rs.note);
+			logger.warn("  Calculated from following service statuses --");
 			
 			rs.resource_id = resource_id;
 			rs.timestamp = 0;
@@ -552,10 +552,10 @@ public class RSVOverallStatus implements RSVProcess {
 				}
 			}
 
-			logger.warn("Adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
+			logger.warn("  Adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
 			resource_statuschanges.add(rs);			
 			
-			logger.warn("Resetting current_resource_status with newly calculated result");
+			logger.warn("  Resetting current_resource_status with newly calculated result");
 			current_resource_status = rs;
 			
 			dump = true;
@@ -590,7 +590,7 @@ public class RSVOverallStatus implements RSVProcess {
 		if(dump) {
 			logger.warn("  Dumping resource status change records to be inserted");
 			for(ResourceStatus it : resource_statuschanges) {
-				logger.warn("timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
+				logger.warn("  timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
 			}
 		}
 		
