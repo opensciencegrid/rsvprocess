@@ -17,6 +17,7 @@ public class MetricInserter extends RSVDatabase {
 	
 	//private PreparedStatement prepStmt = null;
 	private PreparedStatement stmt_data = null;
+	private PreparedStatement stmt_detail = null;
 	
 	public MetricInserter()
 	{
@@ -25,6 +26,9 @@ public class MetricInserter extends RSVDatabase {
 		try {
 			sql = "insert into metricdata (id, timestamp, resource_id, metric_id, metric_status_id) values (?,?,?,?,?)";
 		    stmt_data = RSVDatabase.db.prepareStatement(sql);
+		    
+			sql = "insert into metricdetail (id, detail) values (?,?)";
+			stmt_detail = RSVDatabase.db.prepareStatement(sql);
 		    
 		} catch (SQLException e) {
 			logger.error("failed to prepare for batch insert", e);
@@ -50,7 +54,7 @@ public class MetricInserter extends RSVDatabase {
 	    return recs;
 	}
 	*/
-	public void add(int id, int timestamp, int resource_id, int metric_id, int status_id) throws SQLException 
+	public void add(int id, int timestamp, int resource_id, int metric_id, int status_id, String detail) throws SQLException 
 	{	
 		stmt_data.setInt(1, id); //use the same key as in the gratia DB
 		stmt_data.setInt(2, timestamp);
@@ -58,19 +62,23 @@ public class MetricInserter extends RSVDatabase {
 		stmt_data.setInt(4, metric_id);
 		stmt_data.setInt(5, status_id);
 		stmt_data.addBatch();
+		
+		stmt_detail.setInt(1, id);
+		stmt_detail.setString(2, detail);
+		stmt_detail.addBatch();
 	}
 	
 	//returns number of records inserted
 	public void commit() throws SQLException
 	{
-		logger.info("Executing Insert Batch");
+		logger.info("Executing Insert Batch for metricdata");
 		int recs = 0;
 		try {
 			int[] numUpdates = stmt_data.executeBatch();    
 			for(int i = 0;i < numUpdates.length; ++i) {
 				recs += numUpdates[i];
 			}
-			logger.info(recs + " records were inserted to newmetrics");
+			logger.info(recs + " records were inserted to metricdata");
 			
 			//has any warning?
 			SQLWarning w = stmt_data.getWarnings();
@@ -78,7 +86,25 @@ public class MetricInserter extends RSVDatabase {
 				logger.warn(w.getMessage());
 			}
 		} catch (BatchUpdateException e) {
-			logger.error(e);
+			logger.error("BatchUpdateException on metricdata insertion", e);
+		}
+		
+		logger.info("Executing Insert Batch for metricdetail");
+		recs = 0;
+		try {
+			int[] numUpdates = stmt_detail.executeBatch();    
+			for(int i = 0;i < numUpdates.length; ++i) {
+				recs += numUpdates[i];
+			}
+			logger.info(recs + " records were inserted to metricdetail");
+			
+			//has any warning?
+			SQLWarning w = stmt_detail.getWarnings();
+			if(w != null) {
+				logger.warn(w.getMessage());
+			}
+		} catch (BatchUpdateException e) {
+			logger.error("BatchUpdateException on metricdetail insertion", e);
 		}
 	}
 
