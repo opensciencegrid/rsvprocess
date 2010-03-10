@@ -10,6 +10,8 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import rsv.process.Configuration;
+import rsv.process.control.RSVMain;
 import rsv.process.control.RSVPreprocess;
 
 public class MetricInserter extends RSVDatabase {
@@ -71,6 +73,14 @@ public class MetricInserter extends RSVDatabase {
 	//returns number of records inserted
 	public void commit() throws SQLException
 	{
+		commit_data();
+		String store_metricdetail = RSVMain.conf.getProperty("store_metricdetail");
+		if(store_metricdetail != null && store_metricdetail.equals("true")) {
+			commit_detail();
+		}
+	}
+	public void commit_data() throws SQLException {
+		
 		logger.info("Executing Insert Batch for metricdata");
 		int recs = 0;
 		try {
@@ -88,9 +98,11 @@ public class MetricInserter extends RSVDatabase {
 		} catch (BatchUpdateException e) {
 			logger.error("BatchUpdateException on metricdata insertion", e);
 		}
-		
+	}
+	
+	public void commit_detail() throws SQLException {
 		logger.info("Executing Insert Batch for metricdetail");
-		recs = 0;
+		int recs = 0;
 		try {
 			int[] numUpdates = stmt_detail.executeBatch();    
 			for(int i = 0;i < numUpdates.length; ++i) {
