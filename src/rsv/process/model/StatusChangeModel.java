@@ -28,7 +28,7 @@ public class StatusChangeModel extends RSVDatabase {
         	"(select max(timestamp) last_timestamp ,service_id from statuschange_service "+
         	"where resource_id = "+ resource_id + " " + where_timestamp +
         	"group by service_id) last "+
-        	"where s.timestamp = last.last_timestamp and s.service_id = last.service_id ";
+        	"where s.timestamp = last.last_timestamp and resource_id = "+resource_id+" and s.service_id = last.service_id ";
         //logger.debug(sql);
         ResultSet rs = stmt.executeQuery(sql);
         while(rs.next()) {
