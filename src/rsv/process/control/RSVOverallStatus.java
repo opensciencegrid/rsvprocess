@@ -300,7 +300,7 @@ public class RSVOverallStatus implements RSVProcess {
 	//from a list of metricdata, add dummymetricdata where the metricdata expires.
 	private ArrayList<MetricData> addExpirationTriggers(RelevantRecordSet initial_rrs, ArrayList<MetricData> mds, TimePeriod tp) throws SQLException 
 	{
-		//create list of expiration_points that we will need to insert as DummyMetricData
+		//create list of expiration_poiource_id:177 status_id:nts that we will need to insert as DummyMetricData
 		TreeSet<Integer/*timestamp*/> expiration_points = new TreeSet<Integer>();
 		
 		//add from initial_rrs
@@ -538,7 +538,7 @@ public class RSVOverallStatus implements RSVProcess {
 		ResourceStatus rs = calculateResourceStatus(oim, initial_service_statuses);
 		if(current_resource_status != null && rs.status_id != current_resource_status.status_id) {
 
-			logger.warn("Current resource status conflict on resource_id:" + resource_id + " status_id:"+current_resource_status.status_id + " timestamp:"+current_resource_status.timestamp + " note:"+current_resource_status.note);
+			logger.warn("Current resource status conflict on resource_id:" + resource_id + " status_id:"+current_resource_status.status_id + " timestamp:"+current_resource_status.timestamp);
 			logger.warn("  Calculated status_id:" + rs.status_id + " note:" + rs.note);
 			logger.warn("  Calculated from following service statuses --");
 			

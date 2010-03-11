@@ -51,7 +51,7 @@ public class StatusChangeModel extends RSVDatabase {
         if(timestamp != null) {
         	where_timestamp = " and timestamp < " + timestamp + " ";
         }
-        String sql = "select status_id from statuschange_resource s, "+
+        String sql = "select status_id, timestamp from statuschange_resource s, "+
         	"(select max(timestamp) last_timestamp from statuschange_resource "+
         	"where resource_id = "+ resource_id + " " + where_timestamp +
         	") last "+
@@ -61,10 +61,12 @@ public class StatusChangeModel extends RSVDatabase {
         if(rs.next()) {
         	ResourceStatus status = new ResourceStatus();
         	status.status_id = rs.getInt(1);
+        	status.timestamp = rs.getInt(2);
         	return status;
         }
         return null;
 	}
+	
 	
 	public int clearStatusChanges(int resource_id, int start, int end) throws SQLException
 	{
