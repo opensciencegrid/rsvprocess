@@ -22,13 +22,14 @@ public class RSVMain {
 	
 	private static final Logger logger = Logger.getLogger(RSVMain.class);
 	public static Configuration conf = null;
+	public static final String version = "1.5";
 	
 	public static boolean debug = false;
 
 	public static void main(String[] args) {
 		int ret = exitcode_ok;		
 		try {
-			logger.info("Initializing RSV Process");
+			logger.info("Initializing RSV Process " + version);
 			conf = new Configuration();
 			
 			conf.load(new FileInputStream("rsvprocess.conf"));
