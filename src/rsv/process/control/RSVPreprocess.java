@@ -129,8 +129,11 @@ public class RSVPreprocess implements RSVProcess {
 	            	count_invalid_timestamp++;
 	            	continue;
 	            }
+	            
+	            //detailsdata
+	            String detail = rs.getString("DetailsData");
 	         
-	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id);
+	            mdetail.add(dbid, utimestamp, resource_id, metric_id, status_id, detail);
 	            records_added++;
 	        }
 			

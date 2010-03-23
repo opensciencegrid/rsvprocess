@@ -2,10 +2,10 @@ package rsv.process;
 
 import java.util.Properties;
 
+//DON'T ADD TO THIS ANYMORE... just pull property using plain string
 public class Configuration extends Properties {
 	
 	public static final String debug = "debug";
-	
 	
 	//RSV DB
 	public static final String rsv_db_url = "rsv_db_url";
@@ -29,4 +29,5 @@ public class Configuration extends Properties {
 	public static final String current_resource_status_xml_cache = "current_resource_status_xml_cache";
 	public static final String overall_status_max_record_count = "overall_status_max_record_count";
 	//public static final String aandr_cache = "aandr_cache";
+
 }

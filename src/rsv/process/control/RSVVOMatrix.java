@@ -123,6 +123,7 @@ public class RSVVOMatrix implements RSVProcess{
 			xml += "</VOMembership>\n";
 			//output XML to specified location
 		    try{
+		    	logger.debug("Wriging generated XML to : " + Configuration.vomatrix_xml_cache);
 		    	FileWriter fstream = new FileWriter(RSVMain.conf.getProperty(Configuration.vomatrix_xml_cache));
 		    	BufferedWriter out = new BufferedWriter(fstream);
 		    	out.write(xml);

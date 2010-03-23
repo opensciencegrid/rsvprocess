@@ -28,7 +28,7 @@ public class StatusChangeModel extends RSVDatabase {
         	"(select max(timestamp) last_timestamp ,service_id from statuschange_service "+
         	"where resource_id = "+ resource_id + " " + where_timestamp +
         	"group by service_id) last "+
-        	"where s.timestamp = last.last_timestamp and s.service_id = last.service_id ";
+        	"where s.timestamp = last.last_timestamp and resource_id = "+resource_id+" and s.service_id = last.service_id ";
         //logger.debug(sql);
         ResultSet rs = stmt.executeQuery(sql);
         while(rs.next()) {
@@ -36,6 +36,7 @@ public class StatusChangeModel extends RSVDatabase {
         	//only store service_id that this resource has (if someone removes service, then we need to filter removed ones)
         	if(services.contains(service_id)) {
 	        	ServiceStatus ss = new ServiceStatus();
+	        	ss.service_id = service_id;
 	        	ss.status_id = rs.getInt("status_id");
 	        	ss.timestamp = rs.getInt("timestamp");
 	        	ret.put(service_id, ss);
@@ -50,7 +51,7 @@ public class StatusChangeModel extends RSVDatabase {
         if(timestamp != null) {
         	where_timestamp = " and timestamp < " + timestamp + " ";
         }
-        String sql = "select status_id from statuschange_resource s, "+
+        String sql = "select status_id, timestamp from statuschange_resource s, "+
         	"(select max(timestamp) last_timestamp from statuschange_resource "+
         	"where resource_id = "+ resource_id + " " + where_timestamp +
         	") last "+
@@ -60,10 +61,12 @@ public class StatusChangeModel extends RSVDatabase {
         if(rs.next()) {
         	ResourceStatus status = new ResourceStatus();
         	status.status_id = rs.getInt(1);
+        	status.timestamp = rs.getInt(2);
         	return status;
         }
         return null;
 	}
+	
 	
 	public int clearStatusChanges(int resource_id, int start, int end) throws SQLException
 	{

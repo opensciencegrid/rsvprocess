@@ -13,7 +13,7 @@ public class GratiaModel extends GratiaDatabase {
 	public ResultSet getMetricRecords(int start_dbid, int limit) throws SQLException
 	{
         Statement stmt = GratiaDatabase.db.createStatement();
-        ResultSet rs = stmt.executeQuery("select dbid,ServiceUri,MetricName,MetricStatus, UNIX_Timestamp(Timestamp) as utimestamp from MetricRecord" + 
+        ResultSet rs = stmt.executeQuery("select dbid,ServiceUri,MetricName,MetricStatus, UNIX_Timestamp(Timestamp) as utimestamp, DetailsData from MetricRecord" + 
         		" where dbid > " + start_dbid + 
         		" order by dbid" +  //TODO - is this necessary?
         		" limit " + limit);

@@ -136,18 +136,7 @@ public class RSVOverallStatus implements RSVProcess {
 			scm.outputResourceStatusChanges(all_resource_statuschanges);
 			if(last_mdid != null) {
 				lm.updateLastMetricDataIDProcessed(last_mdid);	   
-			}
-			/*
-			//Step 5. Recalculate current status cache for all resources
-			Calendar cal = Calendar.getInstance();
-			Date current_date = cal.getTime();
-			int currenttime = (int) (current_date.getTime()/1000);
-			ResourcesType resources = oim.getResources();
-			logger.debug("Updating current status cache files for " + resources.size() + " resources.");
-			for(Integer resource_id : resources.keySet()) {
-				updateCurrentStatusCache(resources.get(resource_id), currenttime);
-			}
-			*/			
+			}			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
 			SendMail.sendErrorEmail(e.getMessage());
@@ -156,151 +145,10 @@ public class RSVOverallStatus implements RSVProcess {
 		return ret;
 	}
 	
-	/*
-	private void updateCurrentStatusCache(Resource r, int currenttime) throws SQLException, IOException 
-	{	
-		int resource_id = r.getID();
-		
-		//load RRS				
-		RelevantRecordSet rrs = new RelevantRecordSet(resource_id, currenttime);
-			
-		//place holder for resource specific xml
-		String xml = "<?xml version=\"1.0\"?>\n";
-		xml += "<CurrentResourceStatus>";
-		xml += "<Timestamp>"+currenttime+"</Timestamp>";
-		
-		LSCType service_statues = new LSCType();
-		
-		//for each service..
-		xml += "<Services>";
-		ArrayList<Integer/> services = oim.getResourceService(resource_id); 
-		for(Integer service_id : services) {
-			xml += "<Service>";
-			xml += "<ServiceID>"+service_id+"</ServiceID>";
-			Service s = oim.getService(service_id);
-			xml += "<ServiceName>"+s.getName()+"</ServiceName>";					
-			xml += "<ServiceDescription>"+s.getDescription()+"</ServiceDescription>";	
-			
-			ArrayList<Integer> critical_metrics = oim.getCriticalMetrics(service_id);
-			ArrayList<Integer> non_critical_metrics = oim.getNonCriticalMetrics(service_id);
-
-			//calculate service status
-			ServiceStatus status = calculateServiceStatus(oim, critical_metrics, rrs, currenttime);	
-			status.service_id = service_id;
-			
-			//is this in downtime?
-			Downtime down = getDownTime(resource_id, service_id, currenttime);
-			if(down != null) {
-				xml += "<DowntimeNote>";
-				xml += "<InternalStatus>"+Status.getStatus(status.status_id)+"</InternalStatus>";
-				xml += "<Note>This service is currently under maintenance</Note>";
-				xml += "<MaintenanceSummary>" + down.getSummary()+"</MaintenanceSummary>";
-				Date from = new Date(down.getStartTime()*1000L);
-				Date to = new Date(down.getEndTime()*1000L);
-				xml += "<From>" + from + "</From><To>" + to + "</To>";
-				xml += "</DowntimeNote>";
-				
-				//override status with DOWMTIME
-				status.status_id = Status.DOWNTIME;
-			}
-			service_statues.put(service_id, status);	
-			xml += "<Status>"+Status.getStatus(status.status_id)+"</Status>";
-			xml += "<Note>"+status.note+"</Note>";	
-			
-			//output critical metric details
-			xml += "<CriticalMetrics>";
-			xml += outputMetricXML(critical_metrics, rrs);
-			xml += "</CriticalMetrics>";
-			
-			//output non-critical metric details
-			xml += "<NonCriticalMetrics>";
-			xml += outputMetricXML(non_critical_metrics, rrs);
-			xml += "</NonCriticalMetrics>";
-			
-			xml += "</Service>";
-		}
-		xml += "</Services>";
-		
-		//calculate resource status
-		ResourceStatus rstatus = calculateResourceStatus(oim, service_statues);
-		
-		String resource_detail = "";
-		resource_detail += "<ResourceID>"+resource_id+"</ResourceID>";
-		resource_detail += "<ResourceName>"+r.getName()+"</ResourceName>";
-		resource_detail += "<Status>"+Status.getStatus(rstatus.status_id)+"</Status>";	
-		resource_detail += "<Note>"+rstatus.note+"</Note>";
-		xml += resource_detail;
-		
-		xml += "</CurrentResourceStatus>";
-		
-		//output resource specific XML to configured location
-    	String filename_template = RSVMain.conf.getProperty(Configuration.current_resource_status_xml_cache);
-    	String filename = filename_template.replaceFirst("<ResourceID>", String.valueOf(resource_id));
-    	
-    	//update A&R
-    	//TODO---
-
-    	FileWriter fstream = new FileWriter(filename);
-    	BufferedWriter out = new BufferedWriter(fstream);
-    	out.write(xml);
-    	out.close();
-	}
-	*/
-	/*
-	private String outputMetricXML(ArrayList<Integer> critical_metrics, RelevantRecordSet rrs) throws SQLException
-	{
-		String xml = "";
-		for(Integer metric_id : critical_metrics) {
-			Metric m = oim.getMetric(metric_id);
-			
-			xml += "<Metric>";
-			xml += "<MetricID>"+metric_id+"</MetricID>";
-			xml += "<MetricName>"+m.getName()+"</MetricName>";
-			xml += "<MetricCommonName>"+m.getCommonName()+"</MetricCommonName>";
-			xml += "<MetricDescription>"+m.getDescription()+"</MetricDescription>";
-			xml += "<MetricFreshFor>"+m.getFreshFor()+"</MetricFreshFor>";
-			
-			MetricData md = rrs.getCurrent(metric_id);
-			
-			if(md == null) {
-				xml += "<Status/>";
-				xml += "<Timestamp/>";
-				xml += "<Detail/>";			
-				xml += "<MetricDataID/>";
-			} else {
-				xml += "<Status>"+Status.getStatus(md.getStatusID())+"</Status>";
-				xml += "<Timestamp>"+md.getTimestamp()+"</Timestamp>";
-				xml += "<Detail><![CDATA["+md.fetchDetail()+"]]></Detail>";
-				xml += "<MetricDataID>"+md.getID()+"</MetricDataID>";
-			}
-			xml += "</Metric>";
-		}
-		return xml;
-	}
-
-	
-	private Downtime getDownTime(int resource_id, int service_id, int timestamp) throws SQLException 
-	{
-		ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
-		if(downtimes != null) {
-			for(Downtime downtime : downtimes) {
-				//TODO - check boundary case policies.
-				if(downtime.getStartTime() < timestamp && downtime.getEndTime() > timestamp) {
-					ArrayList<Integer> services = downtime.getServiceIDs();
-					if(services.contains(service_id)) {
-						return downtime;
-					}
-				}
-			}
-		}	
-		return null;
-	}
-	*/
-	
 	//from a list of metricdata, add dummymetricdata where the metricdata expires.
 	private ArrayList<MetricData> addExpirationTriggers(RelevantRecordSet initial_rrs, ArrayList<MetricData> mds, TimePeriod tp) throws SQLException 
 	{
-		//create list of expiration_points that we will need to insert as DummyMetricData
+		//create list of expiration_poiource_id:177 status_id:nts that we will need to insert as DummyMetricData
 		TreeSet<Integer/*timestamp*/> expiration_points = new TreeSet<Integer>();
 		
 		//add from initial_rrs
@@ -424,14 +272,6 @@ public class RSVOverallStatus implements RSVProcess {
 					//service status has changed
 					current_status.put(service_id, new_status);
 					statuschanges.add(new_status);
-					/*
-					 * 
-					logger.debug("Resource " + resource_id + 
-							" Service Status for " + service_id + 
-							" has changed to " + new_status.status_id + 
-							" at " + change_date.toString() + "(" + new_status.timestamp + ")" +
-							" reason: " + new_status.note);
-					*/
 				}
 			}
 		}
@@ -441,9 +281,7 @@ public class RSVOverallStatus implements RSVProcess {
 	
 	//this function is used by RSVCache as well..
 	public static ServiceStatus calculateServiceStatus(OIMModel oim, ArrayList<Integer/*metric_id*/> critical, RelevantRecordSet rrs, int timestamp) throws SQLException
-	{
-		ServiceStatus new_status = new ServiceStatus();
-		
+	{	
 		//reset counters
 		int expired = 0;
 		int non_expired_critical = 0;
@@ -493,6 +331,7 @@ public class RSVOverallStatus implements RSVProcess {
 		}	
 		
 		//let's analyze
+		ServiceStatus new_status = new ServiceStatus();
 		if(non_expired_critical > 0) {
 			new_status.status_id = Status.CRITICAL;
 			new_status.note = non_expired_critical + " of " + critical.size() + " critical metrics are in CRITICAL status.";
@@ -531,21 +370,35 @@ public class RSVOverallStatus implements RSVProcess {
 		LSCType current_service_statuses = (LSCType) initial_service_statuses.clone();
 		ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();
 		
+		Boolean dump = false;
+		
 		//first, let's make sure that the current resource status is consistent with the current service status 
 		//this situation should never happen, but it does and I can't figure out why... so for now this is an extremely dirty
 		//patch..
 		ResourceStatus rs = calculateResourceStatus(oim, initial_service_statuses);
 		if(current_resource_status != null && rs.status_id != current_resource_status.status_id) {
+
+			logger.warn("Current resource status conflict on resource_id:" + resource_id + " status_id:"+current_resource_status.status_id + " timestamp:"+current_resource_status.timestamp);
+			logger.warn("  Calculated status_id:" + rs.status_id + " note:" + rs.note);
+			logger.warn("  Calculated from following service statuses --");
+			
 			rs.resource_id = resource_id;
 			rs.timestamp = 0;
 			//find the earliest timestamp for service_status (TODO - not sure if this logic is correct..)
 			for(ServiceStatus st : initial_service_statuses.values()) {
+				logger.warn("    timestamp: "+st.timestamp + " service_id:" + st.service_id + " note:" + st.note + " status_id:" + st.status_id);
 				if(rs.timestamp == 0 || st.timestamp < rs.timestamp) {
 					rs.timestamp = st.timestamp;
 				}
 			}
-			logger.error("Current resource status for "+resource_id+" is inconsistent with the current service status. Fixing..");
-			resource_statuschanges.add(rs);
+
+			logger.warn("  Adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
+			resource_statuschanges.add(rs);			
+			
+			logger.warn("  Resetting current_resource_status with newly calculated result");
+			current_resource_status = rs;
+			
+			dump = true;
 		}
 		
 		for(ServiceStatus change : service_statuschanges) {
@@ -574,6 +427,13 @@ public class RSVOverallStatus implements RSVProcess {
 			}
 		}
 		
+		if(dump) {
+			logger.warn("  Dumping resource status change records to be inserted");
+			for(ResourceStatus it : resource_statuschanges) {
+				logger.warn("  timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
+			}
+		}
+		
 		return resource_statuschanges;
 	}
 	
@@ -584,7 +444,7 @@ public class RSVOverallStatus implements RSVProcess {
 				note += ", ";
 			}
 			if(s == null) {
-				note += "UNKNOWN SERVICE (" + service_id + ")";
+				note += "UNKNOWN (" + service_id + ")";
 			} else {
 				note += s.getName();
 			}
