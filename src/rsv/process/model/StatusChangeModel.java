@@ -1,5 +1,6 @@
 package rsv.process.model;
 
+import java.sql.BatchUpdateException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -94,7 +95,7 @@ public class StatusChangeModel extends RSVDatabase {
 	}
 	
 	//returns number of record inserted
-	public int outputServiceStatusChanges(ArrayList<ServiceStatus> service_statuschanges) throws SQLException
+	public void outputServiceStatusChanges(ArrayList<ServiceStatus> service_statuschanges) throws SQLException
 	{
 		int note_max_length = 256;
 		String sql = "insert into statuschange_service (resource_id, service_id, status_id, timestamp, detail) values (?,?,?,?,?)";
@@ -110,17 +111,19 @@ public class StatusChangeModel extends RSVDatabase {
 			stmt_data.addBatch();
 	    }
 	    
-		int recs = 0;
-		int[] numUpdates = stmt_data.executeBatch();    
-		for(int i = 0;i < numUpdates.length; ++i) {
-			recs += numUpdates[i];
+	    try {
+			int recs = 0;
+			int[] numUpdates = stmt_data.executeBatch();    
+			for(int i = 0;i < numUpdates.length; ++i) {
+				recs += numUpdates[i];
+			}
+			logger.debug(recs + " records were inserted to statuschange_service table");
+		} catch (BatchUpdateException e) {
+			logger.error("BatchUpdateException on statuschange_service insertion", e);
 		}
-		logger.debug(recs + " records were inserted to statuschange_service table");
-		
-		return recs;
 	}
 	
-	public int outputResourceStatusChanges(ArrayList<ResourceStatus> resource_statuschanges) throws SQLException
+	public void outputResourceStatusChanges(ArrayList<ResourceStatus> resource_statuschanges) throws SQLException
 	{
 		int note_max_length = 256;
 		String sql = "insert into statuschange_resource (resource_id, status_id, timestamp, detail) values (?,?,?,?)";
@@ -136,14 +139,16 @@ public class StatusChangeModel extends RSVDatabase {
 			stmt_data.addBatch();
 	    }
 	    
-		int recs = 0;
-		int[] numUpdates = stmt_data.executeBatch();    
-		for(int i = 0;i < numUpdates.length; ++i) {
-			recs += numUpdates[i];
-		}
-		logger.debug(recs + " records were inserted to statuschange_resource table");
-		
-		return recs;		
+	    try {
+			int recs = 0;
+			int[] numUpdates = stmt_data.executeBatch();    
+			for(int i = 0;i < numUpdates.length; ++i) {
+				recs += numUpdates[i];
+			}
+			logger.debug(recs + " records were inserted to statuschange_resource table");
+		} catch (BatchUpdateException e) {
+			logger.error("BatchUpdateException on statuschange_resource insertion", e);
+		}	
 	}
 	
 	public ServiceStatus getInitServiceStatus(int resource_id, int service_id, int start) throws SQLException {
