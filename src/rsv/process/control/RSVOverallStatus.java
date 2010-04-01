@@ -120,7 +120,7 @@ public class RSVOverallStatus implements RSVProcess {
 					all_service_statuschanges.addAll(service_statuschanges);
 					
 					//D3. Calculate Resource Status Changes.
-					ArrayList<ResourceStatus> resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges);
+					ArrayList<ResourceStatus> resource_statuschanges = calculateResourceStatusChanges(resource_id, initial_resource_status, initial_service_statuses, service_statuschanges, tp);
 					all_resource_statuschanges.addAll(resource_statuschanges);
 				}
 			}
@@ -371,7 +371,8 @@ public class RSVOverallStatus implements RSVProcess {
 	private ArrayList<ResourceStatus> calculateResourceStatusChanges(int resource_id, 
 			ResourceStatus current_resource_status, 
 			LSCType initial_service_statuses, 
-			ArrayList<ServiceStatus> service_statuschanges)
+			ArrayList<ServiceStatus> service_statuschanges,
+			TimePeriod tp)
 	{
 		LSCType current_service_statuses = (LSCType) initial_service_statuses.clone();
 		ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();
@@ -401,6 +402,9 @@ public class RSVOverallStatus implements RSVProcess {
 			
 			logger.warn("  Resetting current_resource_status with newly calculated result");
 			current_resource_status = rs;
+			
+			logger.warn("  Also resetting tp.start to be the timestamp of this status change occured - so that we can update it");
+			tp.start = rs.timestamp;
 			
 			dump = true;
 		}
