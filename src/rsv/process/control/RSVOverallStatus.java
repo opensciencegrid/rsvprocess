@@ -131,7 +131,10 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
-					logger.warn("Clearing statuschange tables for "+resource_id+" between "+tp.start+" and "+tp.end);
+					if(dump) {
+						logger.warn("Clearing statuschange tables for "+resource_id+" between "+tp.start+" and "+tp.end);
+				
+					}
 				}
 			}
 			//Step 4. Write out any status changes recorded		
