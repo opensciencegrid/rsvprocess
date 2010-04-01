@@ -49,6 +49,8 @@ public class RSVOverallStatus implements RSVProcess {
 	private StatusChangeModel scm = new StatusChangeModel();
 	private ProcessLogModel lm = new ProcessLogModel();
 	private Integer last_mdid = null;
+	
+	Boolean dump = false;
 		
 	public int run(String args[]) {
 		int ret = RSVMain.exitcode_ok;
@@ -128,9 +130,13 @@ public class RSVOverallStatus implements RSVProcess {
 				TimeRange itp = itps.get(resource_id);
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
+					if(dump) {
+						logger.warn("Clearing status change for " + resource_id + " between " + tp.start + " and " + tp.end);
+					}
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
 				}
 			}
+			
 			//Step 4. Write out any status changes recorded		
 			scm.outputServiceStatusChanges(all_service_statuschanges);
 			scm.outputResourceStatusChanges(all_resource_statuschanges);
@@ -369,8 +375,6 @@ public class RSVOverallStatus implements RSVProcess {
 	{
 		LSCType current_service_statuses = (LSCType) initial_service_statuses.clone();
 		ArrayList<ResourceStatus> resource_statuschanges = new ArrayList<ResourceStatus>();
-		
-		Boolean dump = false;
 		
 		//first, let's make sure that the current resource status is consistent with the current service status 
 		//this situation should never happen, but it does and I can't figure out why... so for now this is an extremely dirty
