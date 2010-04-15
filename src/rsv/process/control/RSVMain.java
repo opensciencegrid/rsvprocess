@@ -22,7 +22,8 @@ public class RSVMain {
 	
 	private static final Logger logger = Logger.getLogger(RSVMain.class);
 	public static Configuration conf = null;
-	public static final String version = "1.6";
+	
+	public static final String version = "1.7";
 	
 	public static boolean debug = false;
 
