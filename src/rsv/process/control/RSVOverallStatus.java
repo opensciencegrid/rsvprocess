@@ -50,7 +50,7 @@ public class RSVOverallStatus implements RSVProcess {
 	private ProcessLogModel lm = new ProcessLogModel();
 	private Integer last_mdid = null;
 		
-	Boolean dump = false;
+	//Boolean dump = false;
 	
 	public int run(String args[]) {
 		int ret = RSVMain.exitcode_ok;
@@ -131,10 +131,11 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
+					/*
 					if(dump) {
 						logger.warn("Clearing statuschange tables for "+resource_id+" between "+tp.start+" and "+tp.end);
-				
 					}
+					*/
 				}
 			}
 			//Step 4. Write out any status changes recorded		
@@ -391,7 +392,7 @@ public class RSVOverallStatus implements RSVProcess {
 			rs.timestamp = 0;
 			//find the earliest timestamp for service_status (TODO - not sure if this logic is correct..)
 			for(ServiceStatus st : initial_service_statuses.values()) {
-				logger.warn("    timestamp: "+st.timestamp + " service_id:" + st.service_id + " note:" + st.note + " status_id:" + st.status_id);
+				//logger.warn("    timestamp: "+st.timestamp + " service_id:" + st.service_id + " note:" + st.note + " status_id:" + st.status_id);
 				if(rs.timestamp == 0 || st.timestamp < rs.timestamp) {
 					rs.timestamp = st.timestamp;
 				}
@@ -406,7 +407,7 @@ public class RSVOverallStatus implements RSVProcess {
 			logger.warn("  Also resetting tp.start to be the timestamp of this status change occured - so that we can update it");
 			tp.start = rs.timestamp;
 			
-			dump = true;
+			//dump = true;
 		}
 		
 		for(ServiceStatus change : service_statuschanges) {
@@ -434,13 +435,14 @@ public class RSVOverallStatus implements RSVProcess {
 				*/
 			}
 		}
-		
+		/*
 		if(dump) {
 			logger.warn("  Dumping resource status change records to be inserted");
 			for(ResourceStatus it : resource_statuschanges) {
 				logger.warn("  timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
 			}
 		}
+		*/
 		
 		return resource_statuschanges;
 	}
