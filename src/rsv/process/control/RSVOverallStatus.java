@@ -50,7 +50,7 @@ public class RSVOverallStatus implements RSVProcess {
 	private ProcessLogModel lm = new ProcessLogModel();
 	private Integer last_mdid = null;
 		
-	//Boolean dump = false;
+	Boolean dump = false;
 	
 	public int run(String args[]) {
 		int ret = RSVMain.exitcode_ok;
@@ -131,11 +131,9 @@ public class RSVOverallStatus implements RSVProcess {
 				ArrayList<TimePeriod> ranges = itp.getRanges();
 				for(TimePeriod tp : ranges) {
 					int removed = scm.clearStatusChanges(resource_id, tp.start, tp.end);
-					/*
 					if(dump) {
-						logger.warn("Clearing statuschange tables for "+resource_id+" between "+tp.start+" and "+tp.end);
+						logger.debug("Clearing statuschange tables for "+resource_id+" between "+tp.start+" and "+tp.end);
 					}
-					*/
 				}
 			}
 			//Step 4. Write out any status changes recorded		
@@ -386,28 +384,28 @@ public class RSVOverallStatus implements RSVProcess {
 
 			logger.warn("Current resource status conflict on resource_id:" + resource_id + " status_id:"+current_resource_status.status_id + " timestamp:"+current_resource_status.timestamp);
 			logger.warn("  Calculated status_id:" + rs.status_id + " note:" + rs.note);
-			logger.warn("  Calculated from following service statuses --");
+			logger.debug("  Calculated from following service statuses --");
 			
 			rs.resource_id = resource_id;
 			rs.timestamp = 0;
 			//find the earliest timestamp for service_status (TODO - not sure if this logic is correct..)
 			for(ServiceStatus st : initial_service_statuses.values()) {
-				//logger.warn("    timestamp: "+st.timestamp + " service_id:" + st.service_id + " note:" + st.note + " status_id:" + st.status_id);
+				logger.debug("    timestamp: "+st.timestamp + " service_id:" + st.service_id + " note:" + st.note + " status_id:" + st.status_id);
 				if(rs.timestamp == 0 || st.timestamp < rs.timestamp) {
 					rs.timestamp = st.timestamp;
 				}
 			}
 
-			logger.warn("  Adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
+			logger.debug("  Adding new status change record with timestamp: " + rs.timestamp + " status_id:" + rs.status_id);
 			resource_statuschanges.add(rs);			
 			
-			logger.warn("  Resetting current_resource_status with newly calculated result");
+			logger.debug("  Resetting current_resource_status with newly calculated result");
 			current_resource_status = rs;
 			
-			logger.warn("  Also resetting tp.start to be the timestamp of this status change occured - so that we can update it");
+			logger.debug("  Also resetting tp.start to be the timestamp of this status change occured - so that we can update it");
 			tp.start = rs.timestamp;
 			
-			//dump = true;
+			dump = true;
 		}
 		
 		for(ServiceStatus change : service_statuschanges) {
@@ -435,14 +433,13 @@ public class RSVOverallStatus implements RSVProcess {
 				*/
 			}
 		}
-		/*
+		
 		if(dump) {
-			logger.warn("  Dumping resource status change records to be inserted");
+			logger.debug("  Dumping resource status change records to be inserted");
 			for(ResourceStatus it : resource_statuschanges) {
-				logger.warn("  timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
+				logger.debug("  timestamp: " + it.timestamp + " status_id:" + it.status_id + " note:" + it.note);
 			}
 		}
-		*/
 		
 		return resource_statuschanges;
 	}
