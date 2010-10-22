@@ -62,7 +62,7 @@ public class RSVVOMatrix implements RSVProcess{
 								String voname = s.next();
 								Integer vo_id = oim.lookupVOID(voname);
 								if(vo_id == null) {
-									logger.warn("Unknown VO name: "+ voname + " found for resource " + resource_id);
+									logger.warn("Unknown VO name: "+ voname + " found for resource " + resource_id + " -- parsed from [" + voinfo + "]");
 								} else {
 									volist.put(vo_id, voname);
 									
