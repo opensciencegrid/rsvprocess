@@ -41,6 +41,10 @@ public class RSVVOMatrix implements RSVProcess{
 			OIMModel.ResourcesType resources = oim.getResources();
 			for(Integer resource_id : resources.keySet()) {
 				
+				StringBuffer errors = new StringBuffer();
+				String voinfo = null;
+				TreeMap<Integer, String> volist = null;
+				
 				//ignore resource with no service
 				ArrayList<Integer/*service_id*/> services = oim.getResourceService(resource_id); 
 				if(services.size() == 0) continue;
@@ -48,10 +52,9 @@ public class RSVVOMatrix implements RSVProcess{
 				MetricDataModel.LMDType mset = mdm.getLastMetricDataSet(resource_id, null);
 				MetricData m = mset.get(vosupported_metric_id);
 				if(m == null) {
-					logger.warn("\tNo VO Detail for resource ID: " + resource_id);
+					errors.append("No VO Detail reported for this resource through RSV\n");
 				} else {
-					String voinfo = m.fetchDetail();
-					TreeMap<Integer, String> volist = null;
+					voinfo = m.fetchDetail();
 					try {
 						if(voinfo.substring(0, vodetail_token.length()).compareTo(vodetail_token) == 0) {
 							String vos = voinfo.substring(vodetail_token.length());
@@ -62,7 +65,7 @@ public class RSVVOMatrix implements RSVProcess{
 								String voname = s.next();
 								Integer vo_id = oim.lookupVOID(voname);
 								if(vo_id == null) {
-									logger.warn("Unknown VO name: "+ voname + " found for resource " + resource_id + " -- parsed from [" + voinfo + "]");
+									errors.append("Unknown VO name: "+ voname + " found\n");
 								} else {
 									volist.put(vo_id, voname);
 									
@@ -80,23 +83,24 @@ public class RSVVOMatrix implements RSVProcess{
 						}
 						
 					} catch(StringIndexOutOfBoundsException e) {
-						logger.warn("\tInvalid VO Detail for resource ID: " + resource_id);
+						errors.append("Invalid VO Detail: " + e.getMessage() + "\n");
 					}
-					
-					//output XML
-					Resource r = resources.get(resource_id);
-					xml += "<Resource id=\""+resource_id+"\">";
-					xml += "<Name>"+r.getName()+"</Name>";
-					xml += "<MembersRaw><![CDATA["+voinfo+"]]></MembersRaw>";
-					xml += "<Members>";
-					if(volist != null) {
-						for(Integer vo : volist.keySet()) {
-							xml += "<VO id=\""+vo+"\">"+volist.get(vo)+"</VO>";
-						}
-					}
-					xml += "</Members>";
-					xml += "</Resource>\n";
 				}
+				
+				//output XML
+				Resource r = resources.get(resource_id);
+				xml += "<Resource id=\""+resource_id+"\">";
+				xml += "<Name>"+r.getName()+"</Name>";
+				xml += "<MembersRaw><![CDATA["+voinfo+"]]></MembersRaw>";
+				xml += "<ErrorMessage><![CDATA["+errors.toString()+"]]></ErrorMessage>";
+				xml += "<Members>";
+				if(volist != null) {
+					for(Integer vo : volist.keySet()) {
+						xml += "<VO id=\""+vo+"\">"+volist.get(vo)+"</VO>";
+					}
+				}
+				xml += "</Members>";
+				xml += "</Resource>\n";
 			}      
 			xml += "</ResourceGrouped>";
 			
