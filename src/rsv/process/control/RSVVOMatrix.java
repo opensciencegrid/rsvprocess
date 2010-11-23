@@ -30,14 +30,15 @@ public class RSVVOMatrix implements RSVProcess{
 		int ret = RSVMain.exitcode_ok;
 				
 		try {			
-			String xml = "<?xml version=\"1.0\"?>\n";
-			xml += "<VOMembership>\n";
+			StringBuffer xml = new StringBuffer();
+			xml.append("<?xml version=\"1.0\"?>\n");
+			xml.append("<VOMembership>\n");
 			MetricDataModel mdm = new MetricDataModel();
 			OIMModel oim = new OIMModel();
 			TreeMap<Integer/*vo_id*/, TreeSet<Integer/*resource_id*/>> void2resources = new TreeMap<Integer, TreeSet<Integer>>();
 			
 			//grouped by Resource ID
-			xml += "<ResourceGrouped>";
+			xml.append("<ResourceGrouped>");
 			OIMModel.ResourcesType resources = oim.getResources();
 			for(Integer resource_id : resources.keySet()) {
 				
@@ -89,48 +90,48 @@ public class RSVVOMatrix implements RSVProcess{
 				
 				//output XML
 				Resource r = resources.get(resource_id);
-				xml += "<Resource id=\""+resource_id+"\">";
-				xml += "<Name>"+r.getName()+"</Name>";
-				xml += "<MembersRaw><![CDATA["+voinfo+"]]></MembersRaw>";
-				xml += "<ErrorMessage><![CDATA["+errors.toString()+"]]></ErrorMessage>";
-				xml += "<Members>";
+				xml.append("<Resource id=\""+resource_id+"\">");
+				xml.append("<Name>"+r.getName()+"</Name>");
+				xml.append("<MembersRaw><![CDATA["+voinfo+"]]></MembersRaw>");
+				xml.append("<ErrorMessage><![CDATA["+errors.toString()+"]]></ErrorMessage>");
+				xml.append("<Members>");
 				if(volist != null) {
 					for(Integer vo : volist.keySet()) {
-						xml += "<VO id=\""+vo+"\">"+volist.get(vo)+"</VO>";
+						xml.append("<VO id=\""+vo+"\">"+volist.get(vo)+"</VO>");
 					}
 				}
-				xml += "</Members>";
-				xml += "</Resource>\n";
+				xml.append("</Members>");
+				xml.append("</Resource>\n");
 			}      
-			xml += "</ResourceGrouped>";
+			xml.append("</ResourceGrouped>");
 			
 			//grouped by VO
-			xml += "<VOGrouped>";
+			xml.append("<VOGrouped>");
 			for(Integer vo_id : void2resources.keySet()) {
 				TreeSet<Integer> rs = void2resources.get(vo_id);
-				xml += "<VO id=\""+vo_id+"\">";
+				xml.append("<VO id=\""+vo_id+"\">");
 				VirtualOrganization vo = oim.lookupVO(vo_id);
-				xml += "<Name>"+vo.getShortName()+"</Name>";
-				xml += "<Members>";
+				xml.append("<Name>"+vo.getShortName()+"</Name>");
+				xml.append("<Members>");
 				for(Integer resource_id : rs) {
-					xml += "<Resource>";
+					xml.append("<Resource>");
 					Resource r = resources.get(resource_id);
-					xml += "<ResourceID>" + r.getID() + "</ResourceID>";
-					xml += "<ResourceName>" + r.getName() + "</ResourceName>";
-					xml += "</Resource>";
+					xml.append("<ResourceID>" + r.getID() + "</ResourceID>");
+					xml.append("<ResourceName>" + r.getName() + "</ResourceName>");
+					xml.append("</Resource>");
 				}
-				xml += "</Members>";
-				xml += "</VO>";
+				xml.append("</Members>");
+				xml.append("</VO>");
 			}
-			xml += "</VOGrouped>";
+			xml.append("</VOGrouped>");
 
-			xml += "</VOMembership>\n";
+			xml.append("</VOMembership>\n");
 			//output XML to specified location
 		    try{
 		    	logger.debug("Wriging generated XML to : " + Configuration.vomatrix_xml_cache);
 		    	FileWriter fstream = new FileWriter(RSVMain.conf.getProperty(Configuration.vomatrix_xml_cache));
 		    	BufferedWriter out = new BufferedWriter(fstream);
-		    	out.write(xml);
+		    	out.write(xml.toString());
 		    	out.close();
 		    } catch (Exception e) {
 		    		logger.error("Caught exception while outputing xml cache", e);
