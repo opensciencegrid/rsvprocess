@@ -57,7 +57,7 @@ public class RSVVOMatrix implements RSVProcess{
 				} else {
 					voinfo = m.fetchDetail();
 					try {
-						if(voinfo.substring(0, vodetail_token.length()).compareTo(vodetail_token) == 0) {
+						if(voinfo != null && voinfo.substring(0, vodetail_token.length()).equals(vodetail_token)) {
 							String vos = voinfo.substring(vodetail_token.length());
 							Scanner s = new Scanner(vos);
 							volist = new TreeMap<Integer, String>();
@@ -81,6 +81,8 @@ public class RSVVOMatrix implements RSVProcess{
 									}
 								}
 						    }
+						} else {
+							errors.append("Failed to find VO detail information in RSV metric\n");
 						}
 						
 					} catch(StringIndexOutOfBoundsException e) {
