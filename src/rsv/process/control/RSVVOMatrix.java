@@ -56,6 +56,8 @@ public class RSVVOMatrix implements RSVProcess{
 					errors.append("No VO Detail reported for this resource through RSV\n");
 				} else {
 					voinfo = m.fetchDetail();
+					logger.debug(voinfo.length());
+					logger.debug(voinfo);
 					try {
 						if(voinfo != null && voinfo.substring(0, vodetail_token.length()).equals(vodetail_token)) {
 							String vos = voinfo.substring(vodetail_token.length());
