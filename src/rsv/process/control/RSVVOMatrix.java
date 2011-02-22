@@ -89,7 +89,7 @@ public class RSVVOMatrix implements RSVProcess{
 						}
 						
 					} catch(StringIndexOutOfBoundsException e) {
-						errors.append("Invalid VO Detail: " + e.getMessage() + "\n");
+						errors.append("Invalid VO Detail: " + e.getMessage() + " ("+voinfo+")\n");
 					}
 				}
 				
