@@ -43,7 +43,7 @@ public class GratiaModel extends GratiaDatabase {
         		return xml.substring(13, xml.length() - 13 - 1);
         	} else {
         		//empty?
-        		return xml;
+        		return null;
         	}
         }
         return null;
