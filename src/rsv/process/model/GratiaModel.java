@@ -20,12 +20,31 @@ public class GratiaModel extends GratiaDatabase {
         return rs;
 	}
 	
+	/* -- original version that pulls detail from MetricRecord table
 	public String getDetail(int id) throws SQLException
 	{
         Statement stmt = GratiaDatabase.db.createStatement();
         ResultSet rs = stmt.executeQuery("select DetailsData from MetricRecord where dbid = " + id);
         if(rs.next()) {
         	return rs.getString(1);
+        }
+        return null;
+	}
+	*/
+	
+	public String getDetail(int id) throws SQLException
+	{
+        Statement stmt = GratiaDatabase.db.createStatement();
+        ResultSet rs = stmt.executeQuery("select extraxml from MetricRecord_Xml where dbid = " + id);
+        if(rs.next()) {
+        	String xml = rs.getString(1);
+        	//unwrap <DetailsData> tags
+        	if(xml.length() > 26) {
+        		return xml.substring(13, xml.length() - 13 - 1);
+        	} else {
+        		//empty?
+        		return xml;
+        	}
         }
         return null;
 	}
