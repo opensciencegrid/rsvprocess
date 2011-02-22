@@ -42,8 +42,12 @@ public class GratiaModel extends GratiaDatabase {
         	if(xml.length() > 26) {
         		return xml.substring(13, xml.length() - 13 - 1);
         	} else {
-        		//empty?
-        		return null;
+        		//try MetricRecord
+                stmt = GratiaDatabase.db.createStatement();
+                rs = stmt.executeQuery("select DetailsData from MetricRecord where dbid = " + id);
+                if(rs.next()) {
+                	return rs.getString(1);
+                }
         	}
         }
         return null;
