@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import rsv.process.Configuration;
 import rsv.process.model.MetricDataModel;
 import rsv.process.model.OIMModel;
+import rsv.process.model.record.GratiaMetricRecord;
 import rsv.process.model.record.MetricData;
 import rsv.process.model.record.Resource;
 import rsv.process.model.record.VirtualOrganization;
@@ -55,39 +56,44 @@ public class RSVVOMatrix implements RSVProcess{
 				if(m == null) {
 					errors.append("No VO Detail reported for this resource through RSV\n");
 				} else {
-					voinfo = m.fetchDetail();
+					GratiaMetricRecord grec = m.fetchDetail();
 					try {
-						if(voinfo != null && voinfo.substring(0, vodetail_token.length()).equals(vodetail_token)) {
-							//logger.debug(voinfo.length());
-							//logger.debug(voinfo);
+						if(grec != null) {
+							voinfo = grec.DetailsData;
+							if(voinfo != null && voinfo.substring(0, vodetail_token.length()).equals(vodetail_token)) {
 							
-							String vos = voinfo.substring(vodetail_token.length());
-							Scanner s = new Scanner(vos);
-							volist = new TreeMap<Integer, String>();
-							while (s.hasNext()) {
-								//lookup the VOID
-								String voname = s.next();
-								Integer vo_id = oim.lookupVOID(voname);
-								if(vo_id == null) {
-									errors.append("Unknown VO name: "+ voname + " found\n");
-								} else {
-									volist.put(vo_id, voname);
-									
-									//store the entry to void2resources (for later output of VO grouped list)
-									TreeSet<Integer> rs = void2resources.get(vo_id);
-									if(rs == null) {
-										rs = new TreeSet<Integer>();
-										void2resources.put(vo_id, rs);
+								//logger.debug(voinfo.length());
+								//logger.debug(voinfo);
+								
+								String vos = voinfo.substring(vodetail_token.length());
+								Scanner s = new Scanner(vos);
+								volist = new TreeMap<Integer, String>();
+								while (s.hasNext()) {
+									//lookup the VOID
+									String voname = s.next();
+									Integer vo_id = oim.lookupVOID(voname);
+									if(vo_id == null) {
+										errors.append("Unknown VO name: "+ voname + " found\n");
+									} else {
+										volist.put(vo_id, voname);
+										
+										//store the entry to void2resources (for later output of VO grouped list)
+										TreeSet<Integer> rs = void2resources.get(vo_id);
+										if(rs == null) {
+											rs = new TreeSet<Integer>();
+											void2resources.put(vo_id, rs);
+										}
+										if(!rs.contains(resource_id)) {
+											rs.add(resource_id);
+										}
 									}
-									if(!rs.contains(resource_id)) {
-										rs.add(resource_id);
-									}
-								}
-						    }
+							    }
+							} else {
+								errors.append("Failed to find VO detail information in RSV metric\n");
+							}
 						} else {
-							errors.append("Failed to find VO detail information in RSV metric\n");
+							errors.append("Couldn't find a gratia record containing VO detail information\n");
 						}
-						
 					} catch(StringIndexOutOfBoundsException e) {
 						errors.append("Invalid VO Detail: " + e.getMessage() + " ("+voinfo+")\n");
 					}

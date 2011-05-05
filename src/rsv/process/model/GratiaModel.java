@@ -6,6 +6,8 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
+import rsv.process.model.record.GratiaMetricRecord;
+
 public class GratiaModel extends GratiaDatabase {
 	
 	private static final Logger logger = Logger.getLogger(GratiaModel.class);	
@@ -32,6 +34,7 @@ public class GratiaModel extends GratiaDatabase {
 	}
 	*/
 	
+	/*
 	public String getDetail(int id) throws SQLException
 	{
         Statement stmt = GratiaDatabase.db.createStatement();
@@ -52,4 +55,31 @@ public class GratiaModel extends GratiaDatabase {
         }
         return null;
 	}
+	*/
+	
+	public GratiaMetricRecord getDetail(int id) throws SQLException
+	{
+        Statement stmt = GratiaDatabase.db.createStatement();
+        ResultSet rs = stmt.executeQuery("select DetailsData,ServiceUri,GatheredAt from MetricRecord where dbid = " + id);
+        if(rs.next()) {
+        	GratiaMetricRecord rec = new GratiaMetricRecord();
+        	rec.DetailsData = rs.getString(1);
+        	rec.ServiceUri = rs.getString(2);
+        	rec.GatheredAt = rs.getString(3);
+        
+        	if(rec.DetailsData.length() == 255) {
+            	//details maybe truncated.. try loading xml version
+                rs = stmt.executeQuery("select extraxml from MetricRecord_Xml where dbid = " + id);
+                if(rs.next()) {
+    	        	//unwrap <DetailsData> tags
+                	String xml = rs.getString(1);
+    	        	if(xml.length() > 26) {
+    	        		rec.DetailsData = xml.substring(13, xml.length() - 13 - 1);
+    	        	}
+                }
+        	}
+        	return rec;
+        }
+        return null;
+	}	
 }
