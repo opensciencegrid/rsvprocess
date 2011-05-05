@@ -169,8 +169,8 @@ public class RSVCurrentStatusCache implements RSVProcess {
 				GratiaMetricRecord rec = md.fetchDetail();
 				if(rec != null) {
 					xml.append("<Detail><![CDATA["+rec.DetailsData+"]]></Detail>");
-					xml.append("<ServiceURI><![CDATA["+rec.ServiceUri+"]]></ServiceURI>");
-					xml.append("<GatheredAt><![CDATA["+rec.GatheredAt+"]]></GatheredAt>");
+					xml.append("<ServiceURI>"+rec.ServiceUri+"</ServiceURI>");
+					xml.append("<GatheredAt>"+rec.GatheredAt+"</GatheredAt>");
 				} else {
 					//no detail available.. maybe truncated / archived
 					xml.append("<Detail>(Gratia Record not available)</Detail>");
