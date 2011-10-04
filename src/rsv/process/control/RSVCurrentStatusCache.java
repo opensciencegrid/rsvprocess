@@ -95,7 +95,7 @@ public class RSVCurrentStatusCache implements RSVProcess {
 				xml.append("<DowntimeNote>");
 				xml.append("<InternalStatus>"+Status.getStatus(status.status_id)+"</InternalStatus>");
 				xml.append("<Note>This service is currently under maintenance</Note>");
-				xml.append("<MaintenanceSummary>" + down.getSummary()+"</MaintenanceSummary>");
+				xml.append("<MaintenanceSummary><![CDATA[" + down.getSummary()+"]]></MaintenanceSummary>");
 				Date from = new Date(down.getStartTime()*1000L);
 				Date to = new Date(down.getEndTime()*1000L);
 				xml.append("<From>" + from + "</From><To>" + to + "</To>");
