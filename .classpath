@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="lib/javamail-lib/mailapi.jar"/>
 	<classpathentry kind="lib" path="lib/javamail-lib/pop3.jar"/>
 	<classpathentry kind="lib" path="lib/javamail-lib/smtp.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang-2.3.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

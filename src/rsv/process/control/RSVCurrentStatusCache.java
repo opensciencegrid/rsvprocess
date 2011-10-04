@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import org.apache.log4j.Logger;
 import rsv.process.Configuration;
@@ -79,8 +80,8 @@ public class RSVCurrentStatusCache implements RSVProcess {
 			xml.append("<Service>");
 			xml.append("<ServiceID>"+service_id+"</ServiceID>");
 			Service s = oim.getService(service_id);
-			xml.append("<ServiceName>"+s.getName()+"</ServiceName>");					
-			xml.append("<ServiceDescription>"+s.getDescription()+"</ServiceDescription>");	
+			xml.append("<ServiceName>"+StringEscapeUtils.escapeXml(s.getName())+"</ServiceName>");					
+			xml.append("<ServiceDescription>"+StringEscapeUtils.escapeXml(s.getDescription())+"</ServiceDescription>");	
 			
 			ArrayList<Integer> critical_metrics = oim.getCriticalMetrics(service_id);
 			ArrayList<Integer> non_critical_metrics = oim.getNonCriticalMetrics(service_id);
@@ -95,7 +96,7 @@ public class RSVCurrentStatusCache implements RSVProcess {
 				xml.append("<DowntimeNote>");
 				xml.append("<InternalStatus>"+Status.getStatus(status.status_id)+"</InternalStatus>");
 				xml.append("<Note>This service is currently under maintenance</Note>");
-				xml.append("<MaintenanceSummary>" + down.getSummary()+"</MaintenanceSummary>");
+				xml.append("<MaintenanceSummary>" + StringEscapeUtils.escapeXml(down.getSummary())+"</MaintenanceSummary>");
 				Date from = new Date(down.getStartTime()*1000L);
 				Date to = new Date(down.getEndTime()*1000L);
 				xml.append("<From>" + from + "</From><To>" + to + "</To>");
@@ -106,7 +107,7 @@ public class RSVCurrentStatusCache implements RSVProcess {
 			}
 			service_statues.put(service_id, status);	
 			xml.append("<Status>"+Status.getStatus(status.status_id)+"</Status>");
-			xml.append("<Note>"+status.note+"</Note>");	
+			xml.append("<Note>"+StringEscapeUtils.escapeXml(status.note)+"</Note>");	
 			
 			//output critical metric details
 			xml.append("<CriticalMetrics>");
@@ -126,9 +127,9 @@ public class RSVCurrentStatusCache implements RSVProcess {
 		ResourceStatus rstatus = RSVOverallStatus.calculateResourceStatus(oim, service_statues);
 		
 		xml.append("<ResourceID>"+resource_id+"</ResourceID>");
-		xml.append("<ResourceName>"+r.getName()+"</ResourceName>");
+		xml.append("<ResourceName>"+StringEscapeUtils.escapeXml(r.getName())+"</ResourceName>");
 		xml.append("<Status>"+Status.getStatus(rstatus.status_id)+"</Status>");
-		xml.append("<Note>"+rstatus.note+"</Note>");
+		xml.append("<Note>"+StringEscapeUtils.escapeXml(rstatus.note)+"</Note>");
 		
 		xml.append("</CurrentResourceStatus>");
 		
@@ -136,9 +137,6 @@ public class RSVCurrentStatusCache implements RSVProcess {
     	String filename_template = RSVMain.conf.getProperty(Configuration.current_resource_status_xml_cache);
     	String filename = filename_template.replaceFirst("<ResourceID>", String.valueOf(resource_id));
     	
-    	//update A&R
-    	//TODO---
-
     	FileWriter fstream = new FileWriter(filename);
     	BufferedWriter out = new BufferedWriter(fstream);
     	out.write(xml.toString());
@@ -152,9 +150,9 @@ public class RSVCurrentStatusCache implements RSVProcess {
 			
 			xml.append("<Metric>");
 			xml.append("<MetricID>"+metric_id+"</MetricID>");
-			xml.append("<MetricName>"+m.getName()+"</MetricName>");
-			xml.append("<MetricCommonName>"+m.getCommonName()+"</MetricCommonName>");
-			xml.append("<MetricDescription>"+m.getDescription()+"</MetricDescription>");
+			xml.append("<MetricName>"+StringEscapeUtils.escapeXml(m.getName())+"</MetricName>");
+			xml.append("<MetricCommonName>"+StringEscapeUtils.escapeXml(m.getCommonName())+"</MetricCommonName>");
+			xml.append("<MetricDescription>"+StringEscapeUtils.escapeXml(m.getDescription())+"</MetricDescription>");
 			xml.append("<MetricFreshFor>"+m.getFreshFor()+"</MetricFreshFor>");
 			
 			MetricData md = rrs.getCurrent(metric_id);
