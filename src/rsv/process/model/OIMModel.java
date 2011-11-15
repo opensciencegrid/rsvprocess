@@ -55,6 +55,7 @@ public class OIMModel extends OIMDatabase {
 			cache_resource_service2id = new HashMap<String, Integer>();
 	        Statement stmt = OIMDatabase.db.createStatement();
 	        //TODO - simply looking at url_override could match non grid service group service detail..
+	        //TODO - Also, I need to not use uri_override from resource that are inactive, or disabled
 	        ResultSet rs = stmt.executeQuery("SELECT * FROM resource_service_detail WHERE `key` = 'uri_override'");			
 	        while(rs.next()) {
 	        	Integer resource_id = rs.getInt("resource_id");
