@@ -1,0 +1,108 @@
+<?xml version="1.0" ?>
+<project default="jar">
+
+    <property name="src.dir"     value="src"/>
+	<property name="lib.dir"     value="lib"/>
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="main-class"  value="rsv.process.control.RSVMain"/>
+    <property name="maxmemory"  value="256M"/>
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar"/>
+	</path>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="clean-build" depends="clean,jar"/>
+
+	<target name="compile" description="Compilation target">
+		<mkdir dir="build/classes"/>
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" debug="true"/>
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" excludes="**/*.java"/>
+        </copy>
+	</target>
+
+	<target name="jar" description="Compression target" depends="compile">
+		<jar jarfile="rsvprocess.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+		</jar>
+	</target>
+	
+    <target name="preprocess" depends="jar">
+        <java fork="true" classname="${main-class}" maxmemory="${maxmemory}">
+        	<arg value="preprocess"/>
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+    
+	<target name="overallstatus" depends="jar">
+        <java fork="true" classname="${main-class}" maxmemory="${maxmemory}">
+        	<arg value="overallstatus"/>
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+	
+	<target name="cache" depends="jar">
+        <java fork="true" classname="${main-class}">
+        	<arg value="cache"/>
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+		
+	<target name="vomatrix" depends="jar">
+        <java fork="true" classname="${main-class}">
+        	<arg value="vomatrix"/>
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+	<target name="availability_yesterday" depends="jar">
+        <java fork="true" classname="${main-class}">
+            <arg value="availability"/>
+            <arg value="yesterday"/>
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+	<target name="availability_week" depends="jar">
+        <java fork="true" classname="${main-class}">
+            <arg value="availability"/>
+            <arg value="lastweek"/>
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+	
+    <target name="test-db" depends="jar">
+        <java fork="true" classname="rsv.process.test.JDBCConnection">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="rsvprocess.jar"/>
+            </classpath>
+        </java>
+    </target>
+	
+
+</project>
