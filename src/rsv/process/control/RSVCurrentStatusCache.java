@@ -1,6 +1,5 @@
 package rsv.process.control;
 
-import rsv.process.lib.SendMail;
 import rsv.process.model.OIMModel;
 import rsv.process.model.OIMModel.ResourcesType;
 import rsv.process.model.StatusChangeModel.LSCType;
@@ -48,7 +47,7 @@ public class RSVCurrentStatusCache implements RSVProcess {
 			}
 		} catch (IOException e) {
 			logger.error("IO Exception", e);
-			SendMail.sendErrorEmail(e.getMessage());
+			//SendMail.sendErrorEmail(e.getMessage());
 			ret = RSVMain.exitcode_error;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

@@ -17,7 +17,6 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import rsv.process.lib.SendMail;
 import rsv.process.model.OIMModel;
 import rsv.process.model.ProcessLogModel;
 import rsv.process.model.MetricDataModel;
@@ -144,7 +143,7 @@ public class RSVOverallStatus implements RSVProcess {
 			}			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
-			SendMail.sendErrorEmail(e.getMessage());
+			//SendMail.sendErrorEmail(e.getMessage());
 			ret = RSVMain.exitcode_error;
 		} 
 		return ret;

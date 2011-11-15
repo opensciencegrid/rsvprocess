@@ -2,7 +2,6 @@ package rsv.process.control;
 
 import org.apache.log4j.Logger;
 
-import rsv.process.lib.SendMail;
 import rsv.process.model.GratiaDatabase;
 import rsv.process.model.OIMDatabase;
 import rsv.process.model.RSVDatabase;
@@ -66,15 +65,15 @@ public class RSVMain {
 			}
 		} catch (FileNotFoundException e) {
 			logger.error("rsvprocess.conf not found in currernt directory.", e);
-			SendMail.sendErrorEmail(e.getMessage());
+			//SendMail.sendErrorEmail(e.getMessage());
 			ret = exitcode_error;
 		} catch (IOException e) {
 			logger.error("Failed to read rsvprocess.conf", e);
-			SendMail.sendErrorEmail(e.getMessage());
+			//SendMail.sendErrorEmail(e.getMessage());
 			ret = exitcode_error;
 		} catch (Exception e) {
 			logger.error(e);
-			SendMail.sendErrorEmail(e.getMessage());
+			//SendMail.sendErrorEmail(e.getMessage());
 			ret = exitcode_error;			
 		}
 		

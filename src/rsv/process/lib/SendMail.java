@@ -10,7 +10,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
+/* Obsoleted by service monitor
 public class SendMail {
 
 	private String from;
@@ -67,3 +67,4 @@ public class SendMail {
 		sendMail.send();
 	}
 }
+*/

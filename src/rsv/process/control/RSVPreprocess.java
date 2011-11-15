@@ -1,6 +1,5 @@
 package rsv.process.control;
 
-import rsv.process.lib.SendMail;
 import rsv.process.model.GratiaModel;
 import rsv.process.model.MetricInserter;
 import rsv.process.model.OIMModel;
@@ -162,7 +161,7 @@ public class RSVPreprocess implements RSVProcess {
 			
 		} catch (SQLException e) {
 			logger.error("SQL Error", e);
-			SendMail.sendErrorEmail(e.getMessage());
+			//SendMail.sendErrorEmail(e.getMessage());
 			ret = RSVMain.exitcode_error;
 		}
 
