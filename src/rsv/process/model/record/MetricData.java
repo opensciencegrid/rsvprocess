@@ -45,7 +45,7 @@ public class MetricData {
 	public int getTimestamp() { return timestamp; }	
 	//public int getDetailID() { return detail_id; }	
 
-	public String fetchDetail() throws SQLException {
+	public GratiaMetricRecord fetchDetail() throws SQLException {
 		GratiaModel mdm = new GratiaModel();
 		return mdm.getDetail(getID());
 	}
