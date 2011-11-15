@@ -54,10 +54,11 @@ public class OIMModel extends OIMDatabase {
 		if(cache_resource_service2id == null) {
 			cache_resource_service2id = new HashMap<String, Integer>();
 	        Statement stmt = OIMDatabase.db.createStatement();
-	        ResultSet rs = stmt.executeQuery("select * from resource_service");			
+	        //TODO - simply looking at url_override could match non grid service group service detail..
+	        ResultSet rs = stmt.executeQuery("SELECT * FROM resource_service_detail WHERE `key` = 'uri_override'");			
 	        while(rs.next()) {
 	        	Integer resource_id = rs.getInt("resource_id");
-	        	String endpoint_override = rs.getString("endpoint_override");
+	        	String endpoint_override = rs.getString("value");
 	        	cache_resource_service2id.put(OIMModel.pullHostname(endpoint_override), resource_id);
 	        }
 		}

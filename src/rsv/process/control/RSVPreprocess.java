@@ -91,6 +91,8 @@ public class RSVPreprocess implements RSVProcess {
 			    	        //logger.info("Failed to find " + serviceuri);
 		            		count_invalid_resource_id++;
 		            		continue;
+		            	} else {
+		            		logger.debug("dbid" + dbid + " -- using endpoint override for " + resource_id);
 		            	}
 	            	}
 	            }
