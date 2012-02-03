@@ -60,15 +60,21 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="RSVMain">
+    <target name="preprocess">
         <java classname="rsv.process.control.RSVMain" failonerror="true" fork="yes">
             <arg line="preprocess"/>
             <classpath refid="rsvprocess.classpath"/>
         </java>
     </target>
-    <target name="RSVProcess cache">
+    <target name="cache">
         <java classname="rsv.process.control.RSVMain" failonerror="true" fork="yes">
             <arg line="cache"/>
+            <classpath refid="rsvprocess.classpath"/>
+        </java>
+    </target>
+    <target name="overallstatus">
+        <java classname="rsv.process.control.RSVMain" failonerror="true" fork="yes">
+            <arg line="overallstatus"/>
             <classpath refid="rsvprocess.classpath"/>
         </java>
     </target>
