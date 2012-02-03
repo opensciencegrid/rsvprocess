@@ -14,16 +14,29 @@ import rsv.process.model.record.ServiceStatus;
 import rsv.process.model.record.Status;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.lang.StringEscapeUtils;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import rsv.process.Configuration;
+import rsv.process.EventPublisher;
 import rsv.process.RelevantRecordSet;
 
 public class RSVCurrentStatusCache implements RSVProcess {
@@ -57,9 +70,45 @@ public class RSVCurrentStatusCache implements RSVProcess {
 		return ret;
 	}
 	
+	private Document parseXmlFile(String filename){
+		//get the factory
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	
+		try {
+
+			//Using factory get an instance of document builder
+			DocumentBuilder db = dbf.newDocumentBuilder();
+
+			//parse using builder to get DOM representation of the XML file
+			Document doc = db.parse(filename);
+			doc.getDocumentElement().normalize();
+			return doc;
+			
+		}catch(ParserConfigurationException pce) {
+			pce.printStackTrace();
+		}catch(SAXException se) {
+			se.printStackTrace();
+		}catch(IOException ioe) {
+			ioe.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	private void updateCurrentStatusCache(Resource r, int currenttime) throws SQLException, IOException 
 	{	
 		int resource_id = r.getID();
+		
+		//figure out xml file name for this resource
+    	String filename_template = RSVMain.conf.getProperty(Configuration.current_resource_status_xml_cache);
+    	String filename = filename_template.replaceFirst("<ResourceID>", String.valueOf(resource_id));
+    	
+    	File file = new File(filename);
+    	Document previous = null;
+    	if(file.exists()) {
+    		//load previous version of xml
+    		previous = parseXmlFile(filename);
+    	}
 		
 		//load RRS				
 		RelevantRecordSet rrs = new RelevantRecordSet(resource_id, currenttime);
@@ -132,14 +181,49 @@ public class RSVCurrentStatusCache implements RSVProcess {
 		
 		xml.append("</CurrentResourceStatus>");
 		
-		//output resource specific XML to configured location
-    	String filename_template = RSVMain.conf.getProperty(Configuration.current_resource_status_xml_cache);
-    	String filename = filename_template.replaceFirst("<ResourceID>", String.valueOf(resource_id));
-    	
+		//if we have previous xml, let's compare with previous value and post events if status changes
+		if(previous != null) {
+			Element status_elem = getStatusElement(previous);
+			String previous_status = status_elem.getTextContent();
+	    	String new_status = Status.getStatus(rstatus.status_id);
+	    	if(!previous_status.equals(new_status)) {
+	    		publish_statuschange_event(resource_id, r.getName(), rstatus);
+	    	}
+		}
+		  	
+		//write new xml
     	FileWriter fstream = new FileWriter(filename);
     	BufferedWriter out = new BufferedWriter(fstream);
     	out.write(xml.toString());
     	out.close();
+	}
+	
+	private Element getStatusElement(Document doc) {
+		NodeList roots = doc.getChildNodes();
+		Node root = roots.item(0);
+		NodeList nodes = root.getChildNodes();
+		for(int i = 0;i < nodes.getLength(); ++i) {
+			Node node = nodes.item(i);
+			if (root.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element) node;
+			    if(elem.getNodeName().equals("Status")) {
+			    	return elem;
+			    }	     
+			}
+		}
+		return null;
+	}
+	
+	private void publish_statuschange_event(Integer resource_id, String resource_name, ResourceStatus rstatus) {
+		EventPublisher publisher = new EventPublisher();
+		String routing_key = resource_name;//TODO - should we add facility/site/rg name too?
+		String msg = 
+			"<ResourceStatusChange>"+
+				"<ResourceID>"+resource_id+"</ResourceID>"+
+				"<Status>"+Status.getStatus(rstatus.status_id)+"</Status>" +
+				"<Note>"+StringEscapeUtils.escapeXml(rstatus.note)+"</Note>"+
+			"</ResourceStatusChange>";
+		publisher.publish(routing_key, msg);
 	}
 	
 	private void outputMetricXML(ArrayList<Integer> critical_metrics, RelevantRecordSet rrs, StringBuffer xml) throws SQLException

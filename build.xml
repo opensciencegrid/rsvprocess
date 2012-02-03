@@ -1,108 +1,75 @@
-<?xml version="1.0" ?>
-<project default="jar">
-
-    <property name="src.dir"     value="src"/>
-	<property name="lib.dir"     value="lib"/>
-    <property name="build.dir"   value="build"/>
-    <property name="classes.dir" value="${build.dir}/classes"/>
-    <property name="main-class"  value="rsv.process.control.RSVMain"/>
-    <property name="maxmemory"  value="256M"/>
-
-	<path id="classpath">
-		<fileset dir="${lib.dir}" includes="**/*.jar"/>
-	</path>
-
-    <target name="clean">
-        <delete dir="${build.dir}"/>
-    </target>
-
-    <target name="clean-build" depends="clean,jar"/>
-
-	<target name="compile" description="Compilation target">
-		<mkdir dir="build/classes"/>
-		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" debug="true"/>
-        <copy todir="${classes.dir}">
-            <fileset dir="${src.dir}" excludes="**/*.java"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="rsvprocess">
+    <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="../../../eclipse/jee"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="rsvprocess.classpath">
+        <pathelement location="build"/>
+        <pathelement location="lib/mysql-connector-java-5.1.6-bin.jar"/>
+        <pathelement location="lib/log4j-1.2.15.jar"/>
+        <pathelement location="lib/mail.jar"/>
+        <pathelement location="lib/javamail-lib/dsn.jar"/>
+        <pathelement location="lib/javamail-lib/imap.jar"/>
+        <pathelement location="lib/javamail-lib/mailapi.jar"/>
+        <pathelement location="lib/javamail-lib/pop3.jar"/>
+        <pathelement location="lib/javamail-lib/smtp.jar"/>
+        <pathelement location="lib/commons-lang-2.3.jar"/>
+        <pathelement location="lib/rabbitmq-client.jar"/>
+        <pathelement location="lib/commons-io-1.2.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="build"/>
+        <copy includeemptydirs="false" todir="build">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
         </copy>
-	</target>
-
-	<target name="jar" description="Compression target" depends="compile">
-		<jar jarfile="rsvprocess.jar" basedir="${classes.dir}">
-            <manifest>
-                <attribute name="Main-Class" value="${main-class}"/>
-            </manifest>
-		</jar>
-	</target>
-	
-    <target name="preprocess" depends="jar">
-        <java fork="true" classname="${main-class}" maxmemory="${maxmemory}">
-        	<arg value="preprocess"/>
-            <classpath>
-                <path refid="classpath"/>
-                <path location="rsvprocess.jar"/>
-            </classpath>
+    </target>
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="build" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="rsvprocess.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+    <target name="RSVMain">
+        <java classname="rsv.process.control.RSVMain" failonerror="true" fork="yes">
+            <arg line="preprocess"/>
+            <classpath refid="rsvprocess.classpath"/>
         </java>
     </target>
-    
-	<target name="overallstatus" depends="jar">
-        <java fork="true" classname="${main-class}" maxmemory="${maxmemory}">
-        	<arg value="overallstatus"/>
-            <classpath>
-                <path refid="classpath"/>
-                <path location="rsvprocess.jar"/>
-            </classpath>
+    <target name="RSVProcess cache">
+        <java classname="rsv.process.control.RSVMain" failonerror="true" fork="yes">
+            <arg line="cache"/>
+            <classpath refid="rsvprocess.classpath"/>
         </java>
     </target>
-	
-	<target name="cache" depends="jar">
-        <java fork="true" classname="${main-class}">
-        	<arg value="cache"/>
-            <classpath>
-                <path refid="classpath"/>
-                <path location="rsvprocess.jar"/>
-            </classpath>
-        </java>
-    </target>
-		
-	<target name="vomatrix" depends="jar">
-        <java fork="true" classname="${main-class}">
-        	<arg value="vomatrix"/>
-            <classpath>
-                <path refid="classpath"/>
-                <path location="rsvprocess.jar"/>
-            </classpath>
-        </java>
-    </target>
-
-	<target name="availability_yesterday" depends="jar">
-        <java fork="true" classname="${main-class}">
-            <arg value="availability"/>
-            <arg value="yesterday"/>
-            <classpath>
-                <path refid="classpath"/>
-                <path location="rsvprocess.jar"/>
-            </classpath>
-        </java>
-    </target>
-	<target name="availability_week" depends="jar">
-        <java fork="true" classname="${main-class}">
-            <arg value="availability"/>
-            <arg value="lastweek"/>
-            <classpath>
-                <path refid="classpath"/>
-                <path location="rsvprocess.jar"/>
-            </classpath>
-        </java>
-    </target>
-	
-    <target name="test-db" depends="jar">
-        <java fork="true" classname="rsv.process.test.JDBCConnection">
-            <classpath>
-                <path refid="classpath"/>
-                <path location="rsvprocess.jar"/>
-            </classpath>
-        </java>
-    </target>
-	
-
 </project>

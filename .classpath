@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="lib/javamail-lib/pop3.jar"/>
 	<classpathentry kind="lib" path="lib/javamail-lib/smtp.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/rabbitmq-client.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-1.2.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
