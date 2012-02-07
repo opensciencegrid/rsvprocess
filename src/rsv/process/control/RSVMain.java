@@ -22,7 +22,7 @@ public class RSVMain {
 	private static final Logger logger = Logger.getLogger(RSVMain.class);
 	public static Configuration conf = null;
 	
-	public static final String version = "1.17";
+	public static final String version = "1.18";
 	
 	public static boolean debug = false;
 
