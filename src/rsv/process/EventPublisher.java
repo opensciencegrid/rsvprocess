@@ -25,13 +25,14 @@ public class EventPublisher {
 			
 			//public message
 			String exchange = RSVMain.conf.getProperty("rabbitmq.exchange");
+	        channel.exchangeDeclare(exchange, "topic");
 			channel.basicPublish(exchange, routing_key, null, msg.getBytes());
 			
 			//close it up
 			channel.close();
 			conn.close();
 			
-			logger.debug("posted to event server");
+			logger.debug("posted to event server:" + msg);
 		} catch (Exception e) {
 			logger.error("Failed to publish event", e);
 		}	
