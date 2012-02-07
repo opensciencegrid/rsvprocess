@@ -25,6 +25,7 @@ public class EventPublisher {
 			
 			//public message
 			String exchange = RSVMain.conf.getProperty("rabbitmq.exchange");
+	        channel.exchangeDeclare(exchange, "topic");
 			channel.basicPublish(exchange, routing_key, null, msg.getBytes());
 			
 			//close it up
