@@ -219,7 +219,7 @@ public class RSVCurrentStatusCache implements RSVProcess {
 		String routing_key = resource_name;//TODO - should we add facility/site/rg name too?
 		String msg = 
 			"<ResourceStatusChange>"+
-				"<ResourceGroupID>"+resource_id+"</ResourceGroupID>"+
+				"<ResourceGroupID>"+resource_group_id+"</ResourceGroupID>"+
 				"<ResourceID>"+resource_id+"</ResourceID>"+
 				"<OldStatus>"+previous_status+"</OldStatus>" +
 				"<NewStatus>"+Status.getStatus(rstatus.status_id)+"</NewStatus>" +
