@@ -187,7 +187,7 @@ public class RSVCurrentStatusCache implements RSVProcess {
 			String previous_status = status_elem.getTextContent();
 	    	String new_status = Status.getStatus(rstatus.status_id);
 	    	if(!previous_status.equals(new_status)) {
-	    		publish_statuschange_event(resource_id, r.getName(), previous_status, rstatus);
+	    		publish_statuschange_event(resource_id, r.getGroupID(), r.getName(), previous_status, rstatus);
 	    	}
 		}
 		  	
@@ -214,11 +214,12 @@ public class RSVCurrentStatusCache implements RSVProcess {
 		return null;
 	}
 	
-	private void publish_statuschange_event(Integer resource_id, String resource_name, String previous_status, ResourceStatus rstatus) {
+	private void publish_statuschange_event(Integer resource_id, Integer resource_group_id, String resource_name, String previous_status, ResourceStatus rstatus) {
 		EventPublisher publisher = new EventPublisher();
 		String routing_key = resource_name;//TODO - should we add facility/site/rg name too?
 		String msg = 
 			"<ResourceStatusChange>"+
+				"<ResourceGroupID>"+resource_group_id+"</ResourceGroupID>"+
 				"<ResourceID>"+resource_id+"</ResourceID>"+
 				"<OldStatus>"+previous_status+"</OldStatus>" +
 				"<NewStatus>"+Status.getStatus(rstatus.status_id)+"</NewStatus>" +

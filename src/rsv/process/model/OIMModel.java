@@ -91,12 +91,13 @@ public class OIMModel extends OIMDatabase {
 		if(cache_resource_id2rec == null) {
 			cache_resource_id2rec = new ResourcesType();
 			Statement stmt = OIMDatabase.db.createStatement();
-	        ResultSet rs = stmt.executeQuery("select id,name from resource where active = 1 and disable = 0");			
+	        ResultSet rs = stmt.executeQuery("select id,name,resource_group_id from resource where active = 1 and disable = 0");			
 	        while(rs.next()) {
 	        	Resource rec = new Resource();
 	        	int id = rs.getInt("id");
 	        	rec.setID(id);
 	        	rec.setName(rs.getString("name"));
+	        	rec.setGroupID(rs.getInt("resource_group_id"));
 	        	
 	        	//TODO - gather other information that I need
 	        	
@@ -207,7 +208,6 @@ public class OIMModel extends OIMDatabase {
 		}
 		return false;
 	}
-	
 
 	public static class GetResourceGroupsType extends HashMap<Integer/*resource_id*/, Integer/*resource_group_id*/> {}
 	/*

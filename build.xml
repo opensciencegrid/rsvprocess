@@ -6,7 +6,7 @@
               as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="rsvprocess">
     <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="../../../eclipse/jee"/>
+    <property name="ECLIPSE_HOME" value="../../../eclipse/goc"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
@@ -28,6 +28,7 @@
         <mkdir dir="build"/>
         <copy includeemptydirs="false" todir="build">
             <fileset dir="src">
+                <exclude name="**/*.launch"/>
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
@@ -80,6 +81,18 @@
     <target name="vomatrix">
         <java classname="rsv.process.control.RSVMain" failonerror="true" fork="yes">
             <arg line="vomatrix"/>
+            <classpath refid="rsvprocess.classpath"/>
+        </java>
+    </target>
+    <target name="availability_yesterday">
+        <java classname="rsv.process.control.RSVMain" failonerror="true" fork="yes">
+            <arg line="availability yesterday"/>
+            <classpath refid="rsvprocess.classpath"/>
+        </java>
+    </target>
+    <target name="availability_week">
+        <java classname="rsv.process.control.RSVMain" failonerror="true" fork="yes">
+            <arg line="availability lastweek"/>
             <classpath refid="rsvprocess.classpath"/>
         </java>
     </target>
