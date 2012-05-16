@@ -549,7 +549,13 @@ public class RSVOverallStatus implements RSVProcess {
 			int metric_id = rs.getInt("metric_id");
 			int resource_id = rs.getInt("resource_id");
 			int start = rs.getInt("timestamp");
-			int fresh_for = oim.lookupFreshFor(metric_id);
+			Integer fresh_for_i = oim.lookupFreshFor(metric_id);
+			int fresh_for = 28800;
+			if(fresh_for_i == null) {
+				logger.warn("Failed to lookup freshfor value for metric id:" + metric_id + " using default value="+fresh_for);
+			} else {
+				fresh_for = fresh_for_i;
+			}
 			int end = start + fresh_for;
 			
 			//keep the last id retrived
