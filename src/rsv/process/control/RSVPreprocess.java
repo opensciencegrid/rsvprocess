@@ -4,7 +4,6 @@ import rsv.process.model.GratiaModel;
 import rsv.process.model.MetricInserter;
 import rsv.process.model.OIMModel;
 import rsv.process.model.ProcessLogModel;
-import rsv.process.model.ResourceDetailModel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,7 +23,7 @@ public class RSVPreprocess implements RSVProcess {
 		OIMModel oim = new OIMModel();
 		GratiaModel grartia = new GratiaModel();	
 		MetricInserter mdetail = new MetricInserter();
-		ResourceDetailModel resourcedetail = new ResourceDetailModel();
+		//ResourceDetailModel resourcedetail = new ResourceDetailModel();
 		ProcessLogModel lm = new ProcessLogModel();
 		int maxrecords = Integer.parseInt(RSVMain.conf.getProperty(Configuration.preprocess_gratia_record_count));
 		
@@ -104,17 +103,6 @@ public class RSVPreprocess implements RSVProcess {
 	            	continue;
 	            }
 	            ArrayList<Integer/*service_id*/> services = oim.getServicesCriticalFor(metric_id);
-	            /*
-	            if(services.contains(1) || services.contains(5)) {
-	            	//this metric is critical for at least one service. check the gathered at
-	            	String gatheredat = rs.getString("GatheredAt");
-	            	if(!gatheredat.matches("rsv-client\\d.grid.iu.edu")) {
-	            		//critical metric must come from our central server reject..
-	            		count_invalid_gatheredat++;
-	            		continue;
-	            	}
-	            }
-	            */
 	            
 	            //lookup status_id
 	            String metricstatus = rs.getString("MetricStatus");
@@ -138,11 +126,6 @@ public class RSVPreprocess implements RSVProcess {
 	            records_added++;
 	        }
 			
-            //mdetail.add(20000003, 1000, 123, 1, 1);
-            //mdetail.add(20000004, 1000, 123, 1, 2);
-
-			//ALTER IGNORE TABLE `metricdata` ADD UNIQUE INDEX `unique_records`(`timestamp`, `resource_id`, `metric_id`);
-			
 	        //do some reporting
 	        logger.info("Records pulled from Gratia: " + records_pulled);
 	        logger.info("Valid records being sent to MetricData/MetricDetail Tables: " + records_added);
@@ -151,8 +134,7 @@ public class RSVPreprocess implements RSVProcess {
 	        logger.info("\tRecords with count_invalid_gatheredat: " + count_invalid_gatheredat);
 	        logger.info("\tRecords with invalid status_id: " + count_invalid_status_id);
 	        logger.info("\tRecords with invalid timestamp: " + count_invalid_timestamp);
-	        //logger.info("\tRecords with invalid detail: " + count_invalid_detail);
-	        
+
 	        //now, let's commit all changes..
 			mdetail.commit();
 			lm.updateLastGratiaIDProcessed(last_dbid);	 
