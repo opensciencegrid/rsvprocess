@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 import rsv.process.Configuration;
 import rsv.process.model.ServiceAR;
 import rsv.process.model.OIMModel;
-import rsv.process.model.ServiceAR;
 import rsv.process.model.StatusChangeModel;
 import rsv.process.model.OIMModel.ResourcesType;
 import rsv.process.model.record.Downtime;
@@ -67,7 +66,7 @@ public class RSVAvailability implements RSVProcess {
 		
 			Calendar cal = Calendar.getInstance();
 			Date current_date = cal.getTime();
-			int currenttime = (int) (current_date.getTime()/1000);
+			//int currenttime = (int) (current_date.getTime()/1000);
 			int total_time = end_time - start_time;
 			
 			logger.info("Calculating Availability and reliability for all resources/services");
@@ -83,9 +82,12 @@ public class RSVAvailability implements RSVProcess {
 			
 			//allxml += "<Resources>";
 			for(Integer resource_id : resources.keySet()) {
-				
+				/*
 				//debug
-				//if(resource_id != 56) continue;
+				if(resource_id != 123) continue;
+				start_time = 1348272000;
+				end_time = 1348358400;
+				*/
 				
 				//allxml += "<Resource>";
 				ArrayList<Downtime> downtimes = oim.getDowntimes(resource_id);
@@ -264,4 +266,5 @@ public class RSVAvailability implements RSVProcess {
 		}
 		return changes;
 	}
+
 }
