@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #test
-export JAVA_HOME=/usr/lib/jvm/java-sun
+export JAVA_HOME=/usr/lib/jvm/java-openjdk
 export PATH=$JAVA_HOME/bin:$PATH
 export RSVPROCESS_HOME=/usr/local/rsvprocess
 
