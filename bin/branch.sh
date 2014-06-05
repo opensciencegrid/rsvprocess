@@ -10,7 +10,7 @@ echo -n "enter new branch name> "
 read -e NAME
 
 git branch -f $NAME
-git push origin
+git push --all origin
 
 #update latest tag - only do this on production
 #git tag -f -a latest
