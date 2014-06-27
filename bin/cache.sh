@@ -7,7 +7,6 @@ export PATH=$JAVA_HOME/bin:$PATH
 #java rsv.process.control.RSVMain cache
 #cd -
 
-
 export RSVPROCESS_HOME=/usr/local/rsvprocess
 ant -f $RSVPROCESS_HOME/build.xml cache
 if [ ! $? -eq 0 ]; then
